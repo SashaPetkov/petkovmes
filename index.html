@@ -277,15 +277,27 @@
       if (text && currentChatUser) {
         if (editingId) {
           await db.from('messages').update({ text: text, is_edited: 1 }).eq('id', editingId).eq('sender', currentUser);
+          // Мгновенное обновление текста при редактировании
+          const div = document.getElementById(`msg-${editingId}`);
+          if (div) {
+             const span = div.querySelector('span:not(.edited-mark)');
+             if(span) span.innerText = text;
+             if(!div.querySelector('.edited-mark')) div.innerHTML += '<span class="edited-mark">(изм.)</span>';
+          }
         } else {
           await db.from('contacts').upsert([
             { owner: currentUser, contact: currentChatUser },
             { owner: currentChatUser, contact: currentUser }
           ], { onConflict: 'owner,contact' });
           
-          await db.from('messages').insert([{ 
+          // Мы добавили .select(), чтобы база сразу вернула готовое сообщение, и мы мгновенно вывели его на экран!
+          const { data } = await db.from('messages').insert([{ 
             sender: currentUser, receiver: currentChatUser, text: text, reply_to: replyingToId, reply_text: replyingToText 
-          }]);
+          }]).select();
+          
+          if (data && data[0]) {
+             renderMessage(data[0]); // Мгновенная отрисовка!
+          }
         }
         input.value = '';
         cancelReply();
