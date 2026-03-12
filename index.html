@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Petkovmes Pro</title>
+  <style>
+    /* ИЗМЕНЕНИЕ: Жестко фиксируем высоту html и body, отключаем отскок при скролле (overscroll-behavior) */
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; background: #f0f2f5; overscroll-behavior-y: none; }
+    body { display: flex; }
+    
+    #auth-screen { position: fixed; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+    #auth-screen input, #auth-screen button { margin: 10px; padding: 10px; font-size: 16px; width: 250px; box-sizing: border-box; }
+    #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
+    
+    #sidebar { width: 300px; background: #fff; border-right: 1px solid #ddd; display: flex; flex-direction: column; flex-shrink: 0; }
+    
+    #search-box { padding: 10px; display: flex; gap: 5px; border-bottom: 1px solid #eee; flex-shrink: 0; }
+    #search-box input { flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 5px; outline: none; min-width: 0; }
+    #search-box button { padding: 8px; background: #0088cc; color: white; border: none; border-radius: 5px; cursor: pointer; flex-shrink: 0; }
+    
+    #search-results { max-height: 100px; overflow-y: auto; background: #eef; font-size: 14px; flex-shrink: 0; }
+    .search-item { padding: 5px 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .search-item button { background: #0088cc; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;}
+    
+    .sidebar-header { padding: 10px; background: #0088cc; color: white; flex-shrink: 0; font-weight: bold; }
+    #users-list { flex-grow: 1; overflow-y: auto; min-height: 0; }
+    .user-item { padding: 15px; cursor: pointer; border-bottom: 1px solid #eee; }
+    .user-item.active { background: #e6f2ff; font-weight: bold; border-left: 4px solid #0088cc; }
+
+    #chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #e5ddd5; position: relative; height: 100%; min-width: 0; }
+    #chat-header { background: #eee; padding: 15px; font-weight: bold; border-bottom: 1px solid #ddd; flex-shrink: 0; }
+    
+    #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; min-height: 0; }
+    
+    .msg { max-width: 70%; padding: 8px 12px; margin-bottom: 10px; border-radius: 10px; position: relative; word-wrap: break-word; flex-shrink: 0; }
+    .msg.received { background: #fff; align-self: flex-start; }
+    .msg.sent { background: #dcf8c6; align-self: flex-end; }
+    .edited-mark { font-size: 10px; color: #888; margin-left: 5px; }
+    
+    .reply-block { background: rgba(0,0,0,0.05); padding: 5px 8px; border-left: 3px solid #0088cc; font-size: 13px; margin-bottom: 5px; border-radius: 3px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;}
+    
+    .msg-actions { display: none; position: absolute; top: -15px; right: 0; background: #333; color: #fff; padding: 2px 5px; border-radius: 5px; font-size: 12px; gap: 5px; cursor: pointer; white-space: nowrap; }
+    .msg:hover .msg-actions { display: flex; }
+
+    #reply-preview { display: none; background: #eee; padding: 10px; border-left: 4px solid #0088cc; font-size: 13px; flex-shrink: 0;}
+    #stickers-panel { display: none; padding: 10px; background: #fff; border-top: 1px solid #ddd; gap: 10px; font-size: 24px; cursor: pointer; flex-shrink: 0;}
+    
+    #form { background: #f0f0f0; padding: 10px; display: flex; gap: 10px; align-items: center; flex-shrink: 0; width: 100%; box-sizing: border-box;}
+    
+    /* ИЗМЕНЕНИЕ: min-width: 0 не дает длинному тексту сломать ширину формы на телефоне */
+    #input { flex-grow: 1; min-width: 0; padding: 10px; border-radius: 20px; border: 1px solid #ccc; outline: none; box-sizing: border-box;}
+    #send-btn { background: #0088cc; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; flex-shrink: 0;}
+    
+    @media (max-width: 768px) {
+      #app-screen { flex-direction: column; }
+      #sidebar { width: 100%; height: 35%; border-right: none; border-bottom: 2px solid #ccc; flex-shrink: 0; }
+      
+      /* ИЗМЕНЕНИЕ: Заставляем чат занимать ровно оставшееся место, не больше */
+      #chat-area { height: 65%; flex-grow: 1; min-height: 0; }
+      
+      #search-box { padding: 5px; }
+      #search-box input, #search-box button { padding: 4px 8px; font-size: 13px; height: 30px; box-sizing: border-box; }
+      .sidebar-header { padding: 5px 10px; font-size: 13px; }
+      .user-item { padding: 10px 15px; font-size: 14px; }
+      
+      .msg-actions { display: flex; opacity: 0.9; right: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="auth-screen">
+    <h2>Petkovmes Pro</h2>
+    <input type="text" id="auth-user" placeholder="Ваш логин">
+    <input type="password" id="auth-pass" placeholder="Пароль">
+    <button onclick="login()" style="background: #0088cc; color: white; border: none; border-radius: 5px; cursor: pointer;">Войти в чат</button>
+  </div>
+
+  <div id="app-screen">
+    <div id="sidebar">
+      <div id="search-box">
+        <input type="text" id="search-input" placeholder="Поиск людей..." oninput="searchUsers()" onkeypress="if(event.key === 'Enter') searchUsers()">
+        <button onclick="searchUsers()">🔍</button>
+      </div>
+      <div id="search-results"></div>
+      
+      <div class="sidebar-header">Мои контакты:</div>
+      <div id="users-list"></div>
+    </div>
+    
+    <div id="chat-area">
+      <div id="chat-header">Выберите контакт из списка</div>
+      <div id="messages"></div>
+      
+      <div id="reply-preview">
+        <span id="reply-text-preview"></span>
+        <button onclick="cancelReply()" style="float: right; border:none; background:none; cursor:pointer;">❌</button>
+      </div>
+
+      <div id="stickers-panel">
+        <span onclick="sendSticker('👋')">👋</span>
+        <span onclick="sendSticker('😂')">😂</span>
+        <span onclick="sendSticker('❤️')">❤️</span>
+        <span onclick="sendSticker('🔥')">🔥</span>
+        <span onclick="sendSticker('👍')">👍</span>
+      </div>
+
+      <form id="form" onsubmit="sendMessage(event)">
+        <button type="button" onclick="toggleStickers()" style="background: none; border: none; font-size: 20px; cursor: pointer; flex-shrink: 0;">😀</button>
+        <input id="input" autocomplete="off" placeholder="Сообщение..." disabled />
+        <button id="send-btn" disabled>Отправить</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let currentUser = '';
+    let currentChatUser = '';
+    let replyingToId = null;
+    let replyingToText = null;
+    let editingId = null;
+
+    async function login() {
+      const user = document.getElementById('auth-user').value.trim();
+      const pass = document.getElementById('auth-pass').value.trim();
+      if (!user || !pass) return;
+
+      const res = await fetch('/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: user, password: pass }) });
+      const data = await res.json();
+
+      if (data.success) {
+        currentUser = data.username;
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'flex';
+        socket.emit('register_user', currentUser);
+        loadContacts();
+      } else alert(data.message);
+    }
+
+    async function searchUsers() {
+      const q = document.getElementById('search-input').value;
+      const resPanel = document.getElementById('search-results');
+      if (q.length < 1) { resPanel.innerHTML = ''; return; }
+      
+      const res = await fetch(`/search?q=${q}`);
+      const users = await res.json();
+      resPanel.innerHTML = '';
+      
+      users.forEach(u => {
+        if (u.username === currentUser) return;
+        const div = document.createElement('div');
+        div.className = 'search-item';
+        div.innerHTML = `<span>${u.username}</span> <button onclick="addContact('${u.username}')">Добавить</button>`;
+        resPanel.appendChild(div);
+      });
+    }
+
+    async function addContact(contactName) {
+      await fetch('/add_contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner: currentUser, contact: contactName }) });
+      document.getElementById('search-input').value = '';
+      document.getElementById('search-results').innerHTML = '';
+      await loadContacts();
+    }
+
+    async function loadContacts() {
+      const res = await fetch(`/contacts/${currentUser}`);
+      const contacts = await res.json();
+      const list = document.getElementById('users-list');
+      list.innerHTML = '';
+
+      contacts.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        div.innerText = c.contact;
+        if (c.contact === currentChatUser) div.classList.add('active');
+        div.onclick = () => selectChat(c.contact, div);
+        list.appendChild(div);
+      });
+    }
+
+    socket.on('force_update_contacts', () => {
+      loadContacts();
+    });
+
+    async function selectChat(username, element) {
+      currentChatUser = username;
+      document.getElementById('chat-header').innerText = username;
+      document.getElementById('input').disabled = false;
+      document.getElementById('send-btn').disabled = false;
+      document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+      cancelReply();
+
+      const res = await fetch(`/history/${currentUser}/${currentChatUser}`);
+      const messages = await res.json();
+      document.getElementById('messages').innerHTML = '';
+      messages.forEach(msg => renderMessage(msg));
+    }
+
+    function renderMessage(msg) {
+      if (msg.is_deleted) return;
+
+      let div = document.getElementById(`msg-${msg.id}`);
+      if (!div) {
+        div = document.createElement('div');
+        div.id = `msg-${msg.id}`;
+        document.getElementById('messages').appendChild(div);
+      }
+
+      div.className = `msg ${msg.sender === currentUser ? 'sent' : 'received'}`;
+      
+      let html = '';
+      if (msg.reply_text) {
+        html += `<div class="reply-block">💬 ${msg.reply_text}</div>`;
+      }
+      
+      html += `<span>${msg.text}</span>`;
+      if (msg.is_edited) html += `<span class="edited-mark">(изм.)</span>`;
+      
+      let safeText = msg.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      let actions = `<div class="msg-actions"><span onclick="startReply(${msg.id}, '${safeText}')">Отв</span>`;
+      if (msg.sender === currentUser) {
+        actions += ` | <span onclick="startEdit(${msg.id}, '${safeText}')">Ред</span>`;
+        actions += ` | <span onclick="deleteMessage(${msg.id})">Удал</span>`;
+      }
+      actions += `</div>`;
+      html += actions;
+      
+      div.innerHTML = html;
+      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    }
+    
+    function startReply(id, text) {
+      replyingToId = id;
+      replyingToText = text;
+      editingId = null;
+      document.getElementById('reply-preview').style.display = 'block';
+      document.getElementById('reply-text-preview').innerText = "В ответ на: " + text.substring(0, 40) + "...";
+      document.getElementById('input').focus();
+    }
+
+    function cancelReply() {
+      replyingToId = null;
+      replyingToText = null;
+      editingId = null;
+      document.getElementById('reply-preview').style.display = 'none';
+      document.getElementById('input').value = '';
+    }
+
+    function startEdit(id, text) {
+      editingId = id;
+      replyingToId = null;
+      replyingToText = null;
+      document.getElementById('reply-preview').style.display = 'block';
+      document.getElementById('reply-text-preview').innerText = "Редактирование...";
+      document.getElementById('input').value = text;
+      document.getElementById('input').focus();
+    }
+
+    function deleteMessage(id) {
+      if (confirm("Точно удалить сообщение?")) {
+        socket.emit('delete_message', { id: id, sender: currentUser, receiver: currentChatUser });
+      }
+    }
+
+    function toggleStickers() {
+      const panel = document.getElementById('stickers-panel');
+      panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+    }
+    
+    function sendSticker(sticker) {
+      document.getElementById('input').value += sticker;
+      toggleStickers();
+    }
+
+    function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('input');
+      const text = input.value.trim();
+      
+      if (text && currentChatUser) {
+        if (editingId) {
+          socket.emit('edit_message', { id: editingId, text: text, sender: currentUser, receiver: currentChatUser });
+        } else {
+          socket.emit('private_message', { from: currentUser, to: currentChatUser, text: text, reply_to: replyingToId, reply_text: replyingToText });
+        }
+        input.value = '';
+        cancelReply();
+        document.getElementById('stickers-panel').style.display = 'none';
+      }
+    }
+
+    socket.on('receive_message', (msg) => {
+      if (msg.sender === currentChatUser || msg.receiver === currentChatUser) renderMessage(msg);
+    });
+
+    socket.on('message_edited', (data) => {
+      const div = document.getElementById(`msg-${data.id}`);
+      if (div && (data.sender === currentChatUser || data.receiver === currentChatUser)) {
+         const span = div.querySelector('span:not(.edited-mark)');
+         if(span) span.innerText = data.text;
+         if(!div.querySelector('.edited-mark')) div.innerHTML += '<span class="edited-mark">(изм.)</span>';
+      }
+    });
+
+    socket.on('message_deleted', (id) => {
+      const div = document.getElementById(`msg-${id}`);
+      if (div) div.remove();
+    });
+  </script>
+</body>
+</html>
