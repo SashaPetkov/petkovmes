@@ -3,66 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Petkovmes Ultra-Fast</title>
+  <title>Petkovmes Pro Max</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; overscroll-behavior-y: none; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; overscroll-behavior-y: none; }
     body { display: flex; }
-    #auth-screen { position: fixed; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-    #auth-screen input, #auth-screen button { margin: 10px; padding: 12px; font-size: 16px; width: 280px; border-radius: 8px; border: 1px solid #ddd; }
+    
+    /* Экран входа */
+    #auth-screen { position: fixed; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+    #auth-screen input, #auth-screen button { margin: 10px; padding: 12px; font-size: 16px; width: 280px; border-radius: 10px; border: 1px solid #ddd; outline: none; }
+    #auth-screen button { background: #0088cc; color: #fff; font-weight: bold; cursor: pointer; border: none; }
+
     #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
-    #sidebar { width: 300px; background: #fff; border-right: 1px solid #ddd; display: flex; flex-direction: column; flex-shrink: 0; }
-    #search-box { padding: 10px; display: flex; gap: 5px; border-bottom: 1px solid #eee; }
-    #search-box input { flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
-    #search-box button { padding: 8px 15px; background: #0088cc; color: white; border: none; border-radius: 20px; cursor: pointer; }
-    #search-results { max-height: 150px; overflow-y: auto; background: #f9f9ff; font-size: 14px; }
-    .search-item { padding: 8px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    
+    /* Боковая панель */
+    #sidebar { width: 320px; background: #fff; border-right: 1px solid #ddd; display: flex; flex-direction: column; flex-shrink: 0; }
+    #search-box { padding: 15px; border-bottom: 1px solid #eee; }
+    #search-box input { width: 100%; padding: 10px; border: 1px solid #eee; background: #f0f2f5; border-radius: 20px; outline: none; box-sizing: border-box; }
     #users-list { flex-grow: 1; overflow-y: auto; }
-    .user-item { padding: 15px; cursor: pointer; border-bottom: 1px solid #f5f5f5; transition: 0.2s; }
+    
+    .user-item { padding: 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
     .user-item:hover { background: #f0f7ff; }
-    .user-item.active { background: #e6f2ff; border-left: 5px solid #0088cc; font-weight: bold; }
-    #chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #e5ddd5; position: relative; height: 100%; min-width: 0; }
-    #chat-header { background: #fff; padding: 15px; font-weight: bold; border-bottom: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-    .msg { max-width: 75%; padding: 8px 12px; border-radius: 12px; position: relative; font-size: 15px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .user-item.active { background: #e6f2ff; font-weight: bold; border-left: 4px solid #0088cc; }
+    
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; transition: 0.3s; }
+    .status-dot.online { background: #4caf50; box-shadow: 0 0 8px #4caf50; }
+
+    /* Область чата */
+    #chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #e5ddd5; position: relative; min-width: 0; }
+    #chat-header { background: #fff; padding: 10px 20px; border-bottom: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.03); z-index: 10; }
+    #chat-user-name { font-weight: bold; font-size: 17px; }
+    #typing-indicator { font-size: 13px; color: #0088cc; height: 18px; font-style: italic; margin-top: 2px; }
+
+    #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 75%; padding: 10px 14px; border-radius: 15px; font-size: 15px; line-height: 1.4; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
     .msg.sent { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
     .msg.received { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
-    .msg.pending { opacity: 0.6; }
-    .edited-mark { font-size: 10px; color: #888; margin-left: 5px; }
-    .reply-block { background: rgba(0,0,0,0.05); padding: 4px 8px; border-left: 3px solid #0088cc; font-size: 12px; margin-bottom: 4px; border-radius: 4px; color: #555; }
+    .msg.pending { opacity: 0.5; }
+
+    /* Поле ввода */
     #form { background: #fff; padding: 10px 15px; display: flex; gap: 10px; align-items: center; border-top: 1px solid #ddd; }
-    #input { flex-grow: 1; padding: 10px 15px; border-radius: 25px; border: 1px solid #ddd; outline: none; font-size: 15px; }
-    #send-btn { background: #0088cc; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+    #input { flex-grow: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #eee; background: #f0f2f5; outline: none; font-size: 15px; }
+    #send-btn { background: #0088cc; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    #send-btn:disabled { background: #ccc; }
+
+    /* Адаптивность для мобилок */
     @media (max-width: 768px) {
       #app-screen { flex-direction: column; }
-      #sidebar { width: 100%; height: 40%; }
-      #chat-area { height: 60%; }
+      #sidebar { width: 100%; height: 35%; border-right: none; }
+      #chat-area { height: 65%; }
     }
   </style>
 </head>
 <body>
 
   <div id="auth-screen">
-    <h2 style="color: #0088cc;">Petkovmes Ultra</h2>
-    <input type="text" id="auth-user" placeholder="Ваш логин">
+    <h1 style="color: #0088cc; margin-bottom: 5px;">Petkovmes</h1>
+    <p style="color: #888; margin-bottom: 20px;">Версия 4.0 Pro Max</p>
+    <input type="text" id="auth-user" placeholder="Логин">
     <input type="password" id="auth-pass" placeholder="Пароль">
-    <button onclick="login()" style="background: #0088cc; color: white; font-weight: bold;">Войти</button>
+    <button onclick="login()">ВОЙТИ</button>
   </div>
 
   <div id="app-screen">
     <div id="sidebar">
       <div id="search-box">
-        <input type="text" id="search-input" placeholder="Найти человека..." oninput="searchUsers()">
+        <input type="text" id="search-input" placeholder="Поиск людей..." oninput="searchUsers()">
       </div>
       <div id="search-results"></div>
       <div id="users-list"></div>
     </div>
     
     <div id="chat-area">
-      <div id="chat-header">Выберите контакт</div>
+      <div id="chat-header">
+        <div id="chat-user-name">Выберите контакт</div>
+        <div id="typing-indicator"></div>
+      </div>
       <div id="messages"></div>
       <form id="form" onsubmit="sendMessage(event)">
-        <input id="input" autocomplete="off" placeholder="Введите сообщение..." disabled />
+        <input id="input" autocomplete="off" placeholder="Сообщение..." disabled oninput="handleTyping()"/>
         <button id="send-btn" disabled>➤</button>
       </form>
     </div>
@@ -79,7 +98,10 @@
 
     let currentUser = '';
     let currentChatUser = '';
-    let isSubscribed = false;
+    let onlineUsers = {}; 
+    let msgChannel = null;
+    let presenceChannel = null;
+    let typingTimeout = null;
 
     async function login() {
       const user = document.getElementById('auth-user').value.trim();
@@ -98,12 +120,64 @@
       document.getElementById('app-screen').style.display = 'flex';
       
       loadContacts();
-      if (!isSubscribed) {
-        subscribeToEverything();
-        isSubscribed = true;
+      setupMessagesRealtime();
+      setupPresenceRealtime();
+    }
+
+    // --- REALTIME: СООБЩЕНИЯ ---
+    function setupMessagesRealtime() {
+      if (msgChannel) db.removeChannel(msgChannel);
+      
+      msgChannel = db.channel('db-messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+          const msg = payload.new;
+          if ((msg.sender === currentChatUser && msg.receiver === currentUser) || 
+              (msg.sender === currentUser && msg.receiver === currentChatUser)) {
+            renderMessage(msg);
+          }
+        })
+        .subscribe();
+    }
+
+    // --- REALTIME: СТАТУСЫ И ПЕЧАТАНИЕ ---
+    function setupPresenceRealtime() {
+      if (presenceChannel) db.removeChannel(presenceChannel);
+
+      presenceChannel = db.channel('typing-and-presence', { 
+        config: { presence: { key: currentUser } } 
+      });
+
+      presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+          onlineUsers = presenceChannel.presenceState();
+          loadContacts(); 
+        })
+        .on('broadcast', { event: 'typing' }, payload => {
+          if (payload.payload.user === currentChatUser) {
+            const indicator = document.getElementById('typing-indicator');
+            indicator.innerText = 'печатает...';
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => { indicator.innerText = ''; }, 2000);
+          }
+        })
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await presenceChannel.track({ user: currentUser, online_at: new Date().toISOString() });
+          }
+        });
+    }
+
+    function handleTyping() {
+      if (presenceChannel) {
+        presenceChannel.send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { user: currentUser }
+        });
       }
     }
 
+    // --- ЛОГИКА ИНТЕРФЕЙСА ---
     async function searchUsers() {
       const q = document.getElementById('search-input').value;
       const resPanel = document.getElementById('search-results');
@@ -114,8 +188,9 @@
       (data || []).forEach(u => {
         if (u.username === currentUser) return;
         const div = document.createElement('div');
-        div.className = 'search-item';
-        div.innerHTML = `<span>${u.username}</span> <button onclick="addContact('${u.username}')" style="background:#0088cc; color:white; border:none; border-radius:5px; padding:3px 8px; cursor:pointer;">+</button>`;
+        div.className = 'user-item';
+        div.style.fontSize = '14px';
+        div.innerHTML = `<span>${u.username}</span> <button onclick="addContact('${u.username}')" style="background:#0088cc; color:white; border:none; border-radius:15px; padding:4px 12px; cursor:pointer;">+</button>`;
         resPanel.appendChild(div);
       });
     }
@@ -132,9 +207,10 @@
       const list = document.getElementById('users-list');
       list.innerHTML = '';
       (data || []).forEach(c => {
+        const isOnline = !!onlineUsers[c.contact];
         const div = document.createElement('div');
         div.className = `user-item ${c.contact === currentChatUser ? 'active' : ''}`;
-        div.innerText = c.contact;
+        div.innerHTML = `<span>${c.contact}</span><div class="status-dot ${isOnline ? 'online' : ''}"></div>`;
         div.onclick = () => selectChat(c.contact, div);
         list.appendChild(div);
       });
@@ -142,7 +218,8 @@
 
     async function selectChat(username, element) {
       currentChatUser = username;
-      document.getElementById('chat-header').innerText = username;
+      document.getElementById('chat-user-name').innerText = username;
+      document.getElementById('typing-indicator').innerText = '';
       document.getElementById('input').disabled = false;
       document.getElementById('send-btn').disabled = false;
       document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
@@ -159,14 +236,11 @@
     }
 
     function renderMessage(msg, isPending = false) {
-      // Если такое сообщение уже есть на экране, не дублируем его
       if (document.getElementById(`msg-${msg.id}`)) return;
-
       const div = document.createElement('div');
       div.id = `msg-${msg.id}`;
       div.className = `msg ${msg.sender === currentUser ? 'sent' : 'received'} ${isPending ? 'pending' : ''}`;
       div.innerText = msg.text;
-      
       const messagesCont = document.getElementById('messages');
       messagesCont.appendChild(div);
       messagesCont.scrollTop = messagesCont.scrollHeight;
@@ -178,40 +252,18 @@
       const text = input.value.trim();
       if (!text || !currentChatUser) return;
 
-      // ОПТИМИСТИЧНЫЙ ШАГ: Рисуем сообщение сразу!
       const tempId = Date.now();
-      const tempMsg = { id: tempId, sender: currentUser, text: text };
-      renderMessage(tempMsg, true); // Пометка 'pending' (полупрозрачное)
-
+      renderMessage({ id: tempId, sender: currentUser, text: text }, true);
       input.value = '';
 
-      // Шлем в базу в фоне
       const { data, error } = await db.from('messages').insert([{ 
         sender: currentUser, receiver: currentChatUser, text: text 
       }]).select();
 
       if (!error && data[0]) {
-        // Удаляем временное сообщение и заменяем его настоящим из базы
-        const tempEl = document.getElementById(`msg-${tempId}`);
-        if (tempEl) tempEl.remove();
+        document.getElementById(`msg-${tempId}`)?.remove();
         renderMessage(data[0]);
       }
-    }
-
-    function subscribeToEverything() {
-      // Подписка на сообщения
-      db.channel('global-chat')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-          const msg = payload.new;
-          if ((msg.sender === currentChatUser && msg.receiver === currentUser) || 
-              (msg.sender === currentUser && msg.receiver === currentChatUser)) {
-            renderMessage(msg);
-          }
-        })
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'contacts' }, (payload) => {
-          if (payload.new.owner === currentUser) loadContacts();
-        })
-        .subscribe();
     }
   </script>
 </body>
