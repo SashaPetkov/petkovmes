@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petkovmes Final Build</title>
+    <title>Petkovmes Stable</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
@@ -37,12 +37,21 @@
         }
         .user-item:hover { background: #f4f4f4; }
         .user-item.active { background: var(--tg-accent); color: white; }
-        .user-item span { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-item.active .del-contact { color: white; opacity: 0.8; }
         
-        /* Крестик удаления контакта */
-        .del-contact { display: none; font-size: 20px; color: #ccc; padding: 0 5px; line-height: 1; }
-        .user-item:hover .del-contact { display: block; }
-        .del-contact:hover { color: #ff5252; }
+        .user-item span { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 10px; }
+        
+        /* КРЕСТИК ВСЕГДА ВИДЕН */
+        .del-contact { 
+            display: block; 
+            font-size: 22px; 
+            color: #ccc; 
+            padding: 0 5px; 
+            line-height: 1; 
+            opacity: 0.6;
+            transition: 0.2s;
+        }
+        .del-contact:hover { color: #ff5252 !important; opacity: 1 !important; transform: scale(1.2); }
 
         /* Чат */
         #chat-area { 
@@ -60,14 +69,13 @@
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
         
-        /* Всплывающее меню сообщений */
+        /* Меню сообщений */
         #context-menu {
             display: none; position: fixed; background: white; border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 2000; min-width: 160px; overflow: hidden;
         }
         .menu-item { padding: 12px 16px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 12px; color: #333; }
         .menu-item:hover { background: #f0f2f5; }
-        .menu-item i { font-style: normal; font-size: 18px; }
 
         /* Ответ внутри облачка */
         .reply-quote { border-left: 3px solid var(--tg-accent); background: rgba(51, 144, 236, 0.1); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; }
@@ -80,7 +88,7 @@
         #input { flex-grow: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #ddd; outline: none; font-size: 16px; }
         #send-btn { background: var(--tg-accent); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
 
-        @media (max-width: 768px) { #sidebar { width: 70px; } .user-item span:first-child { display: none; } }
+        @media (max-width: 768px) { #sidebar { width: 70px; } .user-item span { display: none; } .del-contact { margin: 0 auto; } }
     </style>
 </head>
 <body onclick="closeMenu()">
@@ -97,7 +105,7 @@
 
 <div id="app-screen">
     <div id="sidebar">
-        <div id="search-container"><input type="text" id="search-input" placeholder="Ник друга + Enter" onkeydown="if(event.key==='Enter') searchUser()"></div>
+        <div id="search-container"><input type="text" id="search-input" placeholder="Ник + Enter" onkeydown="if(event.key==='Enter') searchUser()"></div>
         <div id="contacts"></div>
     </div>
     <div id="chat-area">
