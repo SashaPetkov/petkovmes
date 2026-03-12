@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petkovmes Ultimate</title>
+    <title>Petkovmes Ultimate+</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
@@ -25,37 +25,35 @@
         
         #contacts { flex-grow: 1; overflow-y: auto; }
         .user-item { padding: 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
-        .user-item:hover { background: #f5f5f5; }
         .user-item.active { background: #e9edef; border-left: 4px solid #075e54; font-weight: bold; }
         .del-contact { color: #ccc; font-size: 18px; padding: 0 5px; }
-        .del-contact:hover { color: #ff5252; }
 
         /* Чат */
-        #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; background: #e5ddd5; }
+        #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
         #chat-header { padding: 15px; background: #ededed; font-weight: bold; border-bottom: 1px solid #ddd; }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         
-        .msg { 
-            max-width: 75%; 
-            padding: 8px 12px; 
-            border-radius: 10px; 
-            font-size: 15px; 
-            position: relative; 
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1); 
-        }
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 15px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
         .msg.sent { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
         .msg.received { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
         
-        /* Кнопка удаления сообщения */
-        .del-msg { font-size: 12px; color: rgba(0,0,0,0.2); cursor: pointer; margin-left: 10px; float: right; display: none; }
-        .msg:hover .del-msg { display: inline; }
-        .del-msg:hover { color: #ff5252; }
+        /* Кнопки действий над сообщением */
+        .msg-actions { font-size: 12px; color: rgba(0,0,0,0.3); cursor: pointer; float: right; display: none; margin-left: 10px; gap: 5px; }
+        .msg:hover .msg-actions { display: flex; }
+        .edited-label { font-size: 10px; color: #888; font-style: italic; margin-left: 5px; }
 
-        #form { padding: 10px 15px; background: #f0f0f0; display: flex; gap: 10px; }
+        /* Ответ внутри сообщения */
+        .reply-quote { background: rgba(0,0,0,0.05); border-left: 3px solid #075e54; padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; color: #555; }
+
+        /* Панель ответа/редактирования над инпутом */
+        #action-preview { background: #fff; padding: 8px 15px; border-top: 1px solid #ddd; display: none; justify-content: space-between; align-items: center; border-left: 5px solid #075e54; }
+        #action-text { font-size: 13px; color: #555; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+        #form { padding: 10px 15px; background: #f0f0f0; display: flex; gap: 10px; align-items: center; }
         #input { flex-grow: 1; padding: 12px; border-radius: 25px; border: none; outline: none; }
         #send-btn { background: #075e54; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; }
         
-        @media (max-width: 768px) { #sidebar { width: 80px; } .user-item span { display: none; } .del-contact { display: none; } }
+        @media (max-width: 768px) { #sidebar { width: 80px; } .user-item span { display: none; } }
     </style>
 </head>
 <body>
@@ -80,6 +78,12 @@
     <div id="chat-area">
         <div id="chat-header">Выберите чат</div>
         <div id="messages"></div>
+        
+        <div id="action-preview">
+            <div id="action-text"></div>
+            <div onclick="cancelAction()" style="cursor:pointer; color:#999; font-weight:bold;">×</div>
+        </div>
+
         <form id="form" onsubmit="sendMessage(event)">
             <input id="input" autocomplete="off" placeholder="Сообщение..." disabled>
             <button id="send-btn" disabled>➤</button>
@@ -101,6 +105,10 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let me = '', target = '';
+    
+    // Переменные для состояний
+    let editingMsgKey = null;
+    let replyData = null;
 
     async function login() {
         const u = document.getElementById('auth-user').value.trim().toLowerCase();
@@ -150,23 +158,14 @@
         });
     }
 
-    // УДАЛЕНИЕ КОНТАКТА
     async function removeContact(e, name) {
-        e.stopPropagation(); // Чтобы не открылся чат при нажатии на крестик
-        if (confirm(`Удалить ${name} из списка?`)) {
-            await db.ref(`contacts/${me}/${name}`).remove();
-            if (target === name) {
-                target = '';
-                document.getElementById('messages').innerHTML = '';
-                document.getElementById('chat-header').innerText = 'Выберите чат';
-                document.getElementById('input').disabled = true;
-                document.getElementById('send-btn').disabled = true;
-            }
-        }
+        e.stopPropagation();
+        if (confirm(`Удалить ${name}?`)) await db.ref(`contacts/${me}/${name}`).remove();
     }
 
     function selectChat(name) {
         target = name;
+        cancelAction();
         document.getElementById('chat-header').innerText = "Чат с: " + target;
         document.getElementById('input').disabled = false;
         document.getElementById('send-btn').disabled = false;
@@ -182,22 +181,59 @@
                 const d = document.createElement('div');
                 d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
                 
-                // Добавляем текст и кнопку удаления (только для своих сообщений)
-                let deleteHtml = m.sender === me ? `<span class="del-msg" onclick="deleteMessage('${chatId}', '${key}')">×</span>` : '';
-                d.innerHTML = `${deleteHtml}${m.text}`;
+                let html = '';
+                // Если есть ответ
+                if (m.replyTo) {
+                    html += `<div class="reply-quote"><b>${m.replyTo.user}:</b> ${m.replyTo.text}</div>`;
+                }
                 
+                html += `<span>${m.text}</span>`;
+                if (m.edited) html += `<span class="edited-label">(ред.)</span>`;
+                
+                // Кнопки действий
+                html += `<div class="msg-actions">
+                            <span onclick="prepareReply('${m.sender}', '${m.text.replace(/'/g, "\\'")}')">↩</span>`;
+                if (m.sender === me) {
+                    html += `<span onclick="prepareEdit('${key}', '${m.text.replace(/'/g, "\\'")}')">✎</span>
+                             <span onclick="deleteMessage('${chatId}', '${key}')">×</span>`;
+                }
+                html += `</div>`;
+                
+                d.innerHTML = html;
                 msgDiv.appendChild(d);
             });
             msgDiv.scrollTop = msgDiv.scrollHeight;
         });
-        loadContacts();
     }
 
-    // УДАЛЕНИЕ СООБЩЕНИЯ
+    // ПОДГОТОВКА К ОТВЕТУ
+    function prepareReply(user, text) {
+        cancelAction();
+        replyData = { user, text };
+        document.getElementById('action-text').innerText = `Ответ пользователю ${user}: ${text}`;
+        document.getElementById('action-preview').style.display = 'flex';
+        document.getElementById('input').focus();
+    }
+
+    // ПОДГОТОВКА К РЕДАКТИРОВАНИЮ
+    function prepareEdit(key, text) {
+        cancelAction();
+        editingMsgKey = key;
+        document.getElementById('action-text').innerText = `Редактирование: ${text}`;
+        document.getElementById('action-preview').style.display = 'flex';
+        document.getElementById('input').value = text;
+        document.getElementById('input').focus();
+    }
+
+    function cancelAction() {
+        editingMsgKey = null;
+        replyData = null;
+        document.getElementById('action-preview').style.display = 'none';
+        document.getElementById('input').value = '';
+    }
+
     async function deleteMessage(chatId, key) {
-        if (confirm("Удалить сообщение?")) {
-            await db.ref(`chats/${chatId}/${key}`).remove();
-        }
+        if (confirm("Удалить?")) await db.ref(`chats/${chatId}/${key}`).remove();
     }
 
     function sendMessage(e) {
@@ -206,8 +242,22 @@
         const text = input.value.trim();
         if (!text || !target) return;
         const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
-        db.ref(`chats/${chatId}`).push({ sender: me, text: text, time: Date.now() });
-        input.value = '';
+
+        if (editingMsgKey) {
+            // РЕДАКТИРОВАНИЕ
+            db.ref(`chats/${chatId}/${editingMsgKey}`).update({
+                text: text,
+                edited: true
+            });
+        } else {
+            // ОБЫЧНАЯ ОТПРАВКА ИЛИ ОТВЕТ
+            const msgObj = { sender: me, text: text, time: Date.now() };
+            if (replyData) msgObj.replyTo = replyData;
+            
+            db.ref(`chats/${chatId}`).push(msgObj);
+        }
+
+        cancelAction();
     }
 </script>
 </body>
