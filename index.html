@@ -3,39 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petkovmes Final</title>
+    <title>Petkovmes Ultimate</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; background: #e5ddd5; }
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; background: #e5ddd5; }
         body { display: flex; }
+        
+        /* Авторизация */
         #auth-screen { position: fixed; inset: 0; background: #f0f2f5; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
         .auth-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; width: 300px; }
         .auth-card input { margin: 10px 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         .auth-card button { background: #075e54; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
         #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
+        
+        /* Боковая панель */
         #sidebar { width: 300px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; flex-shrink: 0; }
         #search-container { padding: 15px; border-bottom: 1px solid #eee; }
-        #search-input { width: 100%; padding: 10px; border: 1px solid #f0f2f5; background: #f0f2f5; border-radius: 20px; outline: none; box-sizing: border-box; }
+        #search-input { width: 100%; padding: 10px; border: none; background: #f0f2f5; border-radius: 20px; outline: none; }
         
         #contacts { flex-grow: 1; overflow-y: auto; }
-        .user-item { padding: 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9; }
+        .user-item { padding: 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
+        .user-item:hover { background: #f5f5f5; }
         .user-item.active { background: #e9edef; border-left: 4px solid #075e54; font-weight: bold; }
+        .del-contact { color: #ccc; font-size: 18px; padding: 0 5px; }
+        .del-contact:hover { color: #ff5252; }
 
-        #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-        #chat-header { padding: 15px; background: #ededed; font-weight: bold; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+        /* Чат */
+        #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; background: #e5ddd5; }
+        #chat-header { padding: 15px; background: #ededed; font-weight: bold; border-bottom: 1px solid #ddd; }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         
-        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 15px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .msg { 
+            max-width: 75%; 
+            padding: 8px 12px; 
+            border-radius: 10px; 
+            font-size: 15px; 
+            position: relative; 
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1); 
+        }
         .msg.sent { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
         .msg.received { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
+        
+        /* Кнопка удаления сообщения */
+        .del-msg { font-size: 12px; color: rgba(0,0,0,0.2); cursor: pointer; margin-left: 10px; float: right; display: none; }
+        .msg:hover .del-msg { display: inline; }
+        .del-msg:hover { color: #ff5252; }
 
         #form { padding: 10px 15px; background: #f0f0f0; display: flex; gap: 10px; }
         #input { flex-grow: 1; padding: 12px; border-radius: 25px; border: none; outline: none; }
         #send-btn { background: #075e54; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; }
         
-        @media (max-width: 768px) { #sidebar { width: 80px; } .user-item span { display: none; } }
+        @media (max-width: 768px) { #sidebar { width: 80px; } .user-item span { display: none; } .del-contact { display: none; } }
     </style>
 </head>
 <body>
@@ -43,9 +63,9 @@
 <div id="auth-screen">
     <div class="auth-card">
         <h2 style="color: #075e54; text-align: center;">Petkovmes</h2>
-        <input type="text" id="auth-user" placeholder="Логин (англ)">
+        <input type="text" id="auth-user" placeholder="Логин">
         <input type="password" id="auth-pass" placeholder="Пароль">
-        <button onclick="login()">ВОЙТИ / РЕГИСТРАЦИЯ</button>
+        <button onclick="login()">ВОЙТИ</button>
         <p id="auth-error" style="color: red; font-size: 12px; text-align: center;"></p>
     </div>
 </div>
@@ -58,10 +78,7 @@
         <div id="contacts"></div>
     </div>
     <div id="chat-area">
-        <div id="chat-header">
-            <span id="chat-title">Выберите чат</span>
-            <span id="my-name" style="font-weight: normal; font-size: 12px; color: #666;"></span>
-        </div>
+        <div id="chat-header">Выберите чат</div>
         <div id="messages"></div>
         <form id="form" onsubmit="sendMessage(event)">
             <input id="input" autocomplete="off" placeholder="Сообщение..." disabled>
@@ -71,7 +88,6 @@
 </div>
 
 <script>
-    // ТВОЙ КОНФИГ (УБЕДИСЬ, ЧТО databaseURL ВЕРНЫЙ)
     const firebaseConfig = {
       apiKey: "AIzaSyCydg_mccaTclSxfzfVdLFpCina4fi3LDE",
       authDomain: "petkovmes.firebaseapp.com",
@@ -86,15 +102,12 @@
     const db = firebase.database();
     let me = '', target = '';
 
-    // 1. ВХОД С ПАРОЛЕМ
     async function login() {
         const u = document.getElementById('auth-user').value.trim().toLowerCase();
         const p = document.getElementById('auth-pass').value.trim();
         if (!u || !p) return;
-
         const snapshot = await db.ref(`users/${u}`).once('value');
         const userData = snapshot.val();
-
         if (userData) {
             if (userData.password === p) startApp(u);
             else document.getElementById('auth-error').innerText = "Неверный пароль!";
@@ -106,31 +119,22 @@
 
     function startApp(username) {
         me = username;
-        document.getElementById('my-name').innerText = "Вы: " + me;
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'flex';
         loadContacts();
     }
 
-    // 2. ПОИСК ПО ENTER
     async function searchUser() {
         const q = document.getElementById('search-input').value.trim().toLowerCase();
         if (!q || q === me) return;
-
         const snapshot = await db.ref(`users/${q}`).once('value');
         if (snapshot.exists()) {
-            if (confirm(`Начать чат с ${q}?`)) {
-                await db.ref(`contacts/${me}/${q}`).set(true);
-                await db.ref(`contacts/${q}/${me}`).set(true);
-                document.getElementById('search-input').value = '';
-                selectChat(q);
-            }
-        } else {
-            alert("Пользователь не найден!");
-        }
+            await db.ref(`contacts/${me}/${q}`).set(true);
+            await db.ref(`contacts/${q}/${me}`).set(true);
+            document.getElementById('search-input').value = '';
+        } else { alert("Пользователь не найден!"); }
     }
 
-    // 3. СПИСОК КОНТАКТОВ
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snapshot => {
             const contDiv = document.getElementById('contacts');
@@ -139,33 +143,49 @@
                 const name = child.key;
                 const div = document.createElement('div');
                 div.className = `user-item ${name === target ? 'active' : ''}`;
-                div.innerHTML = `<span>${name}</span>`;
+                div.innerHTML = `<span>${name}</span><span class="del-contact" onclick="removeContact(event, '${name}')">×</span>`;
                 div.onclick = () => selectChat(name);
                 contDiv.appendChild(div);
             });
         });
     }
 
-    // 4. ВЫБОР ЧАТА И СИНХРОНИЗАЦИЯ
+    // УДАЛЕНИЕ КОНТАКТА
+    async function removeContact(e, name) {
+        e.stopPropagation(); // Чтобы не открылся чат при нажатии на крестик
+        if (confirm(`Удалить ${name} из списка?`)) {
+            await db.ref(`contacts/${me}/${name}`).remove();
+            if (target === name) {
+                target = '';
+                document.getElementById('messages').innerHTML = '';
+                document.getElementById('chat-header').innerText = 'Выберите чат';
+                document.getElementById('input').disabled = true;
+                document.getElementById('send-btn').disabled = true;
+            }
+        }
+    }
+
     function selectChat(name) {
         target = name;
-        document.getElementById('chat-title').innerText = "Чат с: " + target;
+        document.getElementById('chat-header').innerText = "Чат с: " + target;
         document.getElementById('input').disabled = false;
         document.getElementById('send-btn').disabled = false;
         
-        // КРИТИЧЕСКИЙ МОМЕНТ: Создаем ID чата
         const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
-        console.log("Подключаюсь к чату:", chatId); // Проверь это в F12 на обоих устройствах!
-
         db.ref(`chats/${chatId}`).off(); 
-        db.ref(`chats/${chatId}`).limitToLast(50).on('value', snapshot => {
+        db.ref(`chats/${chatId}`).on('value', snapshot => {
             const msgDiv = document.getElementById('messages');
             msgDiv.innerHTML = '';
             snapshot.forEach(child => {
                 const m = child.val();
+                const key = child.key;
                 const d = document.createElement('div');
                 d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
-                d.innerText = m.text;
+                
+                // Добавляем текст и кнопку удаления (только для своих сообщений)
+                let deleteHtml = m.sender === me ? `<span class="del-msg" onclick="deleteMessage('${chatId}', '${key}')">×</span>` : '';
+                d.innerHTML = `${deleteHtml}${m.text}`;
+                
                 msgDiv.appendChild(d);
             });
             msgDiv.scrollTop = msgDiv.scrollHeight;
@@ -173,19 +193,20 @@
         loadContacts();
     }
 
-    // 5. ОТПРАВКА
+    // УДАЛЕНИЕ СООБЩЕНИЯ
+    async function deleteMessage(chatId, key) {
+        if (confirm("Удалить сообщение?")) {
+            await db.ref(`chats/${chatId}/${key}`).remove();
+        }
+    }
+
     function sendMessage(e) {
         e.preventDefault();
         const input = document.getElementById('input');
         const text = input.value.trim();
         if (!text || !target) return;
-
         const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
-        db.ref(`chats/${chatId}`).push({
-            sender: me,
-            text: text,
-            time: Date.now()
-        });
+        db.ref(`chats/${chatId}`).push({ sender: me, text: text, time: Date.now() });
         input.value = '';
     }
 </script>
