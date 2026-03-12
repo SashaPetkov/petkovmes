@@ -3,75 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petkovmes Ultimate+</title>
+    <title>Petkovmes TG Style</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; background: #e5ddd5; }
+        :root {
+            --tg-sent: #efffde;
+            --tg-received: #ffffff;
+            --tg-accent: #3390ec;
+            --tg-bg: #7195ba;
+        }
+
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, system-ui, sans-serif; background: var(--tg-bg); }
         body { display: flex; }
         
         /* Авторизация */
-        #auth-screen { position: fixed; inset: 0; background: #f0f2f5; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
-        .auth-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; width: 300px; }
-        .auth-card input { margin: 10px 0; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .auth-card button { background: #075e54; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #auth-screen { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        .auth-card { width: 300px; padding: 20px; text-align: center; }
+        .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .auth-card button { width: 100%; padding: 12px; background: var(--tg-accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
         
         /* Боковая панель */
         #sidebar { width: 300px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; flex-shrink: 0; }
-        #search-container { padding: 15px; border-bottom: 1px solid #eee; }
-        #search-input { width: 100%; padding: 10px; border: none; background: #f0f2f5; border-radius: 20px; outline: none; }
+        #search-container { padding: 10px; }
+        #search-input { width: 100%; padding: 10px; border: none; background: #f1f1f1; border-radius: 10px; outline: none; box-sizing: border-box; }
         
         #contacts { flex-grow: 1; overflow-y: auto; }
-        .user-item { padding: 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
-        .user-item.active { background: #e9edef; border-left: 4px solid #075e54; font-weight: bold; }
-        .del-contact { color: #ccc; font-size: 18px; padding: 0 5px; }
+        .user-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .user-item:hover { background: #f4f4f4; }
+        .user-item.active { background: var(--tg-accent); color: white; }
+        .del-contact { opacity: 0.5; font-size: 20px; }
 
         /* Чат */
-        #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-        #chat-header { padding: 15px; background: #ededed; font-weight: bold; border-bottom: 1px solid #ddd; }
-        #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: contain; }
+        #chat-header { padding: 10px 20px; background: white; border-bottom: 1px solid #ddd; font-weight: bold; }
+        #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
         
-        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 15px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        .msg.sent { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .msg.received { background: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
+        /* Облачко сообщения */
+        .msg { max-width: 85%; padding: 8px 12px; border-radius: 15px; font-size: 15px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); line-height: 1.4; }
+        .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
         
-        /* Кнопки действий над сообщением */
-        .msg-actions { font-size: 12px; color: rgba(0,0,0,0.3); cursor: pointer; float: right; display: none; margin-left: 10px; gap: 5px; }
-        .msg:hover .msg-actions { display: flex; }
-        .edited-label { font-size: 10px; color: #888; font-style: italic; margin-left: 5px; }
+        /* Иконки действий (Побольше и отдельно) */
+        .msg-actions { 
+            display: flex; gap: 15px; padding-top: 5px; margin-top: 5px; 
+            border-top: 1px solid rgba(0,0,0,0.05); opacity: 0; transition: 0.2s; 
+        }
+        .msg:hover .msg-actions { opacity: 1; }
+        .msg-actions span { font-size: 18px; cursor: pointer; padding: 5px; }
+        .msg-actions span:hover { transform: scale(1.2); }
+        .btn-del:hover { color: #e53935; }
+        .btn-edit:hover { color: #1e88e5; }
+        .btn-reply:hover { color: #43a047; }
 
         /* Ответ внутри сообщения */
-        .reply-quote { background: rgba(0,0,0,0.05); border-left: 3px solid #075e54; padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; color: #555; }
+        .reply-quote { border-left: 3px solid var(--tg-accent); background: rgba(51, 144, 236, 0.1); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; }
+        .reply-quote b { color: var(--tg-accent); display: block; font-size: 12px; }
 
-        /* Панель ответа/редактирования над инпутом */
-        #action-preview { background: #fff; padding: 8px 15px; border-top: 1px solid #ddd; display: none; justify-content: space-between; align-items: center; border-left: 5px solid #075e54; }
-        #action-text { font-size: 13px; color: #555; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        /* Превью над инпутом */
+        #action-preview { background: white; padding: 8px 15px; border-top: 1px solid #ddd; display: none; align-items: center; border-left: 4px solid var(--tg-accent); }
+        #action-text { flex-grow: 1; font-size: 13px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        #form { padding: 10px 15px; background: #f0f0f0; display: flex; gap: 10px; align-items: center; }
-        #input { flex-grow: 1; padding: 12px; border-radius: 25px; border: none; outline: none; }
-        #send-btn { background: #075e54; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; }
-        
-        @media (max-width: 768px) { #sidebar { width: 80px; } .user-item span { display: none; } }
+        /* Поле ввода */
+        #form-container { background: white; padding: 10px; display: flex; flex-direction: column; }
+        #form { display: flex; gap: 10px; align-items: center; }
+        #input { flex-grow: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #ddd; outline: none; font-size: 16px; }
+        #send-btn { background: var(--tg-accent); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+
+        @media (max-width: 768px) { #sidebar { width: 70px; } .user-item span:first-child { display: none; } .msg-actions { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div id="auth-screen">
     <div class="auth-card">
-        <h2 style="color: #075e54; text-align: center;">Petkovmes</h2>
+        <h2 style="color: var(--tg-accent);">Petkovmes</h2>
         <input type="text" id="auth-user" placeholder="Логин">
         <input type="password" id="auth-pass" placeholder="Пароль">
-        <button onclick="login()">ВОЙТИ</button>
-        <p id="auth-error" style="color: red; font-size: 12px; text-align: center;"></p>
+        <button onclick="login()">Войти</button>
+        <p id="auth-error" style="color: red; font-size: 12px;"></p>
     </div>
 </div>
 
 <div id="app-screen">
     <div id="sidebar">
         <div id="search-container">
-            <input type="text" id="search-input" placeholder="Ник + Enter" onkeydown="if(event.key==='Enter') searchUser()">
+            <input type="text" id="search-input" placeholder="Поиск (Enter)" onkeydown="if(event.key==='Enter') searchUser()">
         </div>
         <div id="contacts"></div>
     </div>
@@ -79,15 +98,16 @@
         <div id="chat-header">Выберите чат</div>
         <div id="messages"></div>
         
-        <div id="action-preview">
-            <div id="action-text"></div>
-            <div onclick="cancelAction()" style="cursor:pointer; color:#999; font-weight:bold;">×</div>
+        <div id="form-container">
+            <div id="action-preview">
+                <div id="action-text"></div>
+                <div onclick="cancelAction()" style="cursor:pointer; font-size: 20px; margin-left: 10px;">×</div>
+            </div>
+            <form id="form" onsubmit="sendMessage(event)">
+                <input id="input" autocomplete="off" placeholder="Сообщение..." disabled>
+                <button id="send-btn" disabled>➤</button>
+            </form>
         </div>
-
-        <form id="form" onsubmit="sendMessage(event)">
-            <input id="input" autocomplete="off" placeholder="Сообщение..." disabled>
-            <button id="send-btn" disabled>➤</button>
-        </form>
     </div>
 </div>
 
@@ -104,11 +124,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let me = '', target = '';
-    
-    // Переменные для состояний
-    let editingMsgKey = null;
-    let replyData = null;
+    let me = '', target = '', editingMsgKey = null, replyData = null;
 
     async function login() {
         const u = document.getElementById('auth-user').value.trim().toLowerCase();
@@ -166,7 +182,7 @@
     function selectChat(name) {
         target = name;
         cancelAction();
-        document.getElementById('chat-header').innerText = "Чат с: " + target;
+        document.getElementById('chat-header').innerText = target;
         document.getElementById('input').disabled = false;
         document.getElementById('send-btn').disabled = false;
         
@@ -181,59 +197,51 @@
                 const d = document.createElement('div');
                 d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
                 
-                let html = '';
-                // Если есть ответ
-                if (m.replyTo) {
-                    html += `<div class="reply-quote"><b>${m.replyTo.user}:</b> ${m.replyTo.text}</div>`;
-                }
+                let content = m.replyTo ? `<div class="reply-quote"><b>${m.replyTo.user}</b>${m.replyTo.text}</div>` : '';
+                content += `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
                 
-                html += `<span>${m.text}</span>`;
-                if (m.edited) html += `<span class="edited-label">(ред.)</span>`;
-                
-                // Кнопки действий
-                html += `<div class="msg-actions">
-                            <span onclick="prepareReply('${m.sender}', '${m.text.replace(/'/g, "\\'")}')">↩</span>`;
+                // Кнопки (Большие и раздельные)
+                content += `<div class="msg-actions">
+                    <span class="btn-reply" onclick="prepareReply('${m.sender}', '${m.text.replace(/'/g, "\\'")}')">↩</span>`;
                 if (m.sender === me) {
-                    html += `<span onclick="prepareEdit('${key}', '${m.text.replace(/'/g, "\\'")}')">✎</span>
-                             <span onclick="deleteMessage('${chatId}', '${key}')">×</span>`;
+                    content += `
+                    <span class="btn-edit" onclick="prepareEdit('${key}', '${m.text.replace(/'/g, "\\'")}')">✎</span>
+                    <span class="btn-del" onclick="deleteMessage('${chatId}', '${key}')">🗑</span>`;
                 }
-                html += `</div>`;
+                content += `</div>`;
                 
-                d.innerHTML = html;
+                d.innerHTML = content;
                 msgDiv.appendChild(d);
             });
             msgDiv.scrollTop = msgDiv.scrollHeight;
         });
     }
 
-    // ПОДГОТОВКА К ОТВЕТУ
     function prepareReply(user, text) {
         cancelAction();
         replyData = { user, text };
-        document.getElementById('action-text').innerText = `Ответ пользователю ${user}: ${text}`;
+        document.getElementById('action-text').innerText = `Ответ: ${text}`;
         document.getElementById('action-preview').style.display = 'flex';
         document.getElementById('input').focus();
     }
 
-    // ПОДГОТОВКА К РЕДАКТИРОВАНИЮ
     function prepareEdit(key, text) {
         cancelAction();
         editingMsgKey = key;
-        document.getElementById('action-text').innerText = `Редактирование: ${text}`;
+        document.getElementById('action-text').innerText = `Правка: ${text}`;
         document.getElementById('action-preview').style.display = 'flex';
         document.getElementById('input').value = text;
         document.getElementById('input').focus();
     }
 
     function cancelAction() {
-        editingMsgKey = null;
-        replyData = null;
+        editingMsgKey = null; replyData = null;
         document.getElementById('action-preview').style.display = 'none';
         document.getElementById('input').value = '';
     }
 
     async function deleteMessage(chatId, key) {
-        if (confirm("Удалить?")) await db.ref(`chats/${chatId}/${key}`).remove();
+        if (confirm("Удалить сообщение?")) await db.ref(`chats/${chatId}/${key}`).remove();
     }
 
     function sendMessage(e) {
@@ -244,19 +252,12 @@
         const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
 
         if (editingMsgKey) {
-            // РЕДАКТИРОВАНИЕ
-            db.ref(`chats/${chatId}/${editingMsgKey}`).update({
-                text: text,
-                edited: true
-            });
+            db.ref(`chats/${chatId}/${editingMsgKey}`).update({ text, edited: true });
         } else {
-            // ОБЫЧНАЯ ОТПРАВКА ИЛИ ОТВЕТ
-            const msgObj = { sender: me, text: text, time: Date.now() };
+            const msgObj = { sender: me, text, time: Date.now() };
             if (replyData) msgObj.replyTo = replyData;
-            
             db.ref(`chats/${chatId}`).push(msgObj);
         }
-
         cancelAction();
     }
 </script>
