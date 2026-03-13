@@ -11,6 +11,7 @@
         html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; background: var(--tg-bg); scroll-behavior: smooth; }
         body { display: flex; }
         
+        /* Авторизация */
         #auth-screen { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
         .auth-card { width: 300px; padding: 20px; text-align: center; }
         .auth-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
@@ -32,13 +33,38 @@
         .status-dot { width: 12px; height: 12px; background: #ccc; border: 2px solid white; border-radius: 50%; position: absolute; left: 45px; top: 38px; z-index: 2; }
         .status-dot.online { background: var(--online); }
         
+        /* Чат */
         #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); position: relative; }
         #chat-header { padding: 8px 15px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; min-height: 60px; cursor: pointer; }
         #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
         
-        /* Профиль */
-        #my-profile { padding: 12px; border-top: 1px solid #eee; background: #fafafa; }
-        .profile-btn { width: 100%; padding: 8px; font-size: 13px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; margin-top: 5px; }
+        /* Нижний блок профиля */
+        #my-profile { padding: 15px; border-top: 1px solid #eee; background: #fafafa; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        #my-profile:hover { background: #f0f0f0; }
+
+        /* ОКНО ПРОФИЛЯ (MODAL) */
+        #modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
+            display: none; justify-content: center; align-items: center; z-index: 2000; 
+        }
+        .profile-card { 
+            background: white; padding: 30px; border-radius: 20px; width: 500px; 
+            display: flex; align-items: center; justify-content: space-between; gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative;
+        }
+        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #888; }
+        .modal-col { flex: 1; display: flex; flex-direction: column; }
+        .modal-col.left { text-align: left; }
+        .modal-col.right { text-align: right; }
+        .modal-avatar { 
+            width: 120px; height: 120px; border-radius: 20px; object-fit: cover; 
+            cursor: pointer; border: 3px solid var(--tg-accent); 
+        }
+        .modal-input { 
+            border: none; background: #f1f1f1; padding: 8px; border-radius: 8px; 
+            font-size: 14px; margin-top: 5px; outline: none; width: 100%;
+        }
+        .modal-label { font-size: 10px; color: #999; text-transform: uppercase; font-weight: bold; }
 
         .msg { max-width: 80%; padding: 8px 12px 18px 12px; border-radius: 15px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; position: relative; }
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
@@ -52,7 +78,7 @@
         #context-menu { display: none; position: fixed; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 2000; min-width: 150px; }
         .menu-item { padding: 12px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
 
-        @media (max-width: 768px) { #sidebar { width: 75px; } .user-info, .profile-btn, #my-name-display { display: none; } .status-dot { left: 48px; } }
+        @media (max-width: 768px) { #sidebar { width: 75px; } .user-info, #my-name-display, .profile-card { display: none; } .status-dot { left: 48px; } }
     </style>
 </head>
 <body onclick="closeMenu()">
@@ -60,7 +86,7 @@
 <div id="auth-screen">
     <div class="auth-card">
         <h2 style="color: var(--tg-accent);">Petmess</h2>
-        <input type="text" id="auth-user" placeholder="Логин (ID для входа)">
+        <input type="text" id="auth-user" placeholder="Логин">
         <input type="password" id="auth-pass" placeholder="Пароль">
         <button onclick="login()">ВОЙТИ</button>
     </div>
@@ -68,15 +94,12 @@
 
 <div id="app-screen">
     <div id="sidebar">
-        <div id="search-container"><input type="text" id="search-input" placeholder="Поиск по нику или ID" oninput="searchUser(this.value)"><div id="search-results"></div></div>
+        <div id="search-container"><input type="text" id="search-input" placeholder="Поиск (Enter)" oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
-        <div id="my-profile">
-            <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="document.getElementById('profile-upload').click()">
-                <img id="my-avatar" src="https://robohash.org/me" class="avatar">
-                <span id="my-name-display" style="font-weight:bold; font-size:14px; overflow:hidden; text-overflow:ellipsis;">Загрузка...</span>
-            </div>
-            <button class="profile-btn" onclick="changeNickname()">Сменить имя</button>
-            <input type="file" id="profile-upload" style="display:none" accept="image/*" onchange="processFile(this, 'avatar')">
+        
+        <div id="my-profile" onclick="openProfileModal()">
+            <img id="my-avatar" src="https://robohash.org/me" class="avatar">
+            <span id="my-name-display" style="font-weight:bold; font-size:14px; overflow:hidden; text-overflow:ellipsis;">Загрузка...</span>
         </div>
     </div>
 
@@ -104,6 +127,32 @@
     </div>
 </div>
 
+<div id="modal-overlay" onclick="closeProfileModal(event)">
+    <div class="profile-card" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeProfileModal()">×</span>
+        
+        <div class="modal-col left">
+            <span class="modal-label">Имя пользователя</span>
+            <input type="text" id="modal-nick-input" class="modal-input" placeholder="Никнейм" onchange="updateProfileData()">
+            <div style="margin-top: 15px;">
+                <span class="modal-label">Уникальный ID</span>
+                <div id="modal-login-display" style="font-size: 13px; color: #888;">@login</div>
+            </div>
+        </div>
+
+        <div class="modal-col" style="align-items: center;">
+            <img id="modal-avatar-display" src="" class="modal-avatar" onclick="document.getElementById('profile-upload').click()">
+            <input type="file" id="profile-upload" style="display:none" accept="image/*" onchange="processFile(this, 'avatar')">
+            <span style="font-size: 9px; color: #bbb; margin-top: 5px;">Нажми на фото для смены</span>
+        </div>
+
+        <div class="modal-col right">
+            <span class="modal-label">О себе</span>
+            <textarea id="modal-desc-input" class="modal-input" style="height: 60px; resize: none;" placeholder="Пара слов о тебе..." onchange="updateProfileData()"></textarea>
+        </div>
+    </div>
+</div>
+
 <div id="context-menu">
     <div class="menu-item" onclick="prepareReply()">↩ Ответить</div>
     <div class="menu-item" id="menu-edit" onclick="prepareEdit()">✎ Изменить</div>
@@ -123,8 +172,8 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let me = '', target = '', targetLogin = '', editingMsgKey = null, replyData = null, selectedMsg = null, typingTimeout;
-    const cache = new Map(); // Кэш данных юзеров (аватарки и ники)
+    let me = '', targetLogin = '', editingMsgKey = null, replyData = null, selectedMsg = null, typingTimeout;
+    const cache = new Map();
 
     function formatTime(t) { const d = new Date(t); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
 
@@ -134,7 +183,7 @@
         if (!u || !p) return;
         const snap = await db.ref(`users/${u}`).once('value');
         if (snap.val() && snap.val().password !== p) { alert("Неверный пароль!"); return; }
-        if (!snap.val()) await db.ref(`users/${u}`).set({ password: p, nickname: u, avatar: "" });
+        if (!snap.val()) await db.ref(`users/${u}`).set({ password: p, nickname: u, avatar: "", description: "" });
         me = u;
         db.ref(`status/${me}`).set('online');
         db.ref(`status/${me}`).onDisconnect().set('offline');
@@ -144,23 +193,32 @@
         db.ref(`users/${me}`).on('value', s => {
             const data = s.val();
             document.getElementById('my-name-display').innerText = data.nickname || me;
-            if(data.avatar) document.getElementById('my-avatar').src = data.avatar;
+            if(data.avatar) {
+                document.getElementById('my-avatar').src = data.avatar;
+                document.getElementById('modal-avatar-display').src = data.avatar;
+            } else {
+                document.getElementById('modal-avatar-display').src = `https://robohash.org/${me}`;
+            }
+            document.getElementById('modal-nick-input').value = data.nickname || "";
+            document.getElementById('modal-desc-input').value = data.description || "";
+            document.getElementById('modal-login-display').innerText = "@" + me;
         });
         loadContacts();
     }
 
-    async function changeNickname() {
-        const newNick = prompt("Введите новое имя пользователя:");
-        if (newNick && newNick.trim().length > 0) {
-            await db.ref(`users/${me}/nickname`).set(newNick.trim());
-        }
+    function openProfileModal() { document.getElementById('modal-overlay').style.display = 'flex'; }
+    function closeProfileModal(e) { document.getElementById('modal-overlay').style.display = 'none'; }
+
+    async function updateProfileData() {
+        const nick = document.getElementById('modal-nick-input').value.trim();
+        const desc = document.getElementById('modal-desc-input').value.trim();
+        await db.ref(`users/${me}`).update({ nickname: nick, description: desc });
     }
 
     function searchUser(q) {
         const query = q.trim().toLowerCase();
         const resultsDiv = document.getElementById('search-results');
         if (query.length < 1) { resultsDiv.style.display = 'none'; return; }
-        
         db.ref('users').once('value', snapshot => {
             resultsDiv.innerHTML = '';
             let found = 0;
@@ -168,7 +226,6 @@
                 const loginID = child.key;
                 const data = child.val();
                 const nickname = (data.nickname || '').toLowerCase();
-                
                 if (loginID !== me && (loginID.includes(query) || nickname.includes(query))) {
                     found++;
                     const div = document.createElement('div');
@@ -201,7 +258,6 @@
                 item.innerHTML = `<img src="https://robohash.org/${loginID}" class="avatar" id="av-${loginID}"><div class="status-dot" id="dot-${loginID}"></div>
                                   <div class="user-info" style="flex-grow:1; overflow:hidden"><b id="nick-${loginID}">${loginID}</b></div>
                                   <span onclick="removeContact(event, '${loginID}')" style="opacity:0.3; font-size:20px">×</span>`;
-                
                 db.ref(`users/${loginID}`).on('value', s => {
                     const d = s.val(); if(!d) return;
                     cache.set(loginID, d);
@@ -209,12 +265,10 @@
                     if(document.getElementById(`nick-${loginID}`)) document.getElementById(`nick-${loginID}`).innerText = d.nickname || loginID;
                     if(targetLogin === loginID) refreshHeader();
                 });
-                
                 db.ref(`status/${loginID}`).on('value', s => {
                     const dot = document.getElementById(`dot-${loginID}`);
                     if(dot) dot.className = `status-dot ${s.val()==='online'?'online':''}`;
                 });
-                
                 item.onclick = () => selectChat(loginID);
                 div.appendChild(item);
             });
@@ -223,15 +277,10 @@
 
     function selectChat(loginID) {
         targetLogin = loginID;
-        const uData = cache.get(loginID) || { nickname: loginID };
-        target = uData.nickname || loginID;
-        
         document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
         if(document.getElementById(`user-item-${loginID}`)) document.getElementById(`user-item-${loginID}`).classList.add('active');
-        
         refreshHeader();
         document.getElementById('input').disabled = false; document.getElementById('send-btn').disabled = false;
-        
         const chatId = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`;
         db.ref(`chats/${chatId}`).off();
         db.ref(`chats/${chatId}`).on('value', snap => {
@@ -252,7 +301,6 @@
             });
             mDiv.scrollTop = mDiv.scrollHeight;
         });
-        
         db.ref(`typing/${chatId}/${targetLogin}`).on('value', s => {
             document.getElementById('header-subtitle').innerText = s.val() ? "печатает..." : "";
         });
@@ -267,13 +315,10 @@
 
     function toggleHeaderID() {
         const title = document.getElementById('header-title');
-        const current = title.innerText;
         const d = cache.get(targetLogin);
-        if (current === d.nickname) title.innerText = "@" + targetLogin;
-        else title.innerText = d.nickname;
+        title.innerText = (title.innerText === d.nickname) ? "@" + targetLogin : d.nickname;
     }
 
-    // Остальные функции (типинг, отправка, удаление)
     function handleTyping() {
         const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`;
         db.ref(`typing/${id}/${me}`).set(true);
@@ -302,7 +347,7 @@
             const img = new Image(); img.src = e.target.result;
             img.onload = async () => {
                 const canvas = document.createElement('canvas');
-                const MAX = type === 'avatar' ? 120 : 600;
+                const MAX = type === 'avatar' ? 150 : 600;
                 let w = img.width, h = img.height;
                 if (w > MAX) { h *= MAX / w; w = MAX; }
                 canvas.width = w; canvas.height = h;
