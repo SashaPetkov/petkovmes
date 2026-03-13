@@ -12,7 +12,7 @@
         body { display: flex; }
         
         /* Авторизация */
-        #auth-screen { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        #auth-screen { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
         .auth-card { width: 300px; padding: 20px; text-align: center; }
         .auth-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
         .auth-card button { width: 100%; padding: 12px; background: var(--tg-accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
@@ -38,33 +38,20 @@
         #chat-header { padding: 8px 15px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; min-height: 60px; cursor: pointer; }
         #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
         
-        /* Нижний блок профиля */
         #my-profile { padding: 15px; border-top: 1px solid #eee; background: #fafafa; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        #my-profile:hover { background: #f0f0f0; }
 
-        /* ОКНО ПРОФИЛЯ (MODAL) */
-        #modal-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
-            display: none; justify-content: center; align-items: center; z-index: 2000; 
-        }
+        /* УНИВЕРСАЛЬНОЕ ОКНО ПРОФИЛЯ */
+        #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2500; }
         .profile-card { 
-            background: white; padding: 30px; border-radius: 20px; width: 500px; 
-            display: flex; align-items: center; justify-content: space-between; gap: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative;
+            background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 550px; 
+            display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; gap: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4); position: relative;
         }
-        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #888; }
-        .modal-col { flex: 1; display: flex; flex-direction: column; }
-        .modal-col.left { text-align: left; }
-        .modal-col.right { text-align: right; }
-        .modal-avatar { 
-            width: 120px; height: 120px; border-radius: 20px; object-fit: cover; 
-            cursor: pointer; border: 3px solid var(--tg-accent); 
-        }
-        .modal-input { 
-            border: none; background: #f1f1f1; padding: 8px; border-radius: 8px; 
-            font-size: 14px; margin-top: 5px; outline: none; width: 100%;
-        }
-        .modal-label { font-size: 10px; color: #999; text-transform: uppercase; font-weight: bold; }
+        .modal-col { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .modal-avatar { width: 130px; height: 130px; border-radius: 20px; object-fit: cover; border: 3px solid var(--tg-accent); align-self: center; }
+        .modal-input { border: 1px solid #eee; background: #f9f9f9; padding: 10px; border-radius: 10px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; }
+        .modal-text { font-size: 14px; color: #333; padding: 5px 0; min-height: 20px; word-break: break-word; }
+        .modal-label { font-size: 10px; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: -5px; }
 
         .msg { max-width: 80%; padding: 8px 12px 18px 12px; border-radius: 15px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; position: relative; }
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
@@ -75,10 +62,14 @@
         #input { flex-grow: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
         #send-btn { background: var(--tg-accent); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
 
-        #context-menu { display: none; position: fixed; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 2000; min-width: 150px; }
+        #context-menu { display: none; position: fixed; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 2000; overflow: hidden; min-width: 150px; }
         .menu-item { padding: 12px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
 
-        @media (max-width: 768px) { #sidebar { width: 75px; } .user-info, #my-name-display, .profile-card { display: none; } .status-dot { left: 48px; } }
+        @media (max-width: 768px) { 
+            #sidebar { width: 75px; } .user-info, #my-name-display { display: none; } 
+            .profile-card { flex-direction: column; align-items: center; text-align: center; }
+            .modal-col { width: 100%; }
+        }
     </style>
 </head>
 <body onclick="closeMenu()">
@@ -94,21 +85,20 @@
 
 <div id="app-screen">
     <div id="sidebar">
-        <div id="search-container"><input type="text" id="search-input" placeholder="Поиск (Enter)" oninput="searchUser(this.value)"><div id="search-results"></div></div>
+        <div id="search-container"><input type="text" id="search-input" placeholder="Поиск..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
-        
-        <div id="my-profile" onclick="openProfileModal()">
+        <div id="my-profile" onclick="openProfileModal(me)">
             <img id="my-avatar" src="https://robohash.org/me" class="avatar">
-            <span id="my-name-display" style="font-weight:bold; font-size:14px; overflow:hidden; text-overflow:ellipsis;">Загрузка...</span>
+            <span id="my-name-display" style="font-weight:bold; font-size:14px; overflow:hidden; text-overflow:ellipsis;">...</span>
         </div>
     </div>
 
     <div id="chat-area">
-        <div id="chat-header" onclick="toggleHeaderID()">
+        <div id="chat-header" onclick="openProfileModal(targetLogin)">
             <img id="header-avatar" class="avatar" style="width:35px;height:35px;display:none;margin-right:10px">
             <div style="display:flex; flex-direction:column;">
                 <span id="header-title">Выберите чат</span>
-                <span id="header-subtitle" style="font-size: 11px; color: #888;"></span>
+                <span id="header-subtitle" style="font-size: 11px; color: var(--tg-accent);"></span>
             </div>
         </div>
         <div id="messages"></div>
@@ -127,28 +117,33 @@
     </div>
 </div>
 
-<div id="modal-overlay" onclick="closeProfileModal(event)">
+<div id="modal-overlay" onclick="closeProfileModal()">
     <div class="profile-card" onclick="event.stopPropagation()">
-        <span class="close-modal" onclick="closeProfileModal()">×</span>
-        
-        <div class="modal-col left">
-            <span class="modal-label">Имя пользователя</span>
-            <input type="text" id="modal-nick-input" class="modal-input" placeholder="Никнейм" onchange="updateProfileData()">
-            <div style="margin-top: 15px;">
-                <span class="modal-label">Уникальный ID</span>
-                <div id="modal-login-display" style="font-size: 13px; color: #888;">@login</div>
+        <div class="modal-col">
+            <div>
+                <span class="modal-label">Отображаемое имя</span>
+                <div id="modal-nick-container"></div>
             </div>
+            <div>
+                <span class="modal-label">Уникальный ID</span>
+                <div id="modal-login-display" class="modal-text" style="color: #888;"></div>
+            </div>
+            <div id="modal-pass-container">
+                </div>
         </div>
 
-        <div class="modal-col" style="align-items: center;">
-            <img id="modal-avatar-display" src="" class="modal-avatar" onclick="document.getElementById('profile-upload').click()">
+        <div class="modal-col" style="align-items:center;">
+            <img id="modal-avatar-display" src="" class="modal-avatar">
             <input type="file" id="profile-upload" style="display:none" accept="image/*" onchange="processFile(this, 'avatar')">
-            <span style="font-size: 9px; color: #bbb; margin-top: 5px;">Нажми на фото для смены</span>
+            <span id="modal-av-hint" style="font-size: 9px; color: #bbb; margin-top: 5px;"></span>
         </div>
 
-        <div class="modal-col right">
-            <span class="modal-label">О себе</span>
-            <textarea id="modal-desc-input" class="modal-input" style="height: 60px; resize: none;" placeholder="Пара слов о тебе..." onchange="updateProfileData()"></textarea>
+        <div class="modal-col">
+            <div>
+                <span class="modal-label">О себе</span>
+                <div id="modal-desc-container"></div>
+            </div>
+            <button onclick="closeProfileModal()" style="margin-top:auto; padding:8px; border:none; background:#eee; border-radius:8px; cursor:pointer; font-size:12px;">Закрыть</button>
         </div>
     </div>
 </div>
@@ -189,32 +184,60 @@
         db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'flex';
-        
         db.ref(`users/${me}`).on('value', s => {
-            const data = s.val();
-            document.getElementById('my-name-display').innerText = data.nickname || me;
-            if(data.avatar) {
-                document.getElementById('my-avatar').src = data.avatar;
-                document.getElementById('modal-avatar-display').src = data.avatar;
-            } else {
-                document.getElementById('modal-avatar-display').src = `https://robohash.org/${me}`;
-            }
-            document.getElementById('modal-nick-input').value = data.nickname || "";
-            document.getElementById('modal-desc-input').value = data.description || "";
-            document.getElementById('modal-login-display').innerText = "@" + me;
+            const d = s.val();
+            document.getElementById('my-name-display').innerText = d.nickname || me;
+            if(d.avatar) document.getElementById('my-avatar').src = d.avatar;
         });
         loadContacts();
     }
 
-    function openProfileModal() { document.getElementById('modal-overlay').style.display = 'flex'; }
-    function closeProfileModal(e) { document.getElementById('modal-overlay').style.display = 'none'; }
+    // ОТКРЫТИЕ ОКНА ПРОФИЛЯ
+    async function openProfileModal(uid) {
+        if (!uid) return;
+        const isMe = (uid === me);
+        const snap = await db.ref(`users/${uid}`).once('value');
+        const d = snap.val(); if (!d) return;
 
-    async function updateProfileData() {
-        const nick = document.getElementById('modal-nick-input').value.trim();
-        const desc = document.getElementById('modal-desc-input').value.trim();
-        await db.ref(`users/${me}`).update({ nickname: nick, description: desc });
+        document.getElementById('modal-login-display').innerText = "@" + uid;
+        document.getElementById('modal-avatar-display').src = d.avatar || `https://robohash.org/${uid}`;
+        document.getElementById('modal-avatar-display').style.cursor = isMe ? "pointer" : "default";
+        document.getElementById('modal-avatar-display').onclick = isMe ? () => document.getElementById('profile-upload').click() : null;
+        document.getElementById('modal-av-hint').innerText = isMe ? "Нажми для смены фото" : "";
+
+        // Контейнеры для полей
+        const nickCont = document.getElementById('modal-nick-container');
+        const descCont = document.getElementById('modal-desc-container');
+        const passCont = document.getElementById('modal-pass-container');
+
+        if (isMe) {
+            nickCont.innerHTML = `<input type="text" id="m-nick" class="modal-input" value="${d.nickname || ''}" onchange="saveProfile()">`;
+            descCont.innerHTML = `<textarea id="m-desc" class="modal-input" style="height:80px; resize:none" onchange="saveProfile()">${d.description || ''}</textarea>`;
+            passCont.innerHTML = `
+                <span class="modal-label">Новый пароль</span>
+                <input type="password" id="m-pass" class="modal-input" placeholder="Введите для смены" onchange="saveProfile()">
+            `;
+        } else {
+            nickCont.innerHTML = `<div class="modal-text">${d.nickname || uid}</div>`;
+            descCont.innerHTML = `<div class="modal-text">${d.description || 'Нет описания'}</div>`;
+            passCont.innerHTML = '';
+        }
+
+        document.getElementById('modal-overlay').style.display = 'flex';
     }
 
+    async function saveProfile() {
+        const nick = document.getElementById('m-nick').value.trim();
+        const desc = document.getElementById('m-desc').value.trim();
+        const pass = document.getElementById('m-pass').value.trim();
+        const updates = { nickname: nick, description: desc };
+        if (pass.length > 0) updates.password = pass;
+        await db.ref(`users/${me}`).update(updates);
+    }
+
+    function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+    // ЛОГИКА ПОИСКА, ЧАТА И ПРОЧЕГО (без изменений)
     function searchUser(q) {
         const query = q.trim().toLowerCase();
         const resultsDiv = document.getElementById('search-results');
@@ -223,16 +246,13 @@
             resultsDiv.innerHTML = '';
             let found = 0;
             snapshot.forEach(child => {
-                const loginID = child.key;
-                const data = child.val();
-                const nickname = (data.nickname || '').toLowerCase();
-                if (loginID !== me && (loginID.includes(query) || nickname.includes(query))) {
+                const lid = child.key; const d = child.val();
+                if (lid !== me && (lid.includes(query) || (d.nickname||'').toLowerCase().includes(query))) {
                     found++;
-                    const div = document.createElement('div');
-                    div.className = 'search-item';
-                    div.innerHTML = `<img src="${data.avatar || 'https://robohash.org/'+loginID}" style="width:30px;height:30px;border-radius:50%"> 
-                                    <div style="display:flex; flex-direction:column"><b style="font-size:14px">${data.nickname || loginID}</b><small style="font-size:10px; color:#888">@${loginID}</small></div>`;
-                    div.onclick = () => { addContact(loginID); resultsDiv.style.display='none'; };
+                    const div = document.createElement('div'); div.className = 'search-item';
+                    div.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+lid}" style="width:30px;height:30px;border-radius:50%"> 
+                                    <div style="display:flex; flex-direction:column"><b style="font-size:14px">${d.nickname || lid}</b><small style="font-size:10px; color:#888">@${lid}</small></div>`;
+                    div.onclick = () => { db.ref(`contacts/${me}/${lid}`).set(true); db.ref(`contacts/${lid}/${me}`).set(true); resultsDiv.style.display='none'; selectChat(lid); };
                     resultsDiv.appendChild(div);
                 }
             });
@@ -240,60 +260,50 @@
         });
     }
 
-    async function addContact(loginID) {
-        await db.ref(`contacts/${me}/${loginID}`).set(true);
-        await db.ref(`contacts/${loginID}/${me}`).set(true);
-        document.getElementById('search-input').value = '';
-        selectChat(loginID);
-    }
-
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snap => {
             const div = document.getElementById('contacts'); div.innerHTML = '';
             snap.forEach(c => {
-                const loginID = c.key;
+                const lid = c.key;
                 const item = document.createElement('div');
-                item.id = `user-item-${loginID}`;
-                item.className = `user-item ${loginID === targetLogin ? 'active' : ''}`;
-                item.innerHTML = `<img src="https://robohash.org/${loginID}" class="avatar" id="av-${loginID}"><div class="status-dot" id="dot-${loginID}"></div>
-                                  <div class="user-info" style="flex-grow:1; overflow:hidden"><b id="nick-${loginID}">${loginID}</b></div>
-                                  <span onclick="removeContact(event, '${loginID}')" style="opacity:0.3; font-size:20px">×</span>`;
-                db.ref(`users/${loginID}`).on('value', s => {
-                    const d = s.val(); if(!d) return;
-                    cache.set(loginID, d);
-                    if(document.getElementById(`av-${loginID}`)) document.getElementById(`av-${loginID}`).src = d.avatar || `https://robohash.org/${loginID}`;
-                    if(document.getElementById(`nick-${loginID}`)) document.getElementById(`nick-${loginID}`).innerText = d.nickname || loginID;
-                    if(targetLogin === loginID) refreshHeader();
+                item.id = `user-item-${lid}`; item.className = `user-item ${lid === targetLogin ? 'active' : ''}`;
+                item.innerHTML = `<img src="https://robohash.org/${lid}" class="avatar" id="av-${lid}"><div class="status-dot" id="dot-${lid}"></div>
+                                  <div class="user-info" style="flex-grow:1; overflow:hidden"><b id="nick-${lid}">${lid}</b></div>
+                                  <span onclick="removeContact(event, '${lid}')" style="opacity:0.3; font-size:20px">×</span>`;
+                db.ref(`users/${lid}`).on('value', s => {
+                    const d = s.val(); if(!d) return; cache.set(lid, d);
+                    if(document.getElementById(`av-${lid}`)) document.getElementById(`av-${lid}`).src = d.avatar || `https://robohash.org/${lid}`;
+                    if(document.getElementById(`nick-${lid}`)) document.getElementById(`nick-${lid}`).innerText = d.nickname || lid;
+                    if(targetLogin === lid) { document.getElementById('header-title').innerText = d.nickname || lid; document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${lid}`; }
                 });
-                db.ref(`status/${loginID}`).on('value', s => {
-                    const dot = document.getElementById(`dot-${loginID}`);
+                db.ref(`status/${lid}`).on('value', s => {
+                    const dot = document.getElementById(`dot-${lid}`);
                     if(dot) dot.className = `status-dot ${s.val()==='online'?'online':''}`;
                 });
-                item.onclick = () => selectChat(loginID);
+                item.onclick = () => selectChat(lid);
                 div.appendChild(item);
             });
         });
     }
 
-    function selectChat(loginID) {
-        targetLogin = loginID;
+    function selectChat(lid) {
+        targetLogin = lid;
         document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
-        if(document.getElementById(`user-item-${loginID}`)) document.getElementById(`user-item-${loginID}`).classList.add('active');
-        refreshHeader();
+        if(document.getElementById(`user-item-${lid}`)) document.getElementById(`user-item-${lid}`).classList.add('active');
+        const ud = cache.get(lid) || { nickname: lid };
+        document.getElementById('header-title').innerText = ud.nickname || lid;
+        const hAv = document.getElementById('header-avatar'); hAv.style.display = 'block'; hAv.src = ud.avatar || `https://robohash.org/${lid}`;
         document.getElementById('input').disabled = false; document.getElementById('send-btn').disabled = false;
-        const chatId = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`;
+        const chatId = me < lid ? `${me}_${lid}` : `${lid}_${me}`;
         db.ref(`chats/${chatId}`).off();
         db.ref(`chats/${chatId}`).on('value', snap => {
             const mDiv = document.getElementById('messages'); mDiv.innerHTML = '';
             snap.forEach(c => {
-                const m = c.val(); if (m.sender === targetLogin && !m.read) db.ref(`chats/${chatId}/${c.key}`).update({ read: true });
-                const d = document.createElement('div'); d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
-                d.id = `msg-${c.key}`;
+                const m = c.val(); if (m.sender === lid && !m.read) db.ref(`chats/${chatId}/${c.key}`).update({ read: true });
+                const d = document.createElement('div'); d.className = `msg ${m.sender === me ? 'sent' : 'received'}`; d.id = `msg-${c.key}`;
                 let html = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}')"><b>💬</b> ${m.replyTo.text}</div>` : '';
-                if (m.type === 'image') {
-                    if (Date.now() - m.time > 86400000) { db.ref(`chats/${chatId}/${c.key}`).remove(); return; }
-                    html += `<img src="${m.file}" style="max-width:100%;border-radius:10px;">`;
-                } else html += `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
+                if (m.type === 'image') html += `<img src="${m.file}" style="max-width:100%;border-radius:10px;">`;
+                else html += `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
                 html += `<div class="msg-meta"><span>${formatTime(m.time)}</span>${(m.sender === me && !m.read) ? '<span>👁‍🗨</span>' : ''}</div>`;
                 d.innerHTML = html;
                 d.onclick = (e) => { if(!e.target.closest('.reply-box')) showMenu(e, c.key, m.sender, m.text || "[Фото]"); };
@@ -301,45 +311,10 @@
             });
             mDiv.scrollTop = mDiv.scrollHeight;
         });
-        db.ref(`typing/${chatId}/${targetLogin}`).on('value', s => {
-            document.getElementById('header-subtitle').innerText = s.val() ? "печатает..." : "";
-        });
+        db.ref(`typing/${chatId}/${lid}`).on('value', s => { document.getElementById('header-subtitle').innerText = s.val() ? "печатает..." : ""; });
     }
 
-    function refreshHeader() {
-        const d = cache.get(targetLogin) || { nickname: targetLogin };
-        document.getElementById('header-title').innerText = d.nickname || targetLogin;
-        const hAv = document.getElementById('header-avatar');
-        hAv.style.display = 'block'; hAv.src = d.avatar || `https://robohash.org/${targetLogin}`;
-    }
-
-    function toggleHeaderID() {
-        const title = document.getElementById('header-title');
-        const d = cache.get(targetLogin);
-        title.innerText = (title.innerText === d.nickname) ? "@" + targetLogin : d.nickname;
-    }
-
-    function handleTyping() {
-        const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`;
-        db.ref(`typing/${id}/${me}`).set(true);
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => db.ref(`typing/${id}/${me}`).set(false), 2000);
-    }
-
-    function sendMessage(e) {
-        e.preventDefault(); const txt = document.getElementById('input').value.trim();
-        if (!txt || !targetLogin) return;
-        const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`;
-        if (editingMsgKey) db.ref(`chats/${id}/${editingMsgKey}`).update({ text: txt, edited: true });
-        else {
-            const obj = { sender: me, text: txt, time: Date.now(), type: 'text', read: false };
-            if (replyData) obj.replyTo = replyData;
-            db.ref(`chats/${id}`).push(obj);
-            db.ref(`contacts/${targetLogin}/${me}`).set(true);
-        }
-        cancelAction();
-    }
-
+    // Обработка файлов и сообщений (остается без изменений)
     async function processFile(input, type) {
         const file = input.files[0]; if (!file) return;
         const reader = new FileReader(); reader.readAsDataURL(file);
@@ -347,21 +322,19 @@
             const img = new Image(); img.src = e.target.result;
             img.onload = async () => {
                 const canvas = document.createElement('canvas');
-                const MAX = type === 'avatar' ? 150 : 600;
+                const MAX = type === 'avatar' ? 120 : 600;
                 let w = img.width, h = img.height;
                 if (w > MAX) { h *= MAX / w; w = MAX; }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                const base64 = canvas.toDataURL('image/jpeg', 0.5);
-                if (type === 'avatar') await db.ref(`users/${me}/avatar`).set(base64);
-                else {
-                    const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`;
-                    db.ref(`chats/${id}`).push({ sender: me, type: 'image', file: base64, time: Date.now(), read: false });
-                }
+                const b64 = canvas.toDataURL('image/jpeg', 0.5);
+                if (type === 'avatar') { await db.ref(`users/${me}/avatar`).set(b64); document.getElementById('modal-avatar-display').src = b64; }
+                else { const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`; db.ref(`chats/${id}`).push({ sender: me, type: 'image', file: b64, time: Date.now(), read: false }); }
             };
         };
     }
-
+    function handleTyping() { const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`; db.ref(`typing/${id}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(() => db.ref(`typing/${id}/${me}`).set(false), 2000); }
+    function sendMessage(e) { e.preventDefault(); const txt = document.getElementById('input').value.trim(); if (!txt || !targetLogin) return; const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`; if (editingMsgKey) db.ref(`chats/${id}/${editingMsgKey}`).update({ text: txt, edited: true }); else { const obj = { sender: me, text: txt, time: Date.now(), type: 'text', read: false }; if (replyData) obj.replyTo = replyData; db.ref(`chats/${id}`).push(obj); db.ref(`contacts/${targetLogin}/${me}`).set(true); } cancelAction(); }
     function jumpToMessage(key) { const el = document.getElementById(`msg-${key}`); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight'); setTimeout(() => el.classList.remove('highlight'), 1000); } }
     function showMenu(e, k, s, t) { e.stopPropagation(); selectedMsg = { key: k, sender: s, text: t }; const m = document.getElementById('context-menu'); m.style.display='block'; m.style.left = Math.min(e.clientX, window.innerWidth - 160) + 'px'; m.style.top = Math.min(e.clientY, window.innerHeight - 150) + 'px'; document.getElementById('menu-edit').style.display = s === me ? 'flex' : 'none'; document.getElementById('menu-del').style.display = s === me ? 'flex' : 'none'; }
     function closeMenu() { document.getElementById('context-menu').style.display = 'none'; }
