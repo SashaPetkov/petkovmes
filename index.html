@@ -17,7 +17,20 @@
         .auth-card button { width: 100%; padding: 12px; background: var(--tg-accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
-        #sidebar { width: 300px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar { width: 300px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; flex-shrink: 0; position: relative; }
+        
+        /* Умный поиск */
+        #search-container { padding: 10px; border-bottom: 1px solid #f0f0f0; position: relative; }
+        #search-input { width: 100%; padding: 10px; border: none; background: #f1f1f1; border-radius: 10px; outline: none; box-sizing: border-box; }
+        #search-results { 
+            position: absolute; top: 55px; left: 10px; right: 10px; 
+            background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            z-index: 100; display: none; max-height: 250px; overflow-y: auto; 
+        }
+        .search-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f9f9f9; display: flex; align-items: center; gap: 10px; }
+        .search-item:hover { background: #f0f7ff; }
+        .search-item b { flex-grow: 1; }
+
         #contacts { flex-grow: 1; overflow-y: auto; }
         .user-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; position: relative; }
         .user-item.active { background: var(--tg-accent); color: white; }
@@ -45,8 +58,6 @@
         #form { display: flex; gap: 10px; align-items: center; }
         #input { flex-grow: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
         
-        .privacy-note { font-size: 10px; color: #999; text-align: center; padding: 2px; }
-        .attach-btn { font-size: 24px; cursor: pointer; color: #888; }
         #send-btn { background: var(--tg-accent); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; }
 
         #context-menu { display: none; position: fixed; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 2000; overflow: hidden; min-width: 150px; }
@@ -60,7 +71,6 @@
 <div id="auth-screen">
     <div class="auth-card">
         <h2 style="color: var(--tg-accent);">Petmess</h2>
-        <p style="font-size: 12px; color: #888; margin-bottom: 15px;">Безопасный эфемерный мессенджер</p>
         <input type="text" id="auth-user" placeholder="Логин">
         <input type="password" id="auth-pass" placeholder="Пароль">
         <button onclick="login()">ВОЙТИ</button>
@@ -69,7 +79,10 @@
 
 <div id="app-screen">
     <div id="sidebar">
-        <div style="padding:10px;"><input type="text" id="search-input" placeholder="Поиск (Enter)" onkeydown="if(event.key==='Enter') searchUser()" style="width:100%; padding:8px; border-radius:10px; border:1px solid #eee; outline:none;"></div>
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="Поиск людей..." oninput="searchUser(this.value)">
+            <div id="search-results"></div>
+        </div>
         <div id="contacts"></div>
         <div id="my-profile" onclick="document.getElementById('profile-upload').click()">
             <img id="my-avatar" src="https://robohash.org/me" class="avatar">
@@ -94,12 +107,11 @@
                 <div onclick="cancelAction()" style="cursor:pointer; font-size:24px; margin-left:10px;">×</div>
             </div>
             <form id="form" onsubmit="sendMessage(event)">
-                <label for="chat-file" class="attach-btn">📎</label>
+                <label for="chat-file" class="attach-btn" style="font-size: 24px; cursor: pointer; color: #888;">📎</label>
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this, 'chat')">
                 <input id="input" autocomplete="off" placeholder="Написать..." disabled>
                 <button id="send-btn" disabled>➤</button>
             </form>
-            <div class="privacy-note">Данные защищены политикой эфемерности Petmess.</div>
         </div>
     </div>
 </div>
@@ -126,7 +138,6 @@
     let me = '', target = '', editingMsgKey = null, replyData = null, selectedMsg = null;
     const avatarCache = new Map();
 
-    // СЖАТИЕ (Аватарки до 120px, фото до 600px)
     async function processFile(input, type) {
         const file = input.files[0]; if (!file) return;
         const reader = new FileReader();
@@ -140,7 +151,6 @@
                 if (w > MAX) { h *= MAX / w; w = MAX; }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                // Качество 0.4 для аватарок, 0.6 для чата
                 const q = type === 'avatar' ? 0.4 : 0.6;
                 const base64 = canvas.toDataURL('image/jpeg', q);
                 if (type === 'avatar') await db.ref(`users/${me}/avatar`).set(base64);
@@ -168,6 +178,37 @@
         watchForIncoming();
     }
 
+    // УМНЫЙ ПОИСК С ВАРИАНТАМИ
+    function searchUser(q) {
+        const query = q.trim().toLowerCase();
+        const resultsDiv = document.getElementById('search-results');
+        if (query.length < 1) { resultsDiv.style.display = 'none'; return; }
+
+        db.ref('users').orderByKey().startAt(query).endAt(query + '\uf8ff').limitToFirst(10).once('value', snapshot => {
+            resultsDiv.innerHTML = '';
+            let count = 0;
+            snapshot.forEach(child => {
+                const name = child.key;
+                if (name === me) return;
+                count++;
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.innerHTML = `<img src="${avatarCache.get(name) || 'https://robohash.org/'+name}" style="width:30px;height:30px;border-radius:50%"> <b>${name}</b>`;
+                div.onclick = () => addContact(name);
+                resultsDiv.appendChild(div);
+            });
+            resultsDiv.style.display = count > 0 ? 'block' : 'none';
+        });
+    }
+
+    async function addContact(name) {
+        await db.ref(`contacts/${me}/${name}`).set(true);
+        await db.ref(`contacts/${name}/${me}`).set(true);
+        document.getElementById('search-input').value = '';
+        document.getElementById('search-results').style.display = 'none';
+        selectChat(name);
+    }
+
     function watchForIncoming() {
         const now = Date.now();
         db.ref('chats').on('child_added', snap => {
@@ -178,13 +219,6 @@
                 });
             }
         });
-    }
-
-    async function searchUser() {
-        const q = document.getElementById('search-input').value.trim().toLowerCase();
-        if (!q || q === me) return;
-        const s = await db.ref(`users/${q}`).once('value');
-        if (s.exists()) { db.ref(`contacts/${me}/${q}`).set(true); db.ref(`contacts/${q}/${me}`).set(true); document.getElementById('search-input').value = ''; }
     }
 
     function loadContacts() {
@@ -220,20 +254,12 @@
         document.getElementById('input').disabled = false; document.getElementById('send-btn').disabled = false;
         
         const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
-        const autoDeleteTime = 24 * 60 * 60 * 1000; // 24 часа
-
         db.ref(`chats/${chatId}`).off();
         db.ref(`chats/${chatId}`).on('value', snap => {
             const mDiv = document.getElementById('messages'); mDiv.innerHTML = '';
             snap.forEach(c => {
                 const m = c.val(); const key = c.key;
-                
-                // АВТО-УДАЛЕНИЕ ФОТО СТАРШЕ 24 ЧАСОВ
-                if (m.type === 'image' && (Date.now() - m.time > autoDeleteTime)) {
-                    db.ref(`chats/${chatId}/${key}`).remove();
-                    return;
-                }
-
+                if (m.type === 'image' && (Date.now() - m.time > 86400000)) { db.ref(`chats/${chatId}/${key}`).remove(); return; }
                 const d = document.createElement('div'); d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
                 let html = m.replyTo ? `<div class="reply-box"><b>${m.replyTo.user}</b>${m.replyTo.text}</div>` : '';
                 if (m.type === 'image') html += `<img src="${m.file}" class="chat-img" onclick="window.open(this.src)">`;
@@ -275,7 +301,6 @@
     function cancelAction() { editingMsgKey = null; replyData = null; document.getElementById('action-preview').style.display = 'none'; document.getElementById('input').value = ''; }
 
     function sendMedia(base64) {
-        if (!target) return;
         const id = me < target ? `${me}_${target}` : `${target}_${me}`;
         db.ref(`chats/${id}`).push({ sender: me, type: 'image', file: base64, time: Date.now() });
         db.ref(`contacts/${target}/${me}`).set(true);
@@ -295,7 +320,7 @@
         cancelAction();
     }
 
-    async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) { await db.ref(`contacts/${me}/${n}`).remove(); if(target === n) location.reload(); }}
+    async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) { await db.ref(`contacts/${me}/${n}`).remove(); if(target === n) { target = ''; document.getElementById('messages').innerHTML = ''; document.getElementById('header-title').innerText = 'Выберите чат'; document.getElementById('header-avatar').style.display = 'none'; } } }
     async function deleteMsg() { const id = me < target ? `${me}_${target}` : `${target}_${me}`; await db.ref(`chats/${id}/${selectedMsg.key}`).remove(); }
 </script>
 </body>
