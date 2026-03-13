@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petkovmes Multimedia</title>
+    <title>Petkovmes Ultimate+</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
@@ -28,33 +28,33 @@
         .status-dot.online { background: var(--online); }
         
         #my-profile { padding: 15px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 12px; background: #fafafa; cursor: pointer; }
-        .del-contact { font-size: 24px; color: #ccc; padding: 0 5px; opacity: 0.8; cursor: pointer; }
+        .del-contact { font-size: 24px; color: #ccc; padding: 0 5px; opacity: 0.8; cursor: pointer; z-index: 5; }
 
         #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); position: relative; }
         #chat-header { padding: 8px 15px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; font-weight: bold; height: 55px; }
         #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
         
-        .msg { max-width: 80%; padding: 8px 12px; border-radius: 15px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; word-wrap: break-word; position: relative; }
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 15px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; word-wrap: break-word; }
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
         
-        /* Стили для картинок в чате */
-        .chat-img { max-width: 100%; border-radius: 10px; margin-top: 5px; display: block; cursor: zoom-in; }
+        .chat-img { max-width: 100%; border-radius: 10px; margin: 5px 0; display: block; }
+        .reply-box { border-left: 3px solid var(--tg-accent); background: rgba(0,0,0,0.05); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; color: #555; }
+        .reply-box b { color: var(--tg-accent); display: block; font-size: 11px; }
 
+        #action-preview { background: white; padding: 8px 15px; border-top: 1px solid #ddd; display: none; align-items: center; border-left: 4px solid var(--tg-accent); }
         #form-container { background: white; padding: 10px; display: flex; flex-direction: column; }
         #form { display: flex; gap: 10px; align-items: center; }
         #input { flex-grow: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
         
-        /* Кнопка скрепки */
-        .attach-btn { font-size: 24px; cursor: pointer; color: #888; padding: 0 5px; }
-        .attach-btn:hover { color: var(--tg-accent); }
-        
+        .attach-btn { font-size: 24px; cursor: pointer; color: #888; }
         #send-btn { background: var(--tg-accent); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; }
 
-        #context-menu { display: none; position: fixed; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 2000; min-width: 150px; }
-        .menu-item { padding: 12px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+        #context-menu { display: none; position: fixed; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 2000; overflow: hidden; min-width: 150px; }
+        .menu-item { padding: 12px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 10px; }
+        .menu-item:hover { background: #f5f5f5; }
 
-        @media (max-width: 768px) { #sidebar { width: 75px; } .user-info, #my-profile b, .del-contact { display: none; } .status-dot { left: 48px; } }
+        @media (max-width: 768px) { #sidebar { width: 75px; } .user-info, #my-profile b { display: none; } .status-dot { left: 48px; } .del-contact { position: absolute; right: 0; top: 0; background: white; border-radius: 50%; } }
     </style>
 </head>
 <body onclick="closeMenu()">
@@ -85,11 +85,15 @@
             <span id="header-title">Выберите чат</span>
         </div>
         <div id="messages"></div>
+        
         <div id="form-container">
-            <form id="form" onsubmit="sendMessage(event)" style="display:flex; width:100%; gap:10px; align-items:center;">
+            <div id="action-preview">
+                <div id="action-text" style="flex-grow:1; font-size:12px; color:#555; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+                <div onclick="cancelAction()" style="cursor:pointer; font-size:24px; margin-left:10px;">×</div>
+            </div>
+            <form id="form" onsubmit="sendMessage(event)">
                 <label for="chat-file" class="attach-btn">📎</label>
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this, 'chat')">
-                
                 <input id="input" autocomplete="off" placeholder="Написать..." disabled>
                 <button id="send-btn" disabled>➤</button>
             </form>
@@ -98,7 +102,9 @@
 </div>
 
 <div id="context-menu">
-    <div class="menu-item" id="menu-del" onclick="deleteMsg()" style="color:red;">Удалить</div>
+    <div class="menu-item" onclick="prepareReply()"><span>↩</span> Ответить</div>
+    <div class="menu-item" id="menu-edit" onclick="prepareEdit()"><span>✎</span> Изменить</div>
+    <div class="menu-item" id="menu-del" onclick="deleteMsg()" style="color:red;"><span>🗑</span> Удалить</div>
 </div>
 
 <script>
@@ -114,43 +120,26 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let me = '', target = '', selectedMsg = null;
+    let me = '', target = '', editingMsgKey = null, replyData = null, selectedMsg = null;
     const avatarCache = new Map();
 
-    // МАГИЯ: СЖАТИЕ КАРТИНКИ
+    // СЖАТИЕ
     async function processFile(input, type) {
-        const file = input.files[0];
-        if (!file) return;
-
+        const file = input.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
+        reader.onload = (e) => {
+            const img = new Image(); img.src = e.target.result;
             img.onload = async () => {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = type === 'avatar' ? 200 : 800; // Аватарки меньше, фото в чате больше
-                let width = img.width;
-                let height = img.height;
-
-                if (width > MAX_WIDTH) {
-                    height *= MAX_WIDTH / width;
-                    width = MAX_WIDTH;
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Превращаем в легкий JPEG
-                const base64 = canvas.toDataURL('image/jpeg', 0.7);
-
-                if (type === 'avatar') {
-                    await db.ref(`users/${me}/avatar`).set(base64);
-                } else {
-                    sendMedia(base64);
-                }
+                const MAX = type === 'avatar' ? 200 : 800;
+                let w = img.width, h = img.height;
+                if (w > MAX) { h *= MAX / w; w = MAX; }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const base64 = canvas.toDataURL('image/jpeg', 0.6);
+                if (type === 'avatar') await db.ref(`users/${me}/avatar`).set(base64);
+                else sendMedia(base64);
             };
         };
     }
@@ -163,7 +152,6 @@
         const userData = snapshot.val();
         if (userData && userData.password !== p) { alert("Неверный пароль!"); return; }
         if (!userData) await db.ref(`users/${u}`).set({ password: p, avatar: "" });
-        
         me = u;
         db.ref(`status/${me}`).set('online');
         db.ref(`status/${me}`).onDisconnect().set('offline');
@@ -180,8 +168,8 @@
         db.ref('chats').on('child_added', snap => {
             if (snap.key.includes(me)) {
                 const other = snap.key.replace(me, '').replace('_', '');
-                db.ref(`chats/${snap.key}`).limitToLast(1).on('child_added', mSnap => {
-                    if (mSnap.val().time > now && mSnap.val().sender !== me) db.ref(`contacts/${me}/${other}`).set(true);
+                db.ref(`chats/${snap.key}`).limitToLast(1).on('child_added', m => {
+                    if (m.val().time > now && m.val().sender !== me) db.ref(`contacts/${me}/${other}`).set(true);
                 });
             }
         });
@@ -190,34 +178,27 @@
     async function searchUser() {
         const q = document.getElementById('search-input').value.trim().toLowerCase();
         if (!q || q === me) return;
-        const snapshot = await db.ref(`users/${q}`).once('value');
-        if (snapshot.exists()) {
-            await db.ref(`contacts/${me}/${q}`).set(true);
-            await db.ref(`contacts/${q}/${me}`).set(true);
-            document.getElementById('search-input').value = '';
-        }
+        const s = await db.ref(`users/${q}`).once('value');
+        if (s.exists()) { db.ref(`contacts/${me}/${q}`).set(true); db.ref(`contacts/${q}/${me}`).set(true); document.getElementById('search-input').value = ''; }
     }
 
     function loadContacts() {
-        db.ref(`contacts/${me}`).on('value', snapshot => {
-            const contDiv = document.getElementById('contacts');
-            contDiv.innerHTML = '';
-            snapshot.forEach(child => {
-                const name = child.key;
-                const div = document.createElement('div');
-                div.id = `user-item-${name}`;
-                div.className = `user-item ${name === target ? 'active' : ''}`;
-                const startAv = avatarCache.get(name) || `https://robohash.org/${name}`;
-                div.innerHTML = `
-                    <img src="${startAv}" class="avatar" id="av-${name}">
+        db.ref(`contacts/${me}`).on('value', snap => {
+            const div = document.getElementById('contacts'); div.innerHTML = '';
+            snap.forEach(c => {
+                const name = c.key;
+                const item = document.createElement('div');
+                item.id = `user-item-${name}`;
+                item.className = `user-item ${name === target ? 'active' : ''}`;
+                item.innerHTML = `
+                    <img src="${avatarCache.get(name) || 'https://robohash.org/'+name}" class="avatar" id="av-${name}">
                     <div class="status-dot" id="dot-${name}"></div>
-                    <div style="flex-grow:1; overflow:hidden"><b>${name}</b></div>
-                    <span class="del-contact" onclick="removeContact(event, '${name}')">×</span>
-                `;
+                    <div class="user-info" style="flex-grow:1; overflow:hidden"><b>${name}</b></div>
+                    <span class="del-contact" onclick="removeContact(event, '${name}')">×</span>`;
                 db.ref(`users/${name}/avatar`).on('value', s => { if(s.val()) { avatarCache.set(name, s.val()); if(document.getElementById(`av-${name}`)) document.getElementById(`av-${name}`).src = s.val(); }});
                 db.ref(`status/${name}`).on('value', s => { if(document.getElementById(`dot-${name}`)) document.getElementById(`dot-${name}`).className = `status-dot ${s.val()==='online'?'online':''}`; });
-                div.onclick = () => selectChat(name);
-                contDiv.appendChild(div);
+                item.onclick = () => selectChat(name);
+                div.appendChild(item);
             });
         });
     }
@@ -225,64 +206,82 @@
     function selectChat(name) {
         document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
         if(document.getElementById(`user-item-${name}`)) document.getElementById(`user-item-${name}`).classList.add('active');
-        target = name;
-        document.getElementById('header-title').innerText = target;
-        const hAv = document.getElementById('header-avatar');
-        hAv.style.display = 'block';
+        target = name; cancelAction();
+        const hAv = document.getElementById('header-avatar'); hAv.style.display = 'block';
         hAv.src = avatarCache.get(target) || `https://robohash.org/${target}`;
         db.ref(`users/${target}/avatar`).on('value', s => { if(s.val()) hAv.src = s.val(); });
-
-        document.getElementById('input').disabled = false;
-        document.getElementById('send-btn').disabled = false;
+        document.getElementById('header-title').innerText = target;
+        document.getElementById('input').disabled = false; document.getElementById('send-btn').disabled = false;
         
         const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
         db.ref(`chats/${chatId}`).off();
         db.ref(`chats/${chatId}`).on('value', snap => {
-            const mDiv = document.getElementById('messages');
-            mDiv.innerHTML = '';
+            const mDiv = document.getElementById('messages'); mDiv.innerHTML = '';
             snap.forEach(c => {
-                const m = c.val();
-                const d = document.createElement('div');
-                d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
-                
-                // Рендерим текст ИЛИ картинку
-                if (m.type === 'image') {
-                    d.innerHTML = `<img src="${m.file}" class="chat-img" onclick="window.open(this.src)">`;
-                } else {
-                    d.innerText = m.text;
-                }
-                
-                d.onclick = (e) => { if(m.sender === me) showMenu(e, c.key); };
+                const m = c.val(); const key = c.key;
+                const d = document.createElement('div'); d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
+                let html = m.replyTo ? `<div class="reply-box"><b>${m.replyTo.user}</b>${m.replyTo.text}</div>` : '';
+                if (m.type === 'image') html += `<img src="${m.file}" class="chat-img" onclick="window.open(this.src)">`;
+                else html += `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
+                d.innerHTML = html;
+                d.onclick = (e) => showMenu(e, key, m.sender, m.text || "[Изображение]");
                 mDiv.appendChild(d);
             });
             mDiv.scrollTop = mDiv.scrollHeight;
         });
     }
 
+    function showMenu(e, key, sender, text) {
+        e.stopPropagation(); selectedMsg = { key, sender, text };
+        const m = document.getElementById('context-menu'); m.style.display='block';
+        m.style.left = Math.min(e.clientX, window.innerWidth - 160) + 'px';
+        m.style.top = Math.min(e.clientY, window.innerHeight - 150) + 'px';
+        document.getElementById('menu-edit').style.display = sender === me ? 'flex' : 'none';
+        document.getElementById('menu-del').style.display = sender === me ? 'flex' : 'none';
+    }
+
+    function closeMenu() { document.getElementById('context-menu').style.display = 'none'; }
+
+    function prepareReply() {
+        cancelAction(); replyData = { user: selectedMsg.sender, text: selectedMsg.text };
+        document.getElementById('action-text').innerText = `Ответ: ${selectedMsg.text}`;
+        document.getElementById('action-preview').style.display = 'flex';
+        document.getElementById('input').focus();
+    }
+
+    function prepareEdit() {
+        cancelAction(); editingMsgKey = selectedMsg.key;
+        document.getElementById('action-text').innerText = `Правка: ${selectedMsg.text}`;
+        document.getElementById('action-preview').style.display = 'flex';
+        document.getElementById('input').value = selectedMsg.text;
+        document.getElementById('input').focus();
+    }
+
+    function cancelAction() { editingMsgKey = null; replyData = null; document.getElementById('action-preview').style.display = 'none'; document.getElementById('input').value = ''; }
+
     function sendMedia(base64) {
         if (!target) return;
-        const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
-        db.ref(`chats/${chatId}`).push({
-            sender: me,
-            type: 'image',
-            file: base64,
-            time: Date.now()
-        });
+        const id = me < target ? `${me}_${target}` : `${target}_${me}`;
+        db.ref(`chats/${id}`).push({ sender: me, type: 'image', file: base64, time: Date.now() });
+        db.ref(`contacts/${target}/${me}`).set(true);
     }
 
     function sendMessage(e) {
-        e.preventDefault();
-        const txt = document.getElementById('input').value.trim();
-        if (!txt || !target) return;
-        const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
-        db.ref(`chats/${chatId}`).push({ sender: me, text: txt, time: Date.now(), type: 'text' });
-        document.getElementById('input').value = '';
+        e.preventDefault(); const input = document.getElementById('input'); const text = input.value.trim();
+        if (!text || !target) return;
+        const id = me < target ? `${me}_${target}` : `${target}_${me}`;
+        if (editingMsgKey) db.ref(`chats/${id}/${editingMsgKey}`).update({ text, edited: true });
+        else {
+            const obj = { sender: me, text, time: Date.now(), type: 'text' };
+            if (replyData) obj.replyTo = replyData;
+            db.ref(`chats/${id}`).push(obj);
+            db.ref(`contacts/${target}/${me}`).set(true);
+        }
+        cancelAction();
     }
 
-    async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
-    function showMenu(e, key) { e.stopPropagation(); selectedMsg = key; const m = document.getElementById('context-menu'); m.style.display='block'; m.style.left=e.clientX+'px'; m.style.top=e.clientY+'px'; }
-    function closeMenu() { document.getElementById('context-menu').style.display = 'none'; }
-    async function deleteMsg() { const chatId = me < target ? `${me}_${target}` : `${target}_${me}`; await db.ref(`chats/${chatId}/${selectedMsg}`).remove(); }
+    async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) { await db.ref(`contacts/${me}/${n}`).remove(); if(target === n) location.reload(); }}
+    async function deleteMsg() { const id = me < target ? `${me}_${target}` : `${target}_${me}`; await db.ref(`chats/${id}/${selectedMsg.key}`).remove(); }
 </script>
 </body>
 </html>
