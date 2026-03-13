@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petkovmes Final Fix</title>
+    <title>Petkovmes Stable Pro</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
@@ -53,7 +53,6 @@
         .menu-item { padding: 12px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 10px; }
         .menu-item:hover { background: #f5f5f5; }
 
-        /* ИСПРАВЛЕНИЕ: Крестик виден на телефоне */
         @media (max-width: 768px) { 
             #sidebar { width: 75px; } 
             .user-info, #my-profile b { display: none; } 
@@ -123,7 +122,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let me = '', target = '', editingMsgKey = null, replyData = null, selectedMsg = null;
-    const avatarCache = new Map(); // КЭШ АВАТАРОК
+    const avatarCache = new Map();
 
     const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -140,30 +139,38 @@
         const userData = snapshot.val();
         if (userData && userData.password !== p) { alert("Неверный пароль!"); return; }
         if (!userData) await db.ref(`users/${u}`).set({ password: p, avatar: "" });
+        
         me = u;
         db.ref(`status/${me}`).set('online');
         db.ref(`status/${me}`).onDisconnect().set('offline');
+        
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'flex';
         document.getElementById('my-name-display').innerText = me;
+        
         db.ref(`users/${me}/avatar`).on('value', s => { 
-            if(s.val()) {
-                document.getElementById('my-avatar').src = s.val();
-                avatarCache.set(me, s.val());
-            }
+            if(s.val()) document.getElementById('my-avatar').src = s.val();
         });
+        
         loadContacts();
-        watchForNewMessages(); // ЗАПУСК АВТО-ДОБАВЛЕНИЯ
+        watchForIncoming(); // ИСПРАВЛЕННАЯ ФУНКЦИЯ
     }
 
-    // ИСПРАВЛЕНИЕ 1: АВТО-ДОБАВЛЕНИЕ КОНТАКТА ПРИ ПОЛУЧЕНИИ СООБЩЕНИЯ
-    function watchForNewMessages() {
-        db.ref('chats').on('child_added', (snap) => {
+    // ИСПРАВЛЕНИЕ: Авто-добавление работает только для НОВЫХ сообщений
+    function watchForIncoming() {
+        // Мы слушаем только те сообщения, которые приходят в момент, когда мы онлайн
+        const now = Date.now();
+        db.ref('chats').on('child_added', snap => {
             const chatId = snap.key;
             if (chatId.includes(me)) {
-                const otherUser = chatId.replace(me, '').replace('_', '');
-                // Если нам написали, а человека нет в контактах — добавляем
-                db.ref(`contacts/${me}/${otherUser}`).set(true);
+                // Подписываемся на последнее сообщение в этом чате
+                db.ref(`chats/${chatId}`).limitToLast(1).on('child_added', mSnap => {
+                    const msg = mSnap.val();
+                    // Если сообщение пришло только что и отправитель не мы
+                    if (msg.time > now && msg.sender !== me) {
+                        db.ref(`contacts/${me}/${msg.sender}`).set(true);
+                    }
+                });
             }
         });
     }
@@ -186,7 +193,6 @@
         } else alert("Юзер не найден");
     }
 
-    // ИСПРАВЛЕНИЕ 3: СТАБИЛЬНЫЕ АВАТАРКИ БЕЗ СЕРОГО ЦВЕТА
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snapshot => {
             const contDiv = document.getElementById('contacts');
@@ -197,9 +203,7 @@
                 div.id = `user-item-${name}`;
                 div.className = `user-item ${name === target ? 'active' : ''}`;
                 
-                // Используем кэш, если он есть, чтобы не было "серого" робота
                 const startAv = avatarCache.get(name) || `https://robohash.org/${name}`;
-                
                 div.innerHTML = `
                     <img src="${startAv}" class="avatar" id="av-${name}">
                     <div class="status-dot" id="dot-${name}"></div>
@@ -209,10 +213,7 @@
                 
                 db.ref(`users/${name}/avatar`).on('value', s => {
                     const img = document.getElementById(`av-${name}`);
-                    if(s.val()) {
-                        avatarCache.set(name, s.val());
-                        if(img) img.src = s.val();
-                    }
+                    if(s.val()) { avatarCache.set(name, s.val()); if(img) img.src = s.val(); }
                 });
                 db.ref(`status/${name}`).on('value', s => {
                     const dot = document.getElementById(`dot-${name}`);
@@ -237,9 +238,7 @@
         hAv.src = avatarCache.get(target) || `https://robohash.org/${target}`;
 
         db.ref(`users/${target}/avatar`).off();
-        db.ref(`users/${target}/avatar`).on('value', s => {
-            if(s.val()) hAv.src = s.val();
-        });
+        db.ref(`users/${target}/avatar`).on('value', s => { if(s.val()) hAv.src = s.val(); });
 
         document.getElementById('input').disabled = false;
         document.getElementById('send-btn').disabled = false;
@@ -251,17 +250,36 @@
             mDiv.innerHTML = '';
             snap.forEach(c => {
                 const m = c.val();
-                const key = c.key;
                 const d = document.createElement('div');
                 d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
                 let content = m.replyTo ? `<div class="reply-box"><b>${m.replyTo.user}</b>${m.replyTo.text}</div>` : '';
                 content += `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
                 d.innerHTML = content;
-                d.onclick = (e) => showMenu(e, key, m.sender, m.text);
+                d.onclick = (e) => showMenu(e, c.key, m.sender, m.text);
                 mDiv.appendChild(d);
             });
             mDiv.scrollTop = mDiv.scrollHeight;
         });
+    }
+
+    // ИСПРАВЛЕНИЕ: Удаление контакта БЕЗ ПЕРЕЗАГРУЗКИ
+    async function removeContact(e, n) { 
+        e.stopPropagation(); 
+        if(confirm(`Удалить контакт ${n}?`)) {
+            // Удаляем только из списка контактов
+            await db.ref(`contacts/${me}/${n}`).remove();
+            
+            // Если этот чат был открыт - просто сбрасываем интерфейс
+            if(target === n) {
+                target = '';
+                document.getElementById('messages').innerHTML = '';
+                document.getElementById('header-title').innerText = 'Выберите чат';
+                document.getElementById('header-avatar').style.display = 'none';
+                document.getElementById('input').disabled = true;
+                document.getElementById('send-btn').disabled = true;
+                cancelAction();
+            }
+        }
     }
 
     function showMenu(e, key, sender, text) {
@@ -305,14 +323,6 @@
         await db.ref(`chats/${chatId}/${selectedMsg.key}`).remove();
     }
 
-    async function removeContact(e, n) { 
-        e.stopPropagation(); 
-        if(confirm(`Удалить ${n}?`)) {
-            await db.ref(`contacts/${me}/${n}`).remove();
-            if(target === n) location.reload();
-        }
-    }
-
     function sendMessage(e) {
         e.preventDefault();
         const input = document.getElementById('input');
@@ -326,7 +336,7 @@
             const msgObj = { sender: me, text: text, time: Date.now() };
             if (replyData) msgObj.replyTo = replyData;
             db.ref(`chats/${chatId}`).push(msgObj);
-            // Добавляем себя в контакты получателя, чтобы у него мы появились
+            // Добавляем себя в контакты получателя
             db.ref(`contacts/${target}/${me}`).set(true);
         }
         cancelAction();
