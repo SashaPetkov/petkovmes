@@ -10,11 +10,10 @@
         :root { 
             --tg-sent: #efffde; --tg-received: #ffffff; --tg-accent: #3390ec; 
             --tg-bg: #7195ba; --online: #4cc351; --lime: #a2ff00;
-            --logo-grad: linear-gradient(135deg, #3390ec, #a2ff00, #3390ec);
+            --logo-grad: linear-gradient(135deg, #3390ec, #a2ff00);
             --glass: rgba(255, 255, 255, 0.95);
         }
 
-        /* ТЕМНАЯ ТЕМА */
         @media (prefers-color-scheme: dark) {
             :root {
                 --tg-sent: #2b5278; --tg-received: #182533; --tg-accent: #5288c1;
@@ -26,26 +25,23 @@
             .user-item:hover { background: #202b36 !important; }
             #action-preview { background: #242f3d !important; }
             .msg-meta { color: #8295ad !important; }
-            .sidebar-top { border-bottom: 1px solid #0e1621; }
         }
 
-        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--tg-bg); scroll-behavior: smooth; }
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--tg-bg); }
         body { display: flex; }
 
-        /* ЭФФЕКТЫ ЛОГОТИПА */
+        /* АНИМАЦИЯ И ГРАДИЕНТ ЛОГОТИПА */
         .shimmer-text {
-            background: var(--logo-grad);
+            background: linear-gradient(90deg, #3390ec, #a2ff00, #3390ec);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: shine 4s linear infinite;
+            animation: shine 3s linear infinite;
             font-weight: 900;
-            text-transform: lowercase;
         }
         @keyframes shine { to { background-position: 200% center; } }
         
-        .logo-svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); transition: 0.3s; }
-        .logo-svg:hover { transform: scale(1.1); }
+        .logo-svg { filter: drop-shadow(0 0 5px rgba(162,255,0,0.3)); }
 
         /* ЭКРАН ВХОДА */
         #auth-screen { position: fixed; inset: 0; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9000; }
@@ -53,15 +49,15 @@
         .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #eee; border-radius: 12px; outline: none; box-sizing: border-box; }
         .auth-card button { width: 100%; padding: 14px; background: var(--tg-accent); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* ПРИЛОЖЕНИЕ СТРУКТУРА */
+        /* ИНТЕРФЕЙС */
         #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
         #sidebar { width: 320px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-top { display: flex; align-items: center; padding: 20px 20px 10px; gap: 10px; justify-content: space-between; }
-        .sidebar-header { font-size: 28px; }
+        .sidebar-top { display: flex; align-items: center; padding: 20px 20px 10px; gap: 8px; }
+        .sidebar-header { font-size: 26px; }
 
         #search-container { padding: 10px 20px 15px; position: relative; }
         #search-input { width: 100%; padding: 12px 16px; border: none; background: #f2f2f2; border-radius: 12px; outline: none; box-sizing: border-box; }
-        #search-results { position: absolute; top: 65px; left: 20px; right: 20px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 100; display: none; border: 1px solid #eee; overflow-y: auto; max-height: 250px; }
+        #search-results { position: absolute; top: 65px; left: 20px; right: 20px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; display: none; border: 1px solid #eee; overflow-y: auto; max-height: 250px; }
         .search-item { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f5f5f5; color: #333; }
 
         #contacts { flex-grow: 1; overflow-y: auto; }
@@ -71,7 +67,7 @@
         .status-dot { width: 13px; height: 13px; background: #ccc; border: 2px solid #fff; border-radius: 50%; position: absolute; left: 56px; top: 46px; z-index: 2; }
         .status-dot.online { background: var(--online); }
         
-        #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #fff; }
 
         /* ЧАТ */
         #chat-area { 
@@ -85,40 +81,41 @@
         .msg { max-width: 75%; padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; position: relative; word-wrap: break-word; }
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg.highlight { background: #ffeb3b !important; }
         .msg-meta { position: absolute; right: 10px; bottom: 5px; display: flex; align-items: center; gap: 4px; font-size: 10px; opacity: 0.6; }
 
-        .voice-msg audio { height: 32px; width: 100%; max-width: 220px; }
+        /* ГОЛОСОВЫЕ */
+        .voice-msg { padding: 5px 0; }
+        .voice-msg audio { height: 35px; width: 100%; max-width: 240px; border-radius: 20px; }
 
+        /* ПАНЕЛЬ ВВОДА */
         #form-container { background: var(--glass); padding: 10px 15px; border-top: 1px solid rgba(0,0,0,0.05); }
         #form { display: flex; align-items: center; gap: 8px; width: 100%; }
         #input { flex-grow: 1; min-width: 0; padding: 12px 18px; border-radius: 24px; border: 1px solid #e0e0e0; background: #f5f5f5; outline: none; font-size: 15px; }
         
-        .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; }
-        #send-btn { background: linear-gradient(135deg, #3390ec, #2b80d0); color: #fff; font-size: 20px; box-shadow: 0 4px 10px rgba(51,144,236,0.3); }
+        .action-btn { width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; min-width: 46px; }
+        #send-btn { background: var(--tg-accent); color: #fff; font-size: 20px; }
         #voice-btn { background: #f0f0f0; color: #888; font-size: 22px; }
-        #voice-btn.recording { background: #ff4d4d !important; color: #fff !important; animation: v-pulse 1.5s infinite; }
+        #voice-btn.recording { background: #ff4d4d; color: #fff; animation: v-pulse 1.5s infinite; }
         @keyframes v-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        /* МОДАЛКА ПРОФИЛЯ */
+        /* ПРОФИЛЬ */
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
-        .profile-card { background: #fff; border-radius: 30px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 30px 90px rgba(0,0,0,0.3); overflow: hidden; }
-        .profile-card-header { background: linear-gradient(135deg, #3390ec, #5eb5f7); padding: 30px; display: flex; justify-content: center; position: relative; }
-        .modal-avatar { width: 110px; height: 110px; border-radius: 35px; object-fit: cover; border: 4px solid #fff; cursor: pointer; }
-        .profile-card-body { padding: 25px; display: flex; flex-direction: row; gap: 25px; }
+        .profile-card { background: #fff; border-radius: 30px; width: 100%; max-width: 560px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 30px 90px rgba(0,0,0,0.3); }
+        .profile-card-header { background: linear-gradient(135deg, #3390ec, #a2ff00); padding: 40px; display: flex; justify-content: center; position: relative; }
+        .modal-avatar { width: 120px; height: 120px; border-radius: 35px; object-fit: cover; border: 5px solid #fff; cursor: pointer; }
+        .profile-card-body { padding: 30px; display: flex; gap: 25px; }
         .modal-col { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
-        .modal-label { font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
+        .modal-label { font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: 700; }
         .modal-input { border: 1px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 12px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; }
 
         #context-menu { display: none; position: fixed; background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 3000; overflow: hidden; min-width: 180px; border: 1px solid #eee; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
 
         @media (max-width: 768px) { 
-            #sidebar { width: 85px; } .user-info, #my-name-display, .sidebar-header, .profile-card-body { display: none; } 
-            .profile-card-body { display: flex !important; flex-direction: column; }
+            #sidebar { width: 85px; } .user-info, #my-name-display, .sidebar-header, .profile-card-body:not(.mobile-visible) { display: none; } 
+            .profile-card-body { display: flex !important; flex-direction: column; padding: 20px; }
             .status-dot { left: 52px; top: 44px; }
-            #sidebar .logo-icon { width: 45px; height: 45px; }
-            .sidebar-top { justify-content: center; padding: 20px 0; }
+            #sidebar .logo-box { justify-content: center; width: 100%; padding: 20px 0; }
         }
     </style>
 </head>
@@ -126,27 +123,23 @@
 
 <svg style="position: absolute; width: 0; height: 0; overflow: hidden;">
     <defs>
-        <linearGradient id="pm-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#3390ec">
-                <animate attributeName="stop-color" values="#3390ec;#a2ff00;#3390ec" dur="4s" repeatCount="indefinite" />
-            </stop>
-            <stop offset="100%" stop-color="#a2ff00">
-                <animate attributeName="stop-color" values="#a2ff00;#3390ec;#a2ff00" dur="4s" repeatCount="indefinite" />
-            </stop>
+        <linearGradient id="pm-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#3390ec"><animate attributeName="stop-color" values="#3390ec;#a2ff00;#3390ec" dur="4s" repeatCount="indefinite" /></stop>
+            <stop offset="100%" stop-color="#a2ff00"><animate attributeName="stop-color" values="#a2ff00;#3390ec;#a2ff00" dur="4s" repeatCount="indefinite" /></stop>
         </linearGradient>
     </defs>
-    <symbol id="logo-icon" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="46" fill="none" stroke="url(#pm-gradient)" stroke-width="4"/>
-        <path d="M42 72 V38 C42 25 65 25 65 38 C65 51 42 51 42 51" fill="none" stroke="url(#pm-gradient)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M42 72 C35 72 30 65 28 60" fill="none" stroke="url(#pm-gradient)" stroke-width="6" stroke-linecap="round"/>
-        <path d="M40 35 L33 22 M63 35 L70 22" stroke="url(#pm-gradient)" stroke-width="7" stroke-linecap="round"/>
+    <symbol id="logo" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="url(#pm-grad)" stroke-width="4"/>
+        <path d="M40 72 V35 C40 22 68 22 68 35 C68 48 40 48 40 48" fill="none" stroke="url(#pm-grad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 72 C32 72 25 65 25 58" fill="none" stroke="url(#pm-grad)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M38 32 L30 18 M62 32 L70 18" stroke="url(#pm-grad)" stroke-width="7" stroke-linecap="round"/>
     </symbol>
 </svg>
 
 <div id="auth-screen">
     <div class="auth-card">
-        <svg width="100" height="100" class="logo-svg" style="margin-bottom: 15px;"><use href="#logo-icon"/></svg>
-        <h1 class="shimmer-text" style="margin: 0 0 25px; font-size: 32px;">Petmess</h1>
+        <svg width="100" height="100" class="logo-svg"><use href="#logo"/></svg>
+        <h1 class="shimmer-text">Petmess</h1>
         <input type="text" id="auth-user" placeholder="Логин">
         <input type="password" id="auth-pass" placeholder="Пароль">
         <button onclick="login()">Начать общение</button>
@@ -155,9 +148,9 @@
 
 <div id="app-screen">
     <div id="sidebar">
-        <div class="sidebar-top">
+        <div class="sidebar-top logo-box">
             <span class="sidebar-header shimmer-text">petmess</span>
-            <svg width="34" height="34" class="logo-icon logo-svg"><use href="#logo-icon"/></svg>
+            <svg width="35" height="35" class="logo-svg"><use href="#logo"/></svg>
         </div>
         <div id="search-container"><input type="text" id="search-input" placeholder="Поиск..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
@@ -165,7 +158,7 @@
             <img id="my-avatar" src="https://robohash.org/me" class="avatar">
             <div class="user-info" style="display:flex; flex-direction:column; overflow:hidden;">
                 <span id="my-name-display" style="font-weight:bold; font-size:15px; white-space:nowrap; text-overflow:ellipsis;">...</span>
-                <span style="font-size: 11px; color: #aaa;">Мой профиль</span>
+                <span style="font-size: 11px; color: #aaa;">Настройки</span>
             </div>
         </div>
     </div>
@@ -180,8 +173,8 @@
         </div>
         <div id="messages"></div>
         <div id="form-container">
-            <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); border-radius:8px; align-items:center; margin-bottom:8px;">
-                <div id="action-text" style="flex-grow:1; font-size:13px; color:#666;"></div>
+            <div id="action-preview" style="display:none; padding:10px; border-left:4px solid var(--tg-accent); border-radius:8px; align-items:center; margin-bottom:8px;">
+                <div id="action-text" style="flex-grow:1; font-size:13px; color:#666; overflow:hidden; text-overflow:ellipsis;"></div>
                 <div onclick="cancelAction()" style="cursor:pointer; font-size:20px; padding: 0 5px;">×</div>
             </div>
             <form id="form" onsubmit="sendMessage(event)">
@@ -198,7 +191,7 @@
 <div id="modal-overlay" onclick="closeProfileModal()">
     <div class="profile-card" onclick="event.stopPropagation()">
         <div class="profile-card-header">
-            <img id="modal-avatar-display" src="" class="modal-avatar" style="cursor: pointer;">
+            <img id="modal-avatar-display" src="" class="modal-avatar">
             <input type="file" id="profile-upload" style="display:none" accept="image/*" onchange="processFile(this, 'avatar')">
         </div>
         <div class="profile-card-body">
@@ -289,6 +282,7 @@
                 if (m.sender === lid && m.read === false) db.ref(`chats/${chatId}/${key}/read`).set(true);
                 const msgClass = `msg ${m.sender === me ? 'sent' : 'received'}`;
                 let replyHTML = m.replyTo ? `<div style="border-left:3px solid var(--tg-accent);background:rgba(0,0,0,0.05);padding:5px;margin-bottom:5px;border-radius:4px;font-size:12px;color:#555;" onclick="jumpToMessage('${m.replyTo.key}')">💬 ${m.replyTo.text}</div>` : '';
+                
                 let contentHTML = '';
                 if (m.type === 'image') {
                     let img = getFromCache(key) || m.file || "";
@@ -323,7 +317,7 @@
                 mediaRecorder.start(); isRecording = true;
                 document.getElementById('voice-btn').classList.add('recording');
             } else { mediaRecorder.stop(); isRecording = false; document.getElementById('voice-btn').classList.remove('recording'); }
-        } catch(e) { alert("Ошибка доступа к микрофону"); }
+        } catch(e) { alert("Микрофон не доступен"); }
     }
 
     async function processFile(input, type) {
@@ -355,9 +349,9 @@
         if (isMe) {
             nC.innerHTML = `<input type="text" id="m-nick" class="modal-input" value="${d.nickname || ''}" onchange="saveProfile()">`;
             dC.innerHTML = `<textarea id="m-desc" class="modal-input" style="height:100px; resize:none" onchange="saveProfile()">${d.description || ''}</textarea>`;
-            pC.innerHTML = `<div style="margin-top:10px; padding:15px; background:rgba(0,0,0,0.03); border-radius:18px;"><span class="modal-label">Безопасность</span><input type="password" id="m-p-old" class="modal-input" style="margin-top:8px" placeholder="Старый пароль"><input type="password" id="m-p-new" class="modal-input" style="margin-top:8px" placeholder="Новый пароль"><button onclick="tryPass()" style="width:100%; margin-top:10px; padding:10px; background:var(--tg-accent); color:#fff; border:none; border-radius:10px; cursor:pointer;">Сменить пароль</button></div>`;
+            pC.innerHTML = `<div style="margin-top:10px; padding:15px; background:rgba(0,0,0,0.03); border-radius:18px;"><span class="modal-label">Смена пароля</span><input type="password" id="m-p-old" class="modal-input" style="margin-top:8px" placeholder="Старый"><input type="password" id="m-p-new" class="modal-input" style="margin-top:8px" placeholder="Новый"><button onclick="tryPass()" style="width:100%; margin-top:10px; padding:10px; background:var(--tg-accent); color:#fff; border:none; border-radius:10px; cursor:pointer;">Сменить</button></div>`;
         } else {
-            nC.innerHTML = `<div style="font-size:18px; font-weight:bold; color:#333;">${d.nickname || uid}</div>`;
+            nC.innerHTML = `<div style="font-size:18px; font-weight:bold;">${d.nickname || uid}</div>`;
             dC.innerHTML = `<div style="font-size:14px; color:#555; white-space: pre-wrap;">${d.description || 'Описание не заполнено.'}</div>`;
             pC.innerHTML = '';
         }
@@ -367,10 +361,9 @@
     async function tryPass() { 
         const o = document.getElementById('m-p-old').value, n = document.getElementById('m-p-new').value; 
         const s = await db.ref(`users/${me}/password`).once('value'); 
-        if(s.val() === o){ await db.ref(`users/${me}/password`).set(n); alert("Успешно!"); } else alert("Ошибка!"); 
+        if(s.val() === o){ await db.ref(`users/${me}/password`).set(n); alert("Успешно!"); } else alert("Неверный пароль"); 
     }
 
-    // ВСПОМОГАТЕЛЬНЫЕ
     function updateHeaderStatusText() { const s = document.getElementById('header-subtitle'); if (typingStatus) { s.innerText = "печатает..."; s.style.color = "var(--tg-accent)"; } else if (onlineStatus === 'online') { s.innerText = "В сети"; s.style.color = "var(--tg-accent)"; } else { s.innerText = "Не в сети"; s.style.color = "#888"; } }
     async function saveProfile() { const n = document.getElementById('m-nick').value.trim(), d_ = document.getElementById('m-desc').value.trim(); await db.ref(`users/${me}`).update({ nickname: n, description: d_ }); }
     function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; }
