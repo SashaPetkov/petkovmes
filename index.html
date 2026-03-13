@@ -14,6 +14,7 @@
             --glass: rgba(255, 255, 255, 0.95);
         }
 
+        /* ТЕМНАЯ ТЕМА */
         @media (prefers-color-scheme: dark) {
             :root {
                 --tg-sent: #2b5278; --tg-received: #182533; --tg-accent: #5288c1;
@@ -24,13 +25,11 @@
             #input, #search-input, .modal-input { background: #242f3d !important; color: #fff; border-color: #101921 !important; }
             .user-item:hover { background: #202b36 !important; }
             #action-preview { background: #242f3d !important; }
-            .msg-meta { color: #8295ad !important; }
         }
 
         html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--tg-bg); }
         body { display: flex; }
 
-        /* АНИМАЦИЯ И ГРАДИЕНТ ЛОГОТИПА */
         .shimmer-text {
             background: linear-gradient(90deg, #3390ec, #a2ff00, #3390ec);
             background-size: 200% auto;
@@ -40,21 +39,17 @@
             font-weight: 900;
         }
         @keyframes shine { to { background-position: 200% center; } }
-        
-        .logo-svg { filter: drop-shadow(0 0 5px rgba(162,255,0,0.3)); }
 
         /* ЭКРАН ВХОДА */
         #auth-screen { position: fixed; inset: 0; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9000; }
-        .auth-card { width: 320px; padding: 40px; text-align: center; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); background: #fff; }
+        .auth-card { width: 320px; padding: 40px; text-align: center; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
         .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #eee; border-radius: 12px; outline: none; box-sizing: border-box; }
         .auth-card button { width: 100%; padding: 14px; background: var(--tg-accent); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* ИНТЕРФЕЙС */
-        #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
+        /* САЙДБАР */
         #sidebar { width: 320px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-top { display: flex; align-items: center; padding: 20px 20px 10px; gap: 8px; }
         .sidebar-header { font-size: 26px; }
-
         #search-container { padding: 10px 20px 15px; position: relative; }
         #search-input { width: 100%; padding: 12px 16px; border: none; background: #f2f2f2; border-radius: 12px; outline: none; box-sizing: border-box; }
         #search-results { position: absolute; top: 65px; left: 20px; right: 20px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; display: none; border: 1px solid #eee; overflow-y: auto; max-height: 250px; }
@@ -66,7 +61,6 @@
         .avatar { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; background: #f0f0f0; flex-shrink: 0; }
         .status-dot { width: 13px; height: 13px; background: #ccc; border: 2px solid #fff; border-radius: 50%; position: absolute; left: 56px; top: 46px; z-index: 2; }
         .status-dot.online { background: var(--online); }
-        
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #fff; }
 
         /* ЧАТ */
@@ -83,16 +77,15 @@
         .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
         .msg-meta { position: absolute; right: 10px; bottom: 5px; display: flex; align-items: center; gap: 4px; font-size: 10px; opacity: 0.6; }
 
-        /* ГОЛОСОВЫЕ */
-        .voice-msg { padding: 5px 0; }
-        .voice-msg audio { height: 35px; width: 100%; max-width: 240px; border-radius: 20px; }
+        /* ГОЛОСОВЫЕ ПЛЕЕР */
+        .voice-msg { padding: 5px 0; min-width: 220px; }
+        .voice-msg audio { height: 35px; width: 100%; border-radius: 20px; }
 
-        /* ПАНЕЛЬ ВВОДА */
+        /* ВВОД */
         #form-container { background: var(--glass); padding: 10px 15px; border-top: 1px solid rgba(0,0,0,0.05); }
         #form { display: flex; align-items: center; gap: 8px; width: 100%; }
-        #input { flex-grow: 1; min-width: 0; padding: 12px 18px; border-radius: 24px; border: 1px solid #e0e0e0; background: #f5f5f5; outline: none; font-size: 15px; }
-        
-        .action-btn { width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; min-width: 46px; }
+        #input { flex-grow: 1; min-width: 0; padding: 12px 16px; border-radius: 24px; border: 1px solid #e0e0e0; background: #f5f5f5; outline: none; font-size: 15px; }
+        .action-btn { width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; min-width: 46px; }
         #send-btn { background: var(--tg-accent); color: #fff; font-size: 20px; }
         #voice-btn { background: #f0f0f0; color: #888; font-size: 22px; }
         #voice-btn.recording { background: #ff4d4d; color: #fff; animation: v-pulse 1.5s infinite; }
@@ -105,8 +98,9 @@
         .modal-avatar { width: 120px; height: 120px; border-radius: 35px; object-fit: cover; border: 5px solid #fff; cursor: pointer; }
         .profile-card-body { padding: 30px; display: flex; gap: 25px; }
         .modal-col { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
-        .modal-label { font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: 700; }
+        .modal-label { font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
         .modal-input { border: 1px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 12px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; }
+        .del-acc-btn { color: #ff4d4d; font-size: 11px; text-decoration: underline; cursor: pointer; margin-top: 10px; border: none; background: none; padding: 0; text-align: left; }
 
         #context-menu { display: none; position: fixed; background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 3000; overflow: hidden; min-width: 180px; border: 1px solid #eee; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
@@ -115,7 +109,6 @@
             #sidebar { width: 85px; } .user-info, #my-name-display, .sidebar-header, .profile-card-body:not(.mobile-visible) { display: none; } 
             .profile-card-body { display: flex !important; flex-direction: column; padding: 20px; }
             .status-dot { left: 52px; top: 44px; }
-            #sidebar .logo-box { justify-content: center; width: 100%; padding: 20px 0; }
         }
     </style>
 </head>
@@ -138,27 +131,27 @@
 
 <div id="auth-screen">
     <div class="auth-card">
-        <svg width="100" height="100" class="logo-svg"><use href="#logo"/></svg>
+        <svg width="100" height="100" style="margin-bottom:15px"><use href="#logo"/></svg>
         <h1 class="shimmer-text">Petmess</h1>
         <input type="text" id="auth-user" placeholder="Логин">
         <input type="password" id="auth-pass" placeholder="Пароль">
-        <button onclick="login()">Начать общение</button>
+        <button onclick="login()">Войти</button>
     </div>
 </div>
 
 <div id="app-screen">
     <div id="sidebar">
-        <div class="sidebar-top logo-box">
+        <div class="sidebar-top">
             <span class="sidebar-header shimmer-text">petmess</span>
-            <svg width="35" height="35" class="logo-svg"><use href="#logo"/></svg>
+            <svg width="35" height="35"><use href="#logo"/></svg>
         </div>
         <div id="search-container"><input type="text" id="search-input" placeholder="Поиск..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
         <div id="my-profile" onclick="openProfileModal(me)">
             <img id="my-avatar" src="https://robohash.org/me" class="avatar">
             <div class="user-info" style="display:flex; flex-direction:column; overflow:hidden;">
-                <span id="my-name-display" style="font-weight:bold; font-size:15px; white-space:nowrap; text-overflow:ellipsis;">...</span>
-                <span style="font-size: 11px; color: #aaa;">Настройки</span>
+                <span id="my-name-display" style="font-weight:bold; font-size:15px;">...</span>
+                <span style="font-size: 11px; color: #aaa;">Профиль</span>
             </div>
         </div>
     </div>
@@ -173,8 +166,8 @@
         </div>
         <div id="messages"></div>
         <div id="form-container">
-            <div id="action-preview" style="display:none; padding:10px; border-left:4px solid var(--tg-accent); border-radius:8px; align-items:center; margin-bottom:8px;">
-                <div id="action-text" style="flex-grow:1; font-size:13px; color:#666; overflow:hidden; text-overflow:ellipsis;"></div>
+            <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); background:rgba(0,0,0,0.05); border-radius:8px; align-items:center; margin-bottom:8px;">
+                <div id="action-text" style="flex-grow:1; font-size:13px; color:#666;"></div>
                 <div onclick="cancelAction()" style="cursor:pointer; font-size:20px; padding: 0 5px;">×</div>
             </div>
             <form id="form" onsubmit="sendMessage(event)">
@@ -271,7 +264,6 @@
         document.getElementById('input').disabled = false; document.getElementById('send-btn').disabled = false; document.getElementById('voice-btn').disabled = false;
         
         const chatId = me < lid ? `${me}_${lid}` : `${lid}_${me}`;
-        db.ref(`chats/${chatId}`).off();
         db.ref(`typing/${chatId}/${lid}`).on('value', s => { typingStatus = s.val(); updateHeaderStatusText(); });
         db.ref(`status/${lid}`).on('value', s => { onlineStatus = s.val() || 'offline'; updateHeaderStatusText(); });
 
@@ -317,26 +309,16 @@
                 mediaRecorder.start(); isRecording = true;
                 document.getElementById('voice-btn').classList.add('recording');
             } else { mediaRecorder.stop(); isRecording = false; document.getElementById('voice-btn').classList.remove('recording'); }
-        } catch(e) { alert("Микрофон не доступен"); }
+        } catch(e) { alert("Ошибка микрофона"); }
     }
 
-    async function processFile(input, type) {
-        const file = input.files[0]; if (!file) return;
-        const reader = new FileReader(); reader.readAsDataURL(file);
-        reader.onload = (e) => {
-            const img = new Image(); img.src = e.target.result;
-            img.onload = async () => {
-                const canvas = document.createElement('canvas');
-                const MAX = type === 'avatar' ? 400 : 1280; 
-                let w = img.width, h = img.height;
-                if (w > MAX || h > MAX) { if (w > h) { h *= MAX / w; w = MAX; } else { w *= MAX / h; h = MAX; } }
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                const b64 = canvas.toDataURL('image/jpeg', 0.85);
-                if (type === 'avatar') { await db.ref(`users/${me}/avatar`).set(b64); document.getElementById('modal-avatar-display').src = b64; }
-                else sendMedia(b64, 'image');
-            };
-        };
+    async function deleteAccount() {
+        if(confirm("ВЫ УВЕРЕНЫ? Ваш аккаунт и список контактов будут удалены навсегда!")) {
+            await db.ref(`users/${me}`).remove();
+            await db.ref(`contacts/${me}`).remove();
+            await db.ref(`status/${me}`).remove();
+            location.reload();
+        }
     }
 
     async function openProfileModal(uid) {
@@ -349,10 +331,10 @@
         if (isMe) {
             nC.innerHTML = `<input type="text" id="m-nick" class="modal-input" value="${d.nickname || ''}" onchange="saveProfile()">`;
             dC.innerHTML = `<textarea id="m-desc" class="modal-input" style="height:100px; resize:none" onchange="saveProfile()">${d.description || ''}</textarea>`;
-            pC.innerHTML = `<div style="margin-top:10px; padding:15px; background:rgba(0,0,0,0.03); border-radius:18px;"><span class="modal-label">Смена пароля</span><input type="password" id="m-p-old" class="modal-input" style="margin-top:8px" placeholder="Старый"><input type="password" id="m-p-new" class="modal-input" style="margin-top:8px" placeholder="Новый"><button onclick="tryPass()" style="width:100%; margin-top:10px; padding:10px; background:var(--tg-accent); color:#fff; border:none; border-radius:10px; cursor:pointer;">Сменить</button></div>`;
+            pC.innerHTML = `<div style="margin-top:10px; padding:15px; background:rgba(0,0,0,0.03); border-radius:18px;"><span class="modal-label">Безопасность</span><input type="password" id="m-p-old" class="modal-input" style="margin-top:8px" placeholder="Текущий пароль"><input type="password" id="m-p-new" class="modal-input" style="margin-top:8px" placeholder="Новый пароль"><button onclick="tryPass()" style="width:100%; margin-top:10px; padding:10px; background:var(--tg-accent); color:#fff; border:none; border-radius:10px; cursor:pointer;">Сменить пароль</button><br><button class="del-acc-btn" onclick="deleteAccount()">Удалить мой аккаунт</button></div>`;
         } else {
             nC.innerHTML = `<div style="font-size:18px; font-weight:bold;">${d.nickname || uid}</div>`;
-            dC.innerHTML = `<div style="font-size:14px; color:#555; white-space: pre-wrap;">${d.description || 'Описание не заполнено.'}</div>`;
+            dC.innerHTML = `<div class="modal-text" style="font-size:14px; color:#555; white-space: pre-wrap;">${d.description || 'Описание не заполнено.'}</div>`;
             pC.innerHTML = '';
         }
         document.getElementById('modal-overlay').style.display = 'flex';
@@ -361,7 +343,7 @@
     async function tryPass() { 
         const o = document.getElementById('m-p-old').value, n = document.getElementById('m-p-new').value; 
         const s = await db.ref(`users/${me}/password`).once('value'); 
-        if(s.val() === o){ await db.ref(`users/${me}/password`).set(n); alert("Успешно!"); } else alert("Неверный пароль"); 
+        if(s.val() === o){ await db.ref(`users/${me}/password`).set(n); alert("Успешно!"); } else alert("Ошибка!"); 
     }
 
     function updateHeaderStatusText() { const s = document.getElementById('header-subtitle'); if (typingStatus) { s.innerText = "печатает..."; s.style.color = "var(--tg-accent)"; } else if (onlineStatus === 'online') { s.innerText = "В сети"; s.style.color = "var(--tg-accent)"; } else { s.innerText = "Не в сети"; s.style.color = "#888"; } }
@@ -372,6 +354,7 @@
     function sendMedia(base64, type) { const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`; db.ref(`chats/${id}`).push({ sender: me, type: type, file: base64, time: Date.now(), read: false }); db.ref(`contacts/${targetLogin}/${me}`).set(true); }
     function searchUser(q) { const query = q.trim().toLowerCase(), res = document.getElementById('search-results'); if (query.length < 1) { res.style.display = 'none'; return; } db.ref('users').once('value', snapshot => { res.innerHTML = ''; let f = 0; snapshot.forEach(child => { const lid = child.key, d = child.val(); if (lid !== me && (lid.includes(query) || (d.nickname||'').toLowerCase().includes(query))) { f++; const div = document.createElement('div'); div.className = 'search-item'; div.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+lid}" class="avatar" style="width:35px;height:35px"> <div><b>${d.nickname || lid}</b><br><small>@${lid}</small></div>`; div.onclick = () => { db.ref(`contacts/${me}/${lid}`).set(true); db.ref(`contacts/${lid}/${me}`).set(true); res.style.display='none'; selectChat(lid); }; res.appendChild(div); } }); res.style.display = f > 0 ? 'block' : 'none'; }); }
     function loadContacts() { db.ref(`contacts/${me}`).on('value', snap => { const div = document.getElementById('contacts'); div.innerHTML = ''; snap.forEach(c => { const lid = c.key, item = document.createElement('div'); item.id = `user-item-${lid}`; item.className = `user-item ${lid === targetLogin ? 'active' : ''}`; item.innerHTML = `<img src="https://robohash.org/${lid}" class="avatar" id="av-${lid}"><div class="status-dot" id="dot-${lid}"></div><div class="user-info" style="flex-grow:1; overflow:hidden"><b id="nick-${lid}">${lid}</b></div>`; db.ref(`users/${lid}`).on('value', s => { const d = s.val(); if(!d) return; cache.set(lid, d); if(document.getElementById(`av-${lid}`)) document.getElementById(`av-${lid}`).src = d.avatar || `https://robohash.org/${lid}`; if(document.getElementById(`nick-${lid}`)) document.getElementById(`nick-${lid}`).innerText = d.nickname || lid; }); db.ref(`status/${lid}`).on('value', s => { const dot = document.getElementById(`dot-${lid}`); if(dot) dot.className = `status-dot ${s.val()==='online'?'online':''}`; }); item.onclick = () => selectChat(lid); div.appendChild(item); }); }); }
+    async function processFile(input, type) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (e) => { const img = new Image(); img.src = e.target.result; img.onload = async () => { const canvas = document.createElement('canvas'); const MAX = type === 'avatar' ? 400 : 1280; let w = img.width, h = img.height; if (w > MAX || h > MAX) { if (w > h) { h *= MAX / w; w = MAX; } else { w *= MAX / h; h = MAX; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); const b64 = canvas.toDataURL('image/jpeg', 0.85); if (type === 'avatar') { await db.ref(`users/${me}/avatar`).set(b64); document.getElementById('modal-avatar-display').src = b64; } else sendMedia(b64, 'image'); }; }; }
     function jumpToMessage(key) { const el = document.getElementById(`msg-${key}`); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight'); setTimeout(() => el.classList.remove('highlight'), 1000); } }
     function handleMsgClick(e, key, sender, text) { if(e.target.closest('div[onclick^="jumpToMessage"]')) return; showMenu(e, key, sender, text); }
     function showMenu(e, k, s, t) { e.stopPropagation(); selectedMsg = { key: k, sender: s, text: t }; const m = document.getElementById('context-menu'); m.style.display='block'; m.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px'; m.style.top = Math.min(e.clientY, window.innerHeight - 150) + 'px'; document.getElementById('menu-edit').style.display = (s === me) ? 'block' : 'none'; document.getElementById('menu-del').style.display = (s === me) ? 'block' : 'none'; }
@@ -380,6 +363,7 @@
     function prepareEdit() { cancelAction(); editingMsgKey = selectedMsg.key; document.getElementById('action-text').innerText = `Правка: ${selectedMsg.text}`; document.getElementById('action-preview').style.display = 'flex'; document.getElementById('input').value = selectedMsg.text; document.getElementById('input').focus(); }
     function cancelAction() { editingMsgKey = null; replyData = null; document.getElementById('action-preview').style.display = 'none'; document.getElementById('input').value = ''; }
     function deleteMsg() { const id = me < targetLogin ? `${me}_${targetLogin}` : `${targetLogin}_${me}`; db.ref(`chats/${id}/${selectedMsg.key}`).remove(); }
+    async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
 </script>
 </body>
 </html>
