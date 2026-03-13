@@ -11,15 +11,12 @@
         html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; background: var(--tg-bg); scroll-behavior: smooth; }
         body { display: flex; }
         
-        /* Авторизация */
         #auth-screen { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
         .auth-card { width: 300px; padding: 20px; text-align: center; }
         .auth-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
         .auth-card button { width: 100%; padding: 12px; background: var(--tg-accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
-        
-        /* Сайдбар */
         #sidebar { width: 300px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; flex-shrink: 0; position: relative; }
         #search-container { padding: 10px; border-bottom: 1px solid #f0f0f0; position: relative; }
         #search-input { width: 100%; padding: 10px; border: none; background: #f1f1f1; border-radius: 10px; outline: none; box-sizing: border-box; }
@@ -34,19 +31,21 @@
         .status-dot { width: 12px; height: 12px; background: #ccc; border: 2px solid white; border-radius: 50%; position: absolute; left: 45px; top: 38px; z-index: 2; transition: 0.3s; }
         .status-dot.online { background: var(--online); }
         
-        /* Чат */
         #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); position: relative; }
         #chat-header { padding: 8px 15px; background: white; border-bottom: 1px solid #ddd; display: flex; flex-direction: column; justify-content: center; min-height: 60px; }
         #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
         
-        .msg { max-width: 80%; padding: 8px 12px; border-radius: 15px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; position: relative; transition: background 0.4s; }
+        .msg { max-width: 80%; padding: 8px 12px 18px 12px; border-radius: 15px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; position: relative; transition: background 0.4s; }
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
         .msg.highlight { background: #ffeb3b !important; }
 
-        .read-status { font-size: 11px; margin-left: 5px; opacity: 0.5; float: right; margin-top: 4px; }
-        .reply-box { border-left: 3px solid var(--tg-accent); background: rgba(0,0,0,0.05); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 12px; color: #555; cursor: pointer; }
+        /* ВРЕМЯ И ГЛАЗ */
+        .msg-meta { position: absolute; right: 8px; bottom: 3px; display: flex; align-items: center; gap: 4px; pointer-events: none; }
+        .msg-time { font-size: 10px; opacity: 0.5; color: #000; }
+        .read-status { font-size: 10px; opacity: 0.5; }
 
+        .reply-box { border-left: 3px solid var(--tg-accent); background: rgba(0,0,0,0.05); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 12px; color: #555; cursor: pointer; }
         #form-container { background: white; padding: 10px; display: flex; flex-direction: column; }
         #form { display: flex; gap: 10px; align-items: center; }
         #input { flex-grow: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
@@ -127,6 +126,15 @@
     let me = '', target = '', editingMsgKey = null, replyData = null, selectedMsg = null, typingTimeout;
     const avatarCache = new Map();
 
+    // ФОРМАТ ВРЕМЕНИ
+    function formatTime(timestamp) {
+        if (!timestamp) return '';
+        const date = new Date(timestamp);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
     async function login() {
         const u = document.getElementById('auth-user').value.trim().toLowerCase();
         const p = document.getElementById('auth-pass').value.trim();
@@ -187,11 +195,7 @@
 
     function jumpToMessage(key) {
         const el = document.getElementById(`msg-${key}`);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add('highlight');
-            setTimeout(() => el.classList.remove('highlight'), 1000);
-        }
+        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight'); setTimeout(() => el.classList.remove('highlight'), 1000); }
     }
 
     function selectChat(name) {
@@ -208,18 +212,24 @@
             const mDiv = document.getElementById('messages'); mDiv.innerHTML = '';
             snap.forEach(c => {
                 const m = c.val(); const key = c.key;
-                // Авто-прочтение при отрисовке
                 if (m.sender === target && !m.read) db.ref(`chats/${chatId}/${key}`).update({ read: true });
 
                 const d = document.createElement('div');
                 d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
                 d.id = `msg-${key}`;
                 
-                let html = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key || ''}')"><b>💬</b> ${m.replyTo.text}</div>` : '';
-                if (m.type === 'image') html += `<img src="${m.file}" style="max-width:100%;border-radius:10px;">`;
-                else html += `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
+                let html = '';
+                if (m.replyTo) html += `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key || ''}')"><b>💬</b> ${m.replyTo.text}</div>`;
+                if (m.type === 'image') {
+                    if (Date.now() - m.time > 86400000) { db.ref(`chats/${chatId}/${key}`).remove(); return; }
+                    html += `<img src="${m.file}" style="max-width:100%;border-radius:10px;">`;
+                } else html += `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
                 
-                if (m.sender === me && !m.read) html += `<span class="read-status">👁‍🗨</span>`;
+                // ВРЕМЯ И ГЛАЗ
+                html += `<div class="msg-meta">
+                            <span class="msg-time">${formatTime(m.time)}</span>
+                            ${(m.sender === me && !m.read) ? '<span class="read-status">👁‍🗨</span>' : ''}
+                         </div>`;
                 
                 d.innerHTML = html;
                 d.onclick = (e) => { if(!e.target.closest('.reply-box')) showMenu(e, key, m.sender, m.text || "[Фото]"); };
@@ -239,7 +249,6 @@
             const obj = { sender: me, text: txt, time: Date.now(), type: 'text', read: false };
             if (replyData) obj.replyTo = replyData;
             db.ref(`chats/${id}`).push(obj);
-            // ПРИНУДИТЕЛЬНО ДОБАВЛЯЕМ СЕБЯ В КОНТАКТЫ СОБЕСЕДНИКА
             db.ref(`contacts/${target}/${me}`).set(true);
         }
         db.ref(`typing/${id}/${me}`).set(false); cancelAction();
@@ -251,7 +260,6 @@
         db.ref(`contacts/${target}/${me}`).set(true);
     }
 
-    // Вспомогательные функции
     async function processFile(input, type) {
         const file = input.files[0]; if (!file) return;
         const reader = new FileReader(); reader.readAsDataURL(file);
