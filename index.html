@@ -10,7 +10,7 @@
         :root { 
             --tg-sent: #efffde; --tg-received: #ffffff; --tg-accent: #3390ec; 
             --tg-bg: #7195ba; --online: #4cc351; --lime: #a2ff00;
-            --logo-grad: linear-gradient(135deg, #3390ec, #a2ff00);
+            --logo-grad: linear-gradient(135deg, #3390ec, #a2ff00, #3390ec);
             --glass: rgba(255, 255, 255, 0.95);
         }
 
@@ -20,54 +20,56 @@
                 --tg-sent: #2b5278; --tg-received: #182533; --tg-accent: #5288c1;
                 --tg-bg: #0e1621; --glass: rgba(24, 37, 51, 0.95);
             }
-            body { color: #fff; background: #000 !important; }
+            body { color: #fff; background: #0e1621; }
             #sidebar, #chat-header, #form-container, .profile-card { background-color: #17212b !important; color: #fff; border-color: #0e1621 !important; }
             #input, #search-input, .modal-input { background: #242f3d !important; color: #fff; border-color: #101921 !important; }
             .user-item:hover { background: #202b36 !important; }
             #action-preview { background: #242f3d !important; }
+            .sidebar-top { border-bottom: 1px solid #242f3d; }
         }
 
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { display: flex; background: var(--tg-bg); }
 
+        /* АНИМАЦИЯ БРЕНДА */
         .shimmer-text {
-            background: linear-gradient(90deg, #3390ec, #a2ff00, #3390ec);
+            background: var(--logo-grad);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
+            animation: shine 4s linear infinite;
             font-weight: 900;
         }
         @keyframes shine { to { background-position: 200% center; } }
+        
+        .logo-svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15)); }
 
         /* ЭКРАН ВХОДА */
         #auth-screen { position: fixed; inset: 0; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9000; }
-        .auth-card { width: 320px; padding: 40px; text-align: center; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); background: #fff; }
-        .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #eee; border-radius: 12px; outline: none; box-sizing: border-box; }
-        .auth-card button { width: 100%; padding: 14px; background: var(--tg-accent); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .auth-card { width: 320px; padding: 40px; text-align: center; border-radius: 35px; box-shadow: 0 25px 70px rgba(0,0,0,0.12); background: #fff; }
+        .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #eee; border-radius: 14px; outline: none; background: #f9f9f9; }
+        .auth-card button { width: 100%; padding: 14px; background: var(--tg-accent); color: #fff; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* ГЛАВНЫЙ ЭКРАН */
+        /* ПРИЛОЖЕНИЕ */
         #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; }
+        
         #sidebar { width: 320px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-top { display: flex; align-items: center; padding: 20px 20px 10px; gap: 8px; }
-        .sidebar-header { font-size: 26px; }
+        .sidebar-top { display: flex; align-items: center; padding: 20px 25px 15px; gap: 10px; }
+        .sidebar-header { font-size: 28px; text-transform: lowercase; }
 
         #search-container { padding: 10px 20px 15px; position: relative; }
-        #search-input { width: 100%; padding: 12px 16px; border: none; background: #f2f2f2; border-radius: 12px; outline: none; box-sizing: border-box; }
-        #search-results { position: absolute; top: 65px; left: 20px; right: 20px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; display: none; border: 1px solid #eee; overflow-y: auto; max-height: 250px; }
+        #search-input { width: 100%; padding: 12px 16px; border: none; background: #f2f2f2; border-radius: 14px; outline: none; box-sizing: border-box; }
+        #search-results { position: absolute; top: 65px; left: 20px; right: 20px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 100; display: none; border: 1px solid #eee; overflow-y: auto; max-height: 250px; }
         .search-item { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f5f5f5; color: #333; }
 
         #contacts { flex-grow: 1; overflow-y: auto; }
         .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; position: relative; transition: 0.2s; }
-        .user-item:hover { background: rgba(0,0,0,0.03); }
         .user-item.active { background: var(--tg-accent) !important; color: #fff !important; }
-        .avatar { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; background: #f0f0f0; flex-shrink: 0; }
+        .avatar { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; background: #f2f2f2; flex-shrink: 0; }
         .status-dot { width: 13px; height: 13px; background: #ccc; border: 2px solid #fff; border-radius: 50%; position: absolute; left: 56px; top: 46px; z-index: 2; }
         .status-dot.online { background: var(--online); }
         
-        /* КНОПКА УДАЛЕНИЯ КОНТАКТА */
-        .del-btn { opacity: 0; font-size: 20px; color: #bbb; transition: 0.2s; padding: 5px; margin-left: auto; }
-        .user-item:hover .del-btn { opacity: 1; }
+        .del-btn { font-size: 24px; color: #ccc; margin-left: auto; padding: 0 5px; line-height: 1; transition: 0.2s; }
         .del-btn:hover { color: #ff4d4d; }
 
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #fff; }
@@ -81,43 +83,47 @@
         #chat-header { padding: 10px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; min-height: 60px; z-index: 10; cursor: pointer; }
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         
-        .msg { max-width: 75%; padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; position: relative; word-wrap: break-word; }
-        .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
-        .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg-meta { position: absolute; right: 10px; bottom: 5px; display: flex; align-items: center; gap: 4px; font-size: 10px; opacity: 0.6; }
+        .msg { max-width: 75%; padding: 10px 14px 22px; border-radius: 20px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.12); cursor: pointer; position: relative; word-wrap: break-word; }
+        .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 5px; }
+        .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 5px; }
+        .msg-meta { position: absolute; right: 12px; bottom: 6px; display: flex; align-items: center; gap: 4px; font-size: 10px; opacity: 0.6; }
 
-        .voice-msg { padding: 5px 0; min-width: 200px; }
-        .voice-msg audio { height: 35px; width: 100%; border-radius: 20px; }
+        /* ГОЛОСОВЫЕ */
+        .voice-msg { display: flex; align-items: center; gap: 8px; min-width: 220px; padding: 5px 0; }
+        .voice-msg audio { height: 35px; width: 100%; border-radius: 20px; display: block; }
 
-        #form-container { background: var(--glass); padding: 10px 15px; border-top: 1px solid rgba(0,0,0,0.05); }
-        #form { display: flex; align-items: center; gap: 8px; width: 100%; }
-        #input { flex-grow: 1; min-width: 0; padding: 12px 16px; border-radius: 24px; border: 1px solid #e0e0e0; background: #f5f5f5; outline: none; font-size: 15px; }
+        #form-container { background: var(--glass); padding: 12px 18px; border-top: 1px solid rgba(0,0,0,0.05); }
+        #form { display: flex; align-items: center; gap: 10px; width: 100%; }
+        #input { flex-grow: 1; min-width: 0; padding: 12px 18px; border-radius: 25px; border: 1px solid #e0e0e0; background: #f5f5f5; outline: none; font-size: 15px; }
         
-        .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; min-width: 44px; }
-        #send-btn { background: var(--tg-accent); color: #fff; font-size: 20px; }
+        .action-btn { width: 45px; height: 45px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; min-width: 45px; transition: 0.2s; }
+        #send-btn { background: linear-gradient(135deg, #3390ec, #2b80d0); color: #fff; font-size: 20px; box-shadow: 0 4px 10px rgba(51, 144, 236, 0.3); }
         #voice-btn { background: #f0f0f0; color: #888; font-size: 22px; }
-        #voice-btn.recording { background: #ff4d4d; color: #fff; animation: v-pulse 1.5s infinite; }
+        #voice-btn.recording { background: #ff4d4d !important; color: #fff !important; animation: v-pulse 1.5s infinite; }
         @keyframes v-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        /* ПРОФИЛЬ */
+        /* ОКНО ПРОФИЛЯ */
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
-        .profile-card { background: #fff; border-radius: 30px; width: 100%; max-width: 560px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 30px 90px rgba(0,0,0,0.3); }
+        .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 580px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 40px 100px rgba(0,0,0,0.3); }
         .profile-card-header { background: linear-gradient(135deg, #3390ec, #a2ff00); padding: 40px; display: flex; justify-content: center; position: relative; }
-        .modal-avatar { width: 110px; height: 110px; border-radius: 35px; object-fit: cover; border: 4px solid #fff; cursor: pointer; }
-        .profile-card-body { padding: 25px; display: flex; flex-direction: row; gap: 25px; }
+        .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; border: 5px solid #fff; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .profile-card-body { padding: 30px; display: flex; flex-direction: row; gap: 30px; }
         .modal-col { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
-        .modal-label { font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
-        .modal-input { border: 1px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 12px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; }
-        .del-acc-link { color: #ff4d4d; font-size: 11px; text-decoration: underline; cursor: pointer; border: none; background: none; margin-top: 10px; text-align: left; }
+        .modal-label { font-size: 11px; color: #aaa; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
+        .modal-input { border: 1px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 14px; font-size: 14px; outline: none; width: 100%; box-sizing: border-box; }
+        .del-acc-btn { color: #ff4d4d; font-size: 11px; text-decoration: underline; cursor: pointer; border: none; background: none; margin-top: 10px; text-align: left; }
 
-        #context-menu { display: none; position: fixed; background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 3000; overflow: hidden; min-width: 180px; border: 1px solid #eee; }
-        .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
+        #context-menu { display: none; position: fixed; background: #fff; border-radius: 16px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); z-index: 3000; overflow: hidden; min-width: 180px; border: 1px solid #eee; }
+        .menu-item { padding: 15px 20px; cursor: pointer; font-size: 14px; color: #333; transition: 0.2s; }
+        .menu-item:hover { background: #f8f9fa; }
 
         @media (max-width: 768px) { 
-            #sidebar { width: 85px; } .user-info, #my-name-display, .sidebar-header, .profile-card-body:not(.mobile-visible), .del-btn { display: none; } 
-            .profile-card-body { display: flex !important; flex-direction: column; padding: 20px; }
+            #sidebar { width: 85px; } .user-info, #my-name-display, .sidebar-header, .profile-card-body:not(.mobile-visible) { display: none; } 
+            .profile-card-body { display: flex !important; flex-direction: column; padding: 25px; }
             .status-dot { left: 52px; top: 44px; }
-            #sidebar .logo-box { justify-content: center; width: 100%; padding: 20px 0; }
+            #sidebar .logo-top-icon { width: 45px; height: 45px; margin: 0 auto; }
+            .sidebar-top { padding: 20px 0; justify-content: center; }
+            .del-btn { display: none; }
         }
     </style>
 </head>
@@ -125,26 +131,25 @@
 
 <svg style="position: absolute; width: 0; height: 0; overflow: hidden;">
     <defs>
-        <linearGradient id="pm-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#3390ec"><animate attributeName="stop-color" values="#3390ec;#a2ff00;#3390ec" dur="4s" repeatCount="indefinite" /></stop>
             <stop offset="100%" stop-color="#a2ff00"><animate attributeName="stop-color" values="#a2ff00;#3390ec;#a2ff00" dur="4s" repeatCount="indefinite" /></stop>
         </linearGradient>
     </defs>
-    <symbol id="logo" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="45" fill="none" stroke="url(#pm-grad)" stroke-width="4"/>
-        <path d="M40 72 V35 C40 22 68 22 68 35 C68 48 40 48 40 48" fill="none" stroke="url(#pm-grad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M40 72 C32 72 25 65 25 58" fill="none" stroke="url(#pm-grad)" stroke-width="6" stroke-linecap="round"/>
-        <path d="M38 32 L30 18 M62 32 L70 18" stroke="url(#pm-grad)" stroke-width="7" stroke-linecap="round"/>
+    <symbol id="icon-petmess" viewBox="0 0 100 100">
+        <path d="M42 75 V38 C42 25 68 25 68 38 C68 51 42 51 42 51" fill="none" stroke="url(#brand-grad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M42 75 C32 75 22 68 20 58" fill="none" stroke="url(#brand-grad)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M40 34 L32 20 M64 34 L72 20" stroke="url(#brand-grad)" stroke-width="10" stroke-linecap="round"/>
     </symbol>
 </svg>
 
 <div id="auth-screen">
     <div class="auth-card">
-        <svg width="100" height="100"><use href="#logo"/></svg>
-        <h1 class="shimmer-text">Petmess</h1>
+        <svg width="100" height="100" class="logo-svg"><use href="#icon-petmess"/></svg>
+        <h1 class="shimmer-text" style="margin: 10px 0 25px; font-size: 36px;">Petmess</h1>
         <input type="text" id="auth-user" placeholder="Логин">
         <input type="password" id="auth-pass" placeholder="Пароль">
-        <button onclick="login()">Войти</button>
+        <button onclick="login()">Начать</button>
     </div>
 </div>
 
@@ -152,7 +157,7 @@
     <div id="sidebar">
         <div class="sidebar-top">
             <span class="sidebar-header shimmer-text">petmess</span>
-            <svg width="35" height="35"><use href="#logo"/></svg>
+            <svg width="32" height="32" class="logo-top-icon"><use href="#icon-petmess"/></svg>
         </div>
         <div id="search-container"><input type="text" id="search-input" placeholder="Поиск..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
@@ -160,7 +165,7 @@
             <img id="my-avatar" src="https://robohash.org/me" class="avatar">
             <div class="user-info" style="display:flex; flex-direction:column; overflow:hidden;">
                 <span id="my-name-display" style="font-weight:bold; font-size:15px; white-space:nowrap; text-overflow:ellipsis;">...</span>
-                <span style="font-size: 11px; color: #aaa;">Профиль</span>
+                <span style="font-size: 11px; color: #aaa;">Мой аккаунт</span>
             </div>
         </div>
     </div>
@@ -170,13 +175,13 @@
             <img id="header-avatar" class="avatar" style="width:40px; height:40px; display:none; margin-right:12px">
             <div style="display:flex; flex-direction:column;">
                 <span id="header-title" style="font-weight:700; font-size:16px;">Выберите чат</span>
-                <span id="header-subtitle" style="font-size: 12px;"></span>
+                <span id="header-subtitle" style="font-size: 12px; height: 14px;"></span>
             </div>
         </div>
         <div id="messages"></div>
         <div id="form-container">
-            <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); background:rgba(0,0,0,0.05); border-radius:8px; align-items:center; margin-bottom:8px;">
-                <div id="action-text" style="flex-grow:1; font-size:13px; color:#666;"></div>
+            <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); border-radius:8px; align-items:center; margin-bottom:8px;">
+                <div id="action-text" style="flex-grow:1; font-size:13px; color:#666; overflow:hidden; text-overflow:ellipsis;"></div>
                 <div onclick="cancelAction()" style="cursor:pointer; font-size:20px; padding: 0 5px;">×</div>
             </div>
             <form id="form" onsubmit="sendMessage(event)">
@@ -198,13 +203,13 @@
         </div>
         <div class="profile-card-body mobile-visible">
             <div class="modal-col">
-                <div><span class="modal-label">Имя</span><div id="modal-nick-container"></div></div>
-                <div><span class="modal-label">ID</span><div id="modal-login-display" style="color: var(--tg-accent); font-weight:700;"></div></div>
+                <div><span class="modal-label">Публичное имя</span><div id="modal-nick-container"></div></div>
+                <div><span class="modal-label">Уникальный ID</span><div id="modal-login-display" style="color: var(--tg-accent); font-weight:700; margin-top:3px;"></div></div>
                 <div id="modal-pass-container"></div>
             </div>
             <div class="modal-col">
-                <div><span class="modal-label">О себе</span><div id="modal-desc-container"></div></div>
-                <button onclick="closeProfileModal()" style="margin-top:auto; padding:12px; border:none; background:var(--tg-accent); color:#fff; border-radius:12px; cursor:pointer; font-weight:600;">Готово</button>
+                <div><span class="modal-label">О себе</span><div id="modal-desc-container" style="margin-top:5px;"></div></div>
+                <button onclick="closeProfileModal()" style="margin-top:auto; padding:12px; border:none; background:var(--tg-accent); color:#fff; border-radius:14px; cursor:pointer; font-weight:600;">Закрыть</button>
             </div>
         </div>
     </div>
@@ -273,6 +278,7 @@
         document.getElementById('input').disabled = false; document.getElementById('send-btn').disabled = false; document.getElementById('voice-btn').disabled = false;
         
         const chatId = me < lid ? `${me}_${lid}` : `${lid}_${me}`;
+        db.ref(`chats/${chatId}`).off();
         db.ref(`typing/${chatId}/${lid}`).on('value', s => { typingStatus = s.val(); updateHeaderStatusText(); });
         db.ref(`status/${lid}`).on('value', s => { onlineStatus = s.val() || 'offline'; updateHeaderStatusText(); });
 
@@ -283,16 +289,19 @@
                 if (m.sender === lid && m.read === false) db.ref(`chats/${chatId}/${key}/read`).set(true);
                 const msgClass = `msg ${m.sender === me ? 'sent' : 'received'}`;
                 let replyHTML = m.replyTo ? `<div style="border-left:3px solid var(--tg-accent);background:rgba(0,0,0,0.05);padding:5px;margin-bottom:5px;border-radius:4px;font-size:12px;color:#555;" onclick="jumpToMessage('${m.replyTo.key}')">💬 ${m.replyTo.text}</div>` : '';
+                
                 let contentHTML = '';
                 if (m.type === 'image') {
                     let img = getFromCache(key) || m.file || "";
                     if (!getFromCache(key) && m.file) saveToCache(key, m.file);
-                    contentHTML = `<img src="${img}" style="max-width:100%; border-radius:12px;">`;
+                    contentHTML = `<img src="${img}" style="max-width:100%; border-radius:15px; display:block;">`;
                 } else if (m.type === 'audio') {
                     let aud = getFromCache(key) || m.file;
                     if (!getFromCache(key) && m.file) saveToCache(key, m.file);
                     contentHTML = `<div class="voice-msg"><audio controls src="${aud}"></audio></div>`;
-                } else contentHTML = `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
+                } else {
+                    contentHTML = `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
+                }
                 const metaHTML = `<div class="msg-meta"><span>${formatTime(m.time)}</span>${(m.sender === me && !m.read) ? '<span>👁‍🗨</span>' : ''}</div>`;
                 fullHTML += `<div class="${msgClass}" id="msg-${key}" onclick="handleMsgClick(event, '${key}', '${m.sender}', '${(m.text || '[Медиа]').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">${replyHTML}${contentHTML}${metaHTML}</div>`;
             });
@@ -319,12 +328,11 @@
     }
 
     async function removeContact(e, n) { 
-        e.stopPropagation(); 
-        if(confirm(`Удалить ${n} из контактов?`)) await db.ref(`contacts/${me}/${n}`).remove(); 
+        e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); 
     }
 
     async function deleteAccount() {
-        if(confirm("ПОЛНОЕ УДАЛЕНИЕ АККАУНТА? Все данные исчезнут навсегда!")) {
+        if(confirm("ПОЛНОЕ УДАЛЕНИЕ? Все данные исчезнут!")) {
             await db.ref(`users/${me}`).remove(); await db.ref(`contacts/${me}`).remove();
             await db.ref(`status/${me}`).remove(); location.reload();
         }
@@ -340,10 +348,10 @@
         if (isMe) {
             nC.innerHTML = `<input type="text" id="m-nick" class="modal-input" value="${d.nickname || ''}" onchange="saveProfile()">`;
             dC.innerHTML = `<textarea id="m-desc" class="modal-input" style="height:100px; resize:none" onchange="saveProfile()">${d.description || ''}</textarea>`;
-            pC.innerHTML = `<div style="margin-top:10px; padding:15px; background:rgba(0,0,0,0.03); border-radius:18px;"><span class="modal-label">Безопасность</span><input type="password" id="m-p-old" class="modal-input" style="margin-top:8px" placeholder="Старый"><input type="password" id="m-p-new" class="modal-input" style="margin-top:8px" placeholder="Новый"><button onclick="tryPass()" style="width:100%; margin-top:10px; padding:10px; background:var(--tg-accent); color:#fff; border:none; border-radius:10px; cursor:pointer;">Сменить пароль</button><br><button class="del-acc-link" onclick="deleteAccount()">Удалить мой аккаунт</button></div>`;
+            pC.innerHTML = `<div style="margin-top:10px; padding:15px; background:rgba(0,0,0,0.03); border-radius:18px;"><span class="modal-label">Безопасность</span><input type="password" id="m-p-old" class="modal-input" style="margin-top:8px" placeholder="Старый"><input type="password" id="m-p-new" class="modal-input" style="margin-top:8px" placeholder="Новый"><button onclick="tryPass()" style="width:100%; margin-top:10px; padding:10px; background:var(--tg-accent); color:#fff; border:none; border-radius:12px; cursor:pointer;">Сменить пароль</button><br><button class="del-acc-btn" onclick="deleteAccount()">Удалить мой аккаунт</button></div>`;
         } else {
             nC.innerHTML = `<div style="font-size:18px; font-weight:bold;">${d.nickname || uid}</div>`;
-            dC.innerHTML = `<div style="font-size:14px; color:#555; white-space: pre-wrap;">${d.description || 'Описание не заполнено.'}</div>`;
+            dC.innerHTML = `<div class="modal-text" style="font-size:14px; color:#555; white-space: pre-wrap;">${d.description || 'Описание отсутствует.'}</div>`;
             pC.innerHTML = '';
         }
         document.getElementById('modal-overlay').style.display = 'flex';
