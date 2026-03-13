@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petkovmes Ultimate</title>
+    <title>Petkovmes Final Fix</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
@@ -31,25 +31,20 @@
         .status-dot.online { background: var(--online); }
         
         #my-profile { padding: 15px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 12px; background: #fafafa; cursor: pointer; }
-        .del-contact { font-size: 24px; color: #ccc; padding: 0 5px; opacity: 0.6; cursor: pointer; z-index: 5; }
+        .del-contact { font-size: 24px; color: #ccc; padding: 0 5px; opacity: 0.8; cursor: pointer; z-index: 5; }
         .del-contact:hover { color: #ff5252; opacity: 1; }
 
         #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); position: relative; }
-        #chat-header { padding: 8px 15px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; font-weight: bold; height: 55px; box-sizing: border-box; }
+        #chat-header { padding: 8px 15px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; font-weight: bold; height: 55px; }
         #messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
         
-        /* Сообщения */
         .msg { max-width: 80%; padding: 8px 12px; border-radius: 15px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; word-wrap: break-word; position: relative; }
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
-        
-        /* Цитата ответа внутри сообщения */
         .reply-box { border-left: 3px solid var(--tg-accent); background: rgba(0,0,0,0.05); padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; color: #555; }
-        .reply-box b { color: var(--tg-accent); display: block; font-size: 11px; }
 
-        /* Превью над вводом */
-        #action-preview { background: white; padding: 8px 15px; border-top: 1px solid #ddd; display: none; align-items: center; border-left: 4px solid var(--tg-accent); }
         #form-container { background: white; padding: 10px; display: flex; flex-direction: column; }
+        #action-preview { background: white; padding: 8px 15px; border-top: 1px solid #ddd; display: none; align-items: center; border-left: 4px solid var(--tg-accent); }
         #form { display: flex; gap: 10px; align-items: center; }
         #input { flex-grow: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
         #send-btn { background: var(--tg-accent); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; }
@@ -58,7 +53,13 @@
         .menu-item { padding: 12px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 10px; }
         .menu-item:hover { background: #f5f5f5; }
 
-        @media (max-width: 768px) { #sidebar { width: 75px; } .user-info, #my-profile b, .del-contact { display: none; } .status-dot { left: 48px; } }
+        /* ИСПРАВЛЕНИЕ: Крестик виден на телефоне */
+        @media (max-width: 768px) { 
+            #sidebar { width: 75px; } 
+            .user-info, #my-profile b { display: none; } 
+            .status-dot { left: 48px; } 
+            .del-contact { position: absolute; right: 0; top: 0; background: rgba(255,255,255,0.8); border-radius: 50%; font-size: 18px; }
+        }
     </style>
 </head>
 <body onclick="closeMenu()">
@@ -122,6 +123,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let me = '', target = '', editingMsgKey = null, replyData = null, selectedMsg = null;
+    const avatarCache = new Map(); // КЭШ АВАТАРОК
 
     const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -144,8 +146,26 @@
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'flex';
         document.getElementById('my-name-display').innerText = me;
-        db.ref(`users/${me}/avatar`).on('value', s => { if(s.val()) document.getElementById('my-avatar').src = s.val(); });
+        db.ref(`users/${me}/avatar`).on('value', s => { 
+            if(s.val()) {
+                document.getElementById('my-avatar').src = s.val();
+                avatarCache.set(me, s.val());
+            }
+        });
         loadContacts();
+        watchForNewMessages(); // ЗАПУСК АВТО-ДОБАВЛЕНИЯ
+    }
+
+    // ИСПРАВЛЕНИЕ 1: АВТО-ДОБАВЛЕНИЕ КОНТАКТА ПРИ ПОЛУЧЕНИИ СООБЩЕНИЯ
+    function watchForNewMessages() {
+        db.ref('chats').on('child_added', (snap) => {
+            const chatId = snap.key;
+            if (chatId.includes(me)) {
+                const otherUser = chatId.replace(me, '').replace('_', '');
+                // Если нам написали, а человека нет в контактах — добавляем
+                db.ref(`contacts/${me}/${otherUser}`).set(true);
+            }
+        });
     }
 
     async function uploadMyAvatar(input) {
@@ -166,6 +186,7 @@
         } else alert("Юзер не найден");
     }
 
+    // ИСПРАВЛЕНИЕ 3: СТАБИЛЬНЫЕ АВАТАРКИ БЕЗ СЕРОГО ЦВЕТА
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snapshot => {
             const contDiv = document.getElementById('contacts');
@@ -175,15 +196,23 @@
                 const div = document.createElement('div');
                 div.id = `user-item-${name}`;
                 div.className = `user-item ${name === target ? 'active' : ''}`;
+                
+                // Используем кэш, если он есть, чтобы не было "серого" робота
+                const startAv = avatarCache.get(name) || `https://robohash.org/${name}`;
+                
                 div.innerHTML = `
-                    <img src="https://robohash.org/${name}" class="avatar" id="av-${name}">
+                    <img src="${startAv}" class="avatar" id="av-${name}">
                     <div class="status-dot" id="dot-${name}"></div>
-                    <div style="flex-grow:1; overflow:hidden"><b>${name}</b></div>
+                    <div class="user-info" style="flex-grow:1; overflow:hidden"><b>${name}</b></div>
                     <span class="del-contact" onclick="removeContact(event, '${name}')">×</span>
                 `;
+                
                 db.ref(`users/${name}/avatar`).on('value', s => {
                     const img = document.getElementById(`av-${name}`);
-                    if(img && s.val()) img.src = s.val();
+                    if(s.val()) {
+                        avatarCache.set(name, s.val());
+                        if(img) img.src = s.val();
+                    }
                 });
                 db.ref(`status/${name}`).on('value', s => {
                     const dot = document.getElementById(`dot-${name}`);
@@ -205,10 +234,11 @@
         document.getElementById('header-title').innerText = target;
         const hAv = document.getElementById('header-avatar');
         hAv.style.display = 'block';
-        
+        hAv.src = avatarCache.get(target) || `https://robohash.org/${target}`;
+
         db.ref(`users/${target}/avatar`).off();
         db.ref(`users/${target}/avatar`).on('value', s => {
-            hAv.src = s.val() || `https://robohash.org/${target}`;
+            if(s.val()) hAv.src = s.val();
         });
 
         document.getElementById('input').disabled = false;
@@ -224,13 +254,8 @@
                 const key = c.key;
                 const d = document.createElement('div');
                 d.className = `msg ${m.sender === me ? 'sent' : 'received'}`;
-                
-                let content = '';
-                if (m.replyTo) {
-                    content += `<div class="reply-box"><b>${m.replyTo.user}</b>${m.replyTo.text}</div>`;
-                }
+                let content = m.replyTo ? `<div class="reply-box"><b>${m.replyTo.user}</b>${m.replyTo.text}</div>` : '';
                 content += `<div>${m.text}${m.edited ? '<small style="color:#888;margin-left:5px">(ред.)</small>' : ''}</div>`;
-                
                 d.innerHTML = content;
                 d.onclick = (e) => showMenu(e, key, m.sender, m.text);
                 mDiv.appendChild(d);
@@ -246,14 +271,12 @@
         menu.style.display = 'block';
         menu.style.left = Math.min(e.clientX, window.innerWidth - 160) + 'px';
         menu.style.top = Math.min(e.clientY, window.innerHeight - 150) + 'px';
-        
         document.getElementById('menu-edit').style.display = sender === me ? 'flex' : 'none';
         document.getElementById('menu-del').style.display = sender === me ? 'flex' : 'none';
     }
 
     function closeMenu() { document.getElementById('context-menu').style.display = 'none'; }
 
-    // ФУНКЦИИ ДЕЙСТВИЙ
     function prepareReply() {
         cancelAction();
         replyData = { user: selectedMsg.sender, text: selectedMsg.text };
@@ -278,7 +301,6 @@
     }
 
     async function deleteMsg() {
-        if (!selectedMsg) return;
         const chatId = me < target ? `${me}_${target}` : `${target}_${me}`;
         await db.ref(`chats/${chatId}/${selectedMsg.key}`).remove();
     }
@@ -304,6 +326,8 @@
             const msgObj = { sender: me, text: text, time: Date.now() };
             if (replyData) msgObj.replyTo = replyData;
             db.ref(`chats/${chatId}`).push(msgObj);
+            // Добавляем себя в контакты получателя, чтобы у него мы появились
+            db.ref(`contacts/${target}/${me}`).set(true);
         }
         cancelAction();
     }
