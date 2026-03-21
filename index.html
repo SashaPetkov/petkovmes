@@ -11,7 +11,6 @@
         :root { 
             --tg-sent: #efffde; --tg-received: #ffffff; --tg-accent: #3390ec; 
             --tg-bg: #7195ba; --online: #4cc351; --glass: rgba(255, 255, 255, 0.96);
-            --logo-grad: linear-gradient(135deg, #3390ec, #a2ff00);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -24,6 +23,7 @@
             #input, #search-input, .modal-input, .gray-block { background: #242f3d !important; color: #fff; border-color: #101921 !important; }
             .user-item:hover, .menu-item:hover { background: #202b36 !important; }
             #chat-placeholder-box span { background: rgba(0,0,0,0.5) !important; color: #ccc !important; }
+            #pinned-bar { background: rgba(23, 33, 43, 0.95); border-bottom: 1px solid #000; }
         }
 
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -36,7 +36,7 @@
         .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #eee; border-radius: 12px; outline: none; background: #f9f9f9; box-sizing: border-box; }
         .auth-card button { width: 100%; padding: 14px; background: var(--tg-accent); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* ОСНОВНОЙ ЭКРАН - ФИКС ШИРИНЫ */
+        /* ОСНОВНОЙ ЭКРАН */
         #app-screen { display: none; width: 100vw; height: 100vh; flex-direction: row; }
         
         #sidebar { width: 350px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; position: relative; }
@@ -46,13 +46,13 @@
         .group-add-btn { background: rgba(51, 144, 236, 0.1); color: var(--tg-accent); border: none; border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; font-weight: bold; }
 
         #contacts { flex-grow: 1; overflow-y: auto; }
-        .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.02); }
+        .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(0,0,0,0.02); }
         .user-item.active { background: var(--tg-accent) !important; color: #fff !important; }
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; flex-shrink: 0; }
         
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; }
 
-        /* ЧАТ AREA - ФИКС ШИРИНЫ */
+        /* ЧАТ AREA */
         #chat-area { 
             flex-grow: 1; display: flex; flex-direction: column; min-width: 0; height: 100%; 
             background: var(--tg-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') fixed center; 
@@ -63,7 +63,10 @@
         #back-btn { display: none; font-size: 24px; cursor: pointer; background: none; border: none; color: var(--tg-accent); padding: 5px; }
         
         #chat-placeholder-box { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; }
-        #chat-placeholder-box span { background: rgba(0,0,0,0.2); color: #fff; padding: 12px 28px; border-radius: 50px; font-size: 15px; backdrop-filter: blur(5px); }
+        #chat-placeholder-box span { background: rgba(0,0,0,0.2); color: #fff; padding: 12px 28px; border-radius: 50px; font-size: 15px; }
+
+        #pinned-bar { display: none; align-items: center; padding: 10px 20px; background: rgba(255,255,255,0.95); border-bottom: 1px solid rgba(0,0,0,0.08); font-size: 14px; cursor: pointer; color: var(--tg-accent); z-index: 150; height: 45px; }
+        #pinned-content { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid var(--tg-accent); padding-left: 10px; }
 
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; visibility: hidden; }
         .msg { max-width: 75%; padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; }
@@ -80,10 +83,12 @@
         #input { flex-grow: 1; min-width: 0; padding: 12px 18px; border-radius: 25px; border: 1px solid #e0e0e0; background: #f5f5f5; outline: none; font-size: 15px; }
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
         #send-btn { background: var(--tg-accent); color: #fff; }
+        
+        #emoji-picker { display: none; position: absolute; bottom: 80px; left: 20px; background: white; border-radius: 15px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 500; width: 220px; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-        /* МОДАЛКА ПРОФИЛЯ */
+        /* ПРОФИЛЬ */
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; text-align: center; }
+        .profile-card { background: #fff; border-radius: 30px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; text-align: center; }
         .modal-avatar { width: 110px; height: 110px; border-radius: 35px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
         .modal-label { font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: 700; margin-top: 15px; display: block; text-align: left; }
         .modal-input { border: 1px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 12px; width: 100%; box-sizing: border-box; margin-top: 5px; outline: none; }
@@ -106,17 +111,17 @@
 
 <div id="auth-screen">
     <div class="auth-card">
-        <div class="auth-title" style="color: #3390ec;">Petmess</div>
+        <div class="auth-title">Petmess</div>
         <input type="text" id="auth-user" placeholder="Ваш логин">
         <input type="password" id="auth-pass" placeholder="Пароль">
-        <button onclick="login()">Начать общение</button>
+        <button onclick="login()">Начать</button>
     </div>
 </div>
 
 <div id="app-screen">
     <div id="sidebar">
         <div class="sidebar-top">
-            <span class="sidebar-header" style="color: #3390ec;">Petmess</span>
+            <span class="sidebar-header">Petmess</span>
             <button class="group-add-btn" onclick="createGroup()">+</button>
         </div>
         <div id="contacts"></div>
@@ -136,9 +141,20 @@
                 <div id="header-subtitle" style="font-size:12px;"></div>
             </div>
         </div>
+
+        <div id="pinned-bar" onclick="jumpToPinned()">
+            <div id="pinned-content">Закреплено: <span id="pinned-text"></span></div>
+            <div onclick="unpin(event)" style="font-size:20px; margin-left:10px;">×</div>
+        </div>
+
         <div id="messages"></div>
+
         <div id="form-container">
-            <div id="emoji-picker" style="display:none; position:absolute; bottom:80px; background:white; padding:10px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1); z-index:100; flex-wrap:wrap; width:200px; gap:8px;"></div>
+            <div id="emoji-picker"></div>
+            <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); background:rgba(0,0,0,0.05); margin-bottom:8px; align-items:center; border-radius:8px;">
+                <div id="action-text" style="flex-grow:1; font-size:12px; color:#666;"></div>
+                <div onclick="cancelAction()" style="cursor:pointer; font-size:20px;">×</div>
+            </div>
             <form id="form" onsubmit="sendMessage(event)">
                 <label for="chat-file" style="font-size:24px; cursor:pointer; color:#bbb;">📎</label>
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this, 'chat')">
@@ -154,13 +170,15 @@
 <div id="modal-overlay" onclick="closeProfileModal()">
     <div class="profile-card" onclick="event.stopPropagation()">
         <span class="close-modal-btn" onclick="closeProfileModal()">×</span>
-        <input type="file" id="modal-upload" style="display:none" accept="image/*" onchange="processFile(this, 'avatar')">
+        <input type="file" id="modal-upload" style="display:none" accept="image/*" onchange="processFile(this, uploadTarget)">
         <div id="modal-content"></div>
     </div>
 </div>
 
 <div id="context-menu">
     <div class="menu-item" onclick="prepareReply()">↩ Ответить</div>
+    <div class="menu-item" onclick="pinMsg()">📌 Закрепить</div>
+    <div class="menu-item" id="menu-edit" onclick="prepareEdit()">✎ Изменить</div>
     <div class="menu-item" id="menu-del" style="color:red;" onclick="deleteMsg()">🗑 Удалить</div>
 </div>
 
@@ -177,13 +195,16 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let me = '', targetId = '', isGroup = false, typingStatus = false, onlineStatus = 'offline', typingTimeout, mediaRecorder, audioChunks = [], isRecording = false;
+    let me = '', targetId = '', isGroup = false, typingStatus = false, onlineStatus = 'offline', typingTimeout, mediaRecorder, audioChunks = [], isRecording = false, uploadTarget = '', selectedMsg = null, editingMsgKey = null, replyData = null;
+
+    const compress = (v) => LZString.compressToUTF16(v);
+    const decompress = (v) => LZString.decompressFromUTF16(v) || v;
 
     async function login() {
         const u = document.getElementById('auth-user').value.trim().toLowerCase(), p = document.getElementById('auth-pass').value.trim();
         if (!u || !p) return;
         const snap = await db.ref(`users/${u}`).once('value');
-        if (snap.val() && snap.val().password !== p) return alert("Пароль неверный");
+        if (snap.val() && snap.val().password !== p) return alert("Неверный пароль");
         if (!snap.val()) await db.ref(`users/${u}`).set({ password: p, nickname: u });
         me = u;
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
@@ -212,7 +233,14 @@
             document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
         });
         db.ref(`status/${id}`).on('value', s => { onlineStatus = s.val(); updateHeader(); });
-        db.ref(`typing/${me < id ? me+'_'+id : id+'_'+me}/${id}`).on('value', s => { typingStatus = s.val(); updateHeader(); });
+        db.ref(`typing/${getChatId(me,id)}/${id}`).on('value', s => { typingStatus = s.val(); updateHeader(); });
+        
+        // Слушатель закрепов
+        db.ref(`chats/${getChatId(me,id)}/pinned`).on('value', s => {
+            const bar = document.getElementById('pinned-bar');
+            if(s.exists()){ bar.style.display = 'flex'; document.getElementById('pinned-text').innerText = s.val().text; }
+            else bar.style.display = 'none';
+        });
         loadMessages();
     }
 
@@ -227,12 +255,21 @@
         db.ref(getChatPath()).on('value', snap => {
             let html = '';
             snap.forEach(c => {
-                const m = c.val();
+                const m = c.val(), key = c.key;
+                if (m.sender === targetId && m.read === false) db.ref(`${getChatPath()}/${key}/read`).set(true);
                 const msgClass = `msg ${m.sender === me ? 'sent' : 'received'}`;
-                // СЖАТИЕ ТОЛЬКО ДЛЯ ТЕКСТА
-                const data = m.type === 'text' ? LZString.decompressFromUTF16(m.text) : m.file;
-                let content = m.type === 'image' ? `<img src="${data}" class="chat-img">` : m.type === 'audio' ? `<div class="voice-msg"><audio controls src="${data}"></audio></div>` : `<div>${data}</div>`;
-                html += `<div class="${msgClass}">${content}<div class="msg-meta">${new Date(m.time).getHours()}:${new Date(m.time).getMinutes().toString().padStart(2,'0')}</div></div>`;
+                
+                let replyHTML = m.replyTo ? `<div style="border-left:3px solid var(--tg-accent);background:rgba(0,0,0,0.05);padding:5px;margin-bottom:5px;border-radius:6px;font-size:12px;color:#888;">💬 ${m.replyTo.text}</div>` : '';
+                
+                // ВАЖНО: Медиа НЕ декомпрессируем!
+                let data = (m.type === 'text') ? decompress(m.text) : m.file;
+                let content = '';
+                if(m.type === 'image') content = `<img src="${data}" class="chat-img">`;
+                else if(m.type === 'audio') content = `<div class="voice-msg"><audio controls src="${data}"></audio></div>`;
+                else content = `<div>${data}</div>`;
+
+                html += `<div class="${msgClass}" id="msg-${key}" onclick="handleMsgClick(event, '${key}', '${m.sender}', '${(data.substring(0,30))}')">
+                    ${replyHTML}${content}<div class="msg-meta">${new Date(m.time).getHours()}:${new Date(m.time).getMinutes().toString().padStart(2,'0')} ${m.edited?'(ред.)':''} ${m.sender===me && !m.read?'👁‍🗨':''}</div></div>`;
             });
             const div = document.getElementById('messages'); div.innerHTML = html; div.scrollTop = div.scrollHeight;
         });
@@ -245,14 +282,14 @@
             const img = new Image(); img.src = e.target.result;
             img.onload = async () => {
                 const canvas = document.createElement('canvas');
-                const MAX = mode === 'avatar' ? 400 : 1280;
+                const MAX = mode.includes('avatar') ? 400 : 1280;
                 let w = img.width, h = img.height;
                 if (w > MAX || h > MAX) { if (w > h) { h *= MAX / w; w = MAX; } else { w *= MAX / h; h = MAX; } }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                 const b64 = canvas.toDataURL('image/jpeg', 0.8);
-                if (mode === 'avatar') { await db.ref(`users/${me}/avatar`).set(b64); }
-                else { db.ref(getChatPath()).push({ sender: me, file: b64, type: 'image', time: Date.now() }); }
+                if (mode === 'avatar') await db.ref(`users/${me}/avatar`).set(b64);
+                else db.ref(getChatPath()).push({ sender: me, file: b64, type: 'image', time: Date.now(), read: false });
             };
         };
     }
@@ -265,37 +302,52 @@
             mediaRecorder.onstop = () => {
                 const b = new Blob(audioChunks, { type: 'audio/webm' });
                 const r = new FileReader(); r.readAsDataURL(b);
-                r.onloadend = () => { db.ref(getChatPath()).push({ sender: me, file: r.result, type: 'audio', time: Date.now() }); };
+                r.onloadend = () => { db.ref(getChatPath()).push({ sender: me, file: r.result, type: 'audio', time: Date.now(), read: false }); };
             };
             mediaRecorder.start(); isRecording = true; document.getElementById('voice-btn').style.color = 'red';
         } else { mediaRecorder.stop(); isRecording = false; document.getElementById('voice-btn').style.color = '#888'; }
     }
 
+    function handleMsgClick(e, k, s, t) {
+        e.stopPropagation(); selectedMsg = { key: k, sender: s, text: t };
+        const menu = document.getElementById('context-menu'); menu.style.display = 'block';
+        menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+        menu.style.top = Math.min(e.clientY, window.innerHeight - 150) + 'px';
+        document.getElementById('menu-edit').style.display = (s === me) ? 'block' : 'none';
+    }
+
+    function pinMsg() { db.ref(`chats/${getChatId(me,targetId)}/pinned`).set({ key: selectedMsg.key, text: selectedMsg.text }); closePopups(); }
+    function unpin(e) { e.stopPropagation(); db.ref(`chats/${getChatId(me,targetId)}/pinned`).remove(); }
+    function jumpToPinned() { db.ref(`chats/${getChatId(me,targetId)}/pinned`).once('value', s => { if(s.exists()){ const el = document.getElementById('msg-'+s.val().key); el.scrollIntoView({behavior:'smooth'}); el.style.background='#fff59d'; setTimeout(()=>el.style.background='',2000); } }); }
+
+    function prepareReply() { replyData = { key: selectedMsg.key, text: selectedMsg.text }; document.getElementById('action-text').innerText = `Ответ: ${selectedMsg.text}`; document.getElementById('action-preview').style.display = 'flex'; closePopups(); }
+    function prepareEdit() { editingMsgKey = selectedMsg.key; document.getElementById('input').value = selectedMsg.text; document.getElementById('action-text').innerText = `Редактирование`; document.getElementById('action-preview').style.display = 'flex'; closePopups(); }
+    function cancelAction() { editingMsgKey = null; replyData = null; document.getElementById('action-preview').style.display = 'none'; document.getElementById('input').value = ''; }
+    function deleteMsg() { if(confirm("Удалить?")) db.ref(`${getChatPath()}/${selectedMsg.key}`).remove(); closePopups(); }
+
     async function openProfile(uid) {
-        const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val();
-        const modal = document.getElementById('modal-content');
-        const isMe = (uid === me);
+        const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val(); if(!d) return;
+        const modal = document.getElementById('modal-content'); uploadTarget = 'avatar';
         modal.innerHTML = `
-            <img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" onclick="${isMe ? "document.getElementById('modal-upload').click()" : ""}">
+            <img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" onclick="${uid===me ? "document.getElementById('modal-upload').click()" : ""}">
             <span class="modal-label">О себе</span>
             <textarea id="m-desc" class="modal-input" style="height:60px;resize:none" onchange="saveProfile()">${d.description || ''}</textarea>
             <div class="gray-block">
-                <span style="font-size:10px; color:#aaa; text-transform:uppercase;">Твой логин и ID</span>
-                <div style="font-weight:bold; color:var(--tg-accent); margin-bottom:10px;">@${uid}</div>
+                <span style="font-size:10px; color:#aaa; text-transform:uppercase;">ID: @${uid}</span>
                 <span class="modal-label">Никнейм</span>
                 <input type="text" id="m-nick" class="modal-input" value="${d.nickname || ''}" onchange="saveProfile()">
             </div>
-            ${isMe ? `<span class="modal-label">Пароль</span><input type="password" id="m-p-old" class="modal-input" placeholder="Старый"><input type="password" id="m-p-new" class="modal-input" placeholder="Новый"><button onclick="tryPass()" style="width:100%; margin-top:10px; padding:12px; background:var(--tg-accent); color:#fff; border:none; border-radius:12px; cursor:pointer;">Изменить</button>` : ''}
+            ${uid===me ? `<span class="modal-label">Пароль</span><input type="password" id="m-p-old" class="modal-input" placeholder="Старый"><input type="password" id="m-p-new" class="modal-input" placeholder="Новый"><button onclick="tryPass()" style="width:100%; margin-top:10px; padding:12px; background:var(--tg-accent); color:#fff; border:none; border-radius:12px; cursor:pointer;">Изменить</button>` : ''}
         `;
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
+    async function saveProfile() { const n = document.getElementById('m-nick').value, d = document.getElementById('m-desc').value; await db.ref(`users/${me}`).update({ nickname: n, description: d }); }
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snap => {
             const div = document.getElementById('contacts'); div.innerHTML = '';
             snap.forEach(c => {
-                const id = c.key;
-                const item = document.createElement('div'); item.className = `user-item ${id === targetId ? 'active' : ''}`;
+                const id = c.key; const item = document.createElement('div'); item.className = `user-item ${id === targetId ? 'active' : ''}`;
                 item.innerHTML = `<img src="https://robohash.org/${id}" class="avatar" id="av-${id}"><div><b>${id}</b></div>`;
                 db.ref(`users/${id}/avatar`).on('value', s => { if(s.val()) document.getElementById(`av-${id}`).src = s.val(); });
                 item.onclick = () => selectChat(id); div.appendChild(item);
@@ -303,16 +355,17 @@
         });
     }
 
-    // Системные функции
     function goBack(e) { e.stopPropagation(); document.body.classList.remove('chat-open'); }
+    function closePopups() { document.getElementById('emoji-picker').style.display = 'none'; document.getElementById('context-menu').style.display = 'none'; }
     function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; }
-    function getChatPath() { const id = targetId; return `chats/${me < id ? me+'_'+id : id+'_'+me}`; }
-    function sendMessage(e) { e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim()) return; db.ref(getChatPath()).push({sender:me, text: LZString.compressToUTF16(i.value.trim()), time: Date.now(), type:'text'}); i.value=''; if(!isGroup) db.ref(`contacts/${targetId}/${me}`).set(true); }
-    function handleTyping() { if(!targetId) return; db.ref(`typing/${me < targetId ? me+'_'+targetId : targetId+'_'+me}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatPath()}/${me}`).set(false),2000); }
     function toggleEmoji(e) { e.stopPropagation(); const p = document.getElementById('emoji-picker'); p.style.display = p.style.display === 'flex' ? 'none' : 'flex'; }
-    function closePopups() { document.getElementById('emoji-picker').style.display = 'none'; }
+    function getChatId(a, b) { return a < b ? a+'_'+b : b+'_'+a; }
+    function getChatPath() { return `chats/${getChatId(me, targetId)}`; }
+    function sendMessage(e) { e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim()) return; if(editingMsgKey) db.ref(getChatPath()+'/'+editingMsgKey).update({text:compress(i.value.trim()), edited:true}); else { const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text', read:false}; if(replyData) o.replyTo=replyData; db.ref(getChatPath()).push(o); } cancelAction(); i.value=''; }
+    function handleTyping() { if(!targetId) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
+    
     const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
-    emojis.forEach(e => { const d = document.createElement('div'); d.style.cssText="font-size:24px;cursor:pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; document.getElementById('emoji-picker').appendChild(d); });
+    emojis.forEach(e => { const d = document.createElement('div'); d.className="emoji-item"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; document.getElementById('emoji-picker').appendChild(d); });
 </script>
 </body>
 </html>
