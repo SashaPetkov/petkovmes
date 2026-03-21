@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petmess</title>
+    <title>Petmess - Voice Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
@@ -37,50 +37,41 @@
 
         /* ПРИЛОЖЕНИЕ */
         #app-screen { display: none; width: 100%; height: 100%; flex-direction: row; position: relative; }
-        
         #sidebar { width: 320px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; }
         .sidebar-top { padding: 20px 25px 15px; display: flex; justify-content: space-between; align-items: center; }
         .sidebar-header { color: var(--tg-accent); font-size: 26px; font-weight: 900; }
-
         #contacts { flex-grow: 1; overflow-y: auto; }
         .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.03); }
         .user-item.active { background: var(--tg-accent) !important; color: #fff !important; }
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; flex-shrink: 0; }
         .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #ccc; position: absolute; left: 54px; top: 46px; border: 2px solid #fff; }
         .status-dot.online { background: var(--online); }
-        
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; }
 
         /* ЧАТ */
         #chat-area { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; height: 100%; background: var(--tg-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; position: relative; }
         #chat-header { padding: 10px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; min-height: 60px; z-index: 200; gap: 12px; }
         #back-btn { display: none; font-size: 24px; cursor: pointer; background: none; border: none; color: var(--tg-accent); }
-        
-        /* ИСПРАВЛЕННЫЙ ЗАКРЕП */
-        #pinned-bar { 
-            display: none; align-items: center; padding: 10px 20px; 
-            background: rgba(255,255,255,0.95); border-bottom: 1px solid rgba(0,0,0,0.08); 
-            font-size: 14px; cursor: pointer; color: var(--tg-accent); 
-            z-index: 150; height: 45px; box-sizing: border-box;
-        }
+        #pinned-bar { display: none; align-items: center; padding: 10px 20px; background: rgba(255,255,255,0.95); border-bottom: 1px solid rgba(0,0,0,0.08); font-size: 14px; cursor: pointer; color: var(--tg-accent); z-index: 150; height: 45px; box-sizing: border-box; }
         #pinned-content { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid var(--tg-accent); padding-left: 10px; }
-        #unpin-action-btn { font-size: 22px; padding: 0 5px; opacity: 0.5; cursor: pointer; }
-        #unpin-action-btn:hover { opacity: 1; color: #ff4d4d; }
-
+        
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .msg { max-width: 75%; padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; }
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg.highlight { background: #fff59d !important; transition: 1s ease; }
         .msg-meta { position: absolute; right: 12px; bottom: 6px; font-size: 10px; opacity: 0.6; }
+        .msg audio { height: 35px; width: 200px; margin-top: 5px; }
 
         /* ВВОД */
         #form-container { background: var(--glass); padding: 12px 18px; border-top: 1px solid rgba(0,0,0,0.05); }
-        #form { display: flex; align-items: center; gap: 10px; }
         #input { flex-grow: 1; min-width: 0; padding: 12px 18px; border-radius: 25px; border: 1px solid #e0e0e0; background: #f5f5f5; outline: none; font-size: 15px; }
-        
         #emoji-picker { display: none; position: absolute; bottom: 80px; left: 20px; background: white; border-radius: 15px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 500; width: 220px; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .emoji-item { font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .emoji-item { font-size: 24px; cursor: pointer; }
+
+        /* КОНТЕКСТНОЕ МЕНЮ */
+        #context-menu { display: none; position: fixed; background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 9999; overflow: hidden; min-width: 170px; border: 1px solid #eee; }
+        .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; transition: 0.2s; color: #333; }
+        .menu-item:hover { background: #f8f9fa; }
 
         @media (max-width: 768px) {
             #sidebar { width: 100%; position: absolute; inset: 0; transition: 0.3s; }
@@ -89,10 +80,6 @@
             body.chat-open #chat-area { transform: translateX(0); }
             #back-btn { display: block; }
         }
-
-        #context-menu { display: none; position: fixed; background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 9999; overflow: hidden; min-width: 170px; border: 1px solid #eee; }
-        .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; transition: 0.2s; color: #333; }
-        .menu-item:hover { background: #f8f9fa; }
     </style>
 </head>
 <body onclick="closePopups()">
@@ -110,23 +97,20 @@
     <div id="sidebar">
         <div class="sidebar-top"><span class="sidebar-header">petmess</span><button style="border:none;background:none;color:var(--tg-accent);font-weight:bold;cursor:pointer;" onclick="createGroup()">+ Группа</button></div>
         <div id="contacts"></div>
-        <div id="my-profile" onclick="openProfile(me)"><img id="my-avatar" class="avatar" src=""><b id="my-name">...</b></div>
+        <div id="my-profile"><img id="my-avatar" class="avatar" src=""><b id="my-name">...</b></div>
     </div>
 
     <div id="chat-area">
         <div id="chat-header">
             <button id="back-btn" onclick="goBack()">←</button>
-            <img id="header-avatar" class="avatar" style="width:40px;height:40px;display:none">
-            <div style="flex-grow:1;overflow:hidden;" onclick="openProfile(targetId)">
+            <div style="flex-grow:1;overflow:hidden;">
                 <div id="header-title" style="font-weight:700">Выберите чат</div>
-                <div id="header-subtitle" style="font-size:11px;color:#888"></div>
             </div>
-            <button id="group-add-btn" style="display:none;padding:5px 10px;background:var(--tg-accent);color:white;border:none;border-radius:10px;" onclick="inviteToGroup()">+</button>
         </div>
 
-        <div id="pinned-bar" style="display:none;">
+        <div id="pinned-bar">
             <div id="pinned-content" onclick="jumpToMessage(currentPinnedKey)">Закреплено: <span id="pinned-text"></span></div>
-            <div id="unpin-action-btn" onclick="unpinMessage(event, currentPinnedKey)">×</div>
+            <div onclick="unpinMessage(event, currentPinnedKey)" style="cursor:pointer; padding: 0 10px;">×</div>
         </div>
 
         <div id="messages"></div>
@@ -136,16 +120,18 @@
             <form id="form" onsubmit="sendMessage(event)" style="display:flex;align-items:center;gap:10px;">
                 <label for="chat-file" style="font-size:24px;cursor:pointer;color:#bbb;">📎</label>
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
+                
+                <div id="mic-btn" onclick="toggleRecording()" style="font-size:24px;cursor:pointer;color:#bbb;">🎤</div>
+                
                 <div onclick="toggleEmoji(event)" style="font-size:24px;cursor:pointer;">😊</div>
                 <input id="input" autocomplete="off" placeholder="Сообщение..." disabled>
-                <button type="submit" id="send-btn" class="action-btn" disabled>➤</button>
+                <button type="submit" id="send-btn" style="background:none; border:none; color:var(--tg-accent); font-size:24px; cursor:pointer;" disabled>➤</button>
             </form>
         </div>
     </div>
 </div>
 
 <div id="context-menu">
-    <div class="menu-item" onclick="prepareReply()">↩ Ответить</div>
     <div class="menu-item" id="menu-pin-btn" onclick="togglePin()">📌 Закрепить</div>
     <div class="menu-item" id="menu-del" style="color:red;" onclick="deleteMsg()">🗑 Удалить</div>
 </div>
@@ -163,14 +149,13 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let me = '', targetId = '', isGroup = false, selectedMsg = null, currentPinnedKey = null, typingTimeout;
-    const cache = new Map();
+    let me = '', targetId = '', isGroup = false, selectedMsg = null, currentPinnedKey = null;
+    let mediaRecorder, audioChunks = [], isRecording = false;
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
     const formatTime = (t) => { const d = new Date(t); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); };
 
-    // --- ИНИЦИАЛИЗАЦИЯ ---
     async function login() {
         const u = document.getElementById('auth-user').value.trim().toLowerCase(), p = document.getElementById('auth-pass').value.trim();
         if (!u || !p) return;
@@ -189,74 +174,105 @@
     }
 
     function selectChat(id, isGrp = false) {
-        if (targetId) db.ref(getChatPath()).off();
-        if (targetId) db.ref(getPinnedPath()).off();
-        
+        if (targetId) { db.ref(getChatPath()).off(); db.ref(getPinnedPath()).off(); }
         targetId = id; isGroup = isGrp;
         document.body.classList.add('chat-open');
+        document.getElementById('header-title').innerText = id;
         document.getElementById('input').disabled = false; document.getElementById('send-btn').disabled = false;
         
-        // Слушатель закрепов (Мульти-закреп)
         db.ref(getPinnedPath()).on('value', snap => {
             const bar = document.getElementById('pinned-bar');
             if (snap.exists()) {
                 const pins = snap.val();
-                const keys = Object.keys(pins);
-                const lastKey = keys[keys.length - 1]; // Берем последний закрепленный
-                currentPinnedKey = lastKey;
-                document.getElementById('pinned-text').innerText = pins[lastKey].text;
+                currentPinnedKey = Object.keys(pins).pop();
+                document.getElementById('pinned-text').innerText = pins[currentPinnedKey].text;
                 bar.style.display = 'flex';
-            } else {
-                bar.style.display = 'none';
-                currentPinnedKey = null;
-            }
+            } else { bar.style.display = 'none'; }
         });
-
         loadMessages();
     }
 
     function getChatId(a, b) { return a < b ? a+'_'+b : b+'_'+a; }
-    function getChatPath() { return isGroup ? `groups/${targetId}/messages` : `chats/${getChatId(me, targetId)}`; }
+    function getChatPath() { return isGroup ? `groups/${targetId}/messages` : `chats/${getChatId(me, targetId)}/messages`; }
     function getPinnedPath() { return isGroup ? `groups/${targetId}/pinned` : `chats/${getChatId(me, targetId)}/pinned`; }
 
-    // --- ЗАКРЕПЫ (ЛОГИКА) ---
-    async function togglePin() {
-        const path = `${getPinnedPath()}/${selectedMsg.key}`;
-        const snap = await db.ref(path).once('value');
-        if (snap.exists()) {
-            await db.ref(path).remove();
+    // --- ЛОГИКА ГОЛОСОВЫХ ---
+    async function toggleRecording() {
+        const micBtn = document.getElementById('mic-btn');
+        if (!isRecording) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = () => {
+                        db.ref(getChatPath()).push({
+                            sender: me,
+                            text: compress(reader.result),
+                            type: 'voice',
+                            time: Date.now()
+                        });
+                    };
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                mediaRecorder.start();
+                isRecording = true; micBtn.style.color = 'red'; micBtn.innerText = '🛑';
+            } catch (e) { alert("Микрофон недоступен"); }
         } else {
-            await db.ref(path).set({ text: selectedMsg.text, time: Date.now() });
+            mediaRecorder.stop();
+            isRecording = false; micBtn.style.color = '#bbb'; micBtn.innerText = '🎤';
         }
-        closePopups();
     }
 
-    async function unpinMessage(e, key) {
-        e.stopPropagation();
-        await db.ref(`${getPinnedPath()}/${key}`).remove();
-    }
-
-    function jumpToMessage(key) {
-        const el = document.getElementById(`msg-${key}`);
-        if(el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('highlight'); setTimeout(() => el.classList.remove('highlight'), 2000); }
-    }
-
-    // --- СООБЩЕНИЯ ---
     function loadMessages() {
         db.ref(getChatPath()).on('value', snap => {
             let html = '';
             snap.forEach(c => {
                 const m = c.val(), key = c.key;
-                const msgClass = `msg ${m.sender === me ? 'sent' : 'received'}`;
-                let data = decompress(m.text || m.file || "");
-                html += `<div class="${msgClass}" id="msg-${key}" onclick="handleMsgClick(event, '${key}', '${m.sender}', '${data.substring(0,40)}')">
-                    ${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent)">${m.sender}</div>` : ''}
-                    <div>${m.type==='image'?`<img src="${data}" style="max-width:100%;border-radius:10px">`:data}</div>
-                    <div class="msg-meta">${formatTime(m.time)}</div></div>`;
+                const data = decompress(m.text || "");
+                const isMe = m.sender === me;
+                let content = '';
+
+                if (m.type === 'voice') {
+                    content = `<audio src="${data}" controls></audio>`;
+                } else if (m.type === 'image') {
+                    content = `<img src="${data}" style="max-width:100%;border-radius:10px">`;
+                } else {
+                    content = `<div>${data}</div>`;
+                }
+
+                html += `<div class="msg ${isMe?'sent':'received'}" id="msg-${key}" onclick="handleMsgClick(event,'${key}','${m.sender}','${m.type==='text'?data.substring(0,20):'Медиа'}')">
+                    ${isGroup && !isMe ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent)">${m.sender}</div>`:''}
+                    ${content}
+                    <div class="msg-meta">${formatTime(m.time)}</div>
+                </div>`;
             });
-            document.getElementById('messages').innerHTML = html;
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            const container = document.getElementById('messages');
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
         });
+    }
+
+    async function sendMessage(e) {
+        e.preventDefault(); const inp = document.getElementById('input'); if(!inp.value.trim()) return;
+        db.ref(getChatPath()).push({ sender: me, text: compress(inp.value.trim()), time: Date.now(), type: 'text' });
+        if(!isGroup) db.ref(`contacts/${targetId}/${me}`).set(true);
+        if(!isGroup) db.ref(`contacts/${me}/${targetId}`).set(true);
+        inp.value = '';
+    }
+
+    function processFile(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                db.ref(getChatPath()).push({ sender: me, text: compress(e.target.result), type: 'image', time: Date.now() });
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
     function handleMsgClick(e, k, s, t) {
@@ -265,18 +281,10 @@
         menu.style.display = 'block';
         menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
         menu.style.top = Math.min(e.clientY, window.innerHeight - 150) + 'px';
-        
-        // Проверяем, закреплено ли уже это сообщение, чтобы поменять текст кнопки
-        db.ref(`${getPinnedPath()}/${k}`).once('value', snap => {
-            document.getElementById('menu-pin-btn').innerText = snap.exists() ? '📍 Открепить' : '📌 Закрепить';
-        });
-
-        document.getElementById('menu-del').style.display = (s === me) ? 'block' : 'none';
     }
 
-    // --- ВСПОМОГАТЕЛЬНОЕ ---
-    function goBack() { document.body.classList.remove('chat-open'); }
     function closePopups() { document.getElementById('context-menu').style.display = 'none'; document.getElementById('emoji-picker').style.display = 'none'; }
+    function goBack() { document.body.classList.remove('chat-open'); }
     function toggleEmoji(e) { e.stopPropagation(); const p = document.getElementById('emoji-picker'); p.style.display = p.style.display === 'flex' ? 'none' : 'flex'; }
     
     const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
@@ -286,33 +294,33 @@
         document.getElementById('emoji-picker').appendChild(d);
     });
 
-    async function sendMessage(e) {
-        e.preventDefault(); const inp = document.getElementById('input'); if(!inp.value.trim()) return;
-        db.ref(getChatPath()).push({ sender: me, text: compress(inp.value.trim()), time: Date.now(), type: 'text' });
-        if(!isGroup) db.ref(`contacts/${targetId}/${me}`).set(true);
-        inp.value = '';
-    }
-
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snap => {
             const div = document.getElementById('contacts'); div.innerHTML = '';
             snap.forEach(c => {
-                const id = c.key, isGrp = id.startsWith('grp_');
-                const item = document.createElement('div'); item.id = `user-item-${id}`; item.className = `user-item ${id === targetId ? 'active' : ''}`;
-                item.innerHTML = `<img src="https://robohash.org/${id}" class="avatar" id="av-${id}"><div class="status-dot" id="dot-${id}" style="${isGrp?'display:none':''}"></div><div style="flex-grow:1;overflow:hidden"><b>${id}</b></div><span style="color:#ccc;font-size:24px;" onclick="removeContact(event,'${id}')">×</span>`;
-                if(!isGrp) db.ref(`users/${id}`).on('value', s => { if(s.val()) document.getElementById(`av-${id}`).src = s.val().avatar || `https://robohash.org/${id}`; });
-                item.onclick = () => selectChat(id, isGrp); div.appendChild(item);
+                const id = c.key;
+                const item = document.createElement('div'); item.className = 'user-item';
+                item.innerHTML = `<img src="https://robohash.org/${id}" class="avatar"><b>${id}</b>`;
+                item.onclick = () => selectChat(id, id.startsWith('grp_'));
+                div.appendChild(item);
             });
         });
     }
 
     async function createGroup() {
-        const n = prompt("Имя группы:"); if(n) { const id = 'grp_'+Date.now(); await db.ref(`groups/${id}`).set({name:n, members:{[me]:true}}); await db.ref(`contacts/${me}/${id}`).set(true); selectChat(id, true); }
+        const n = prompt("Имя группы:"); if(n) { const id = 'grp_'+Date.now(); await db.ref(`contacts/${me}/${id}`).set(true); selectChat(id, true); }
     }
-    
+
     async function deleteMsg() { if(confirm("Удалить?")) db.ref(`${getChatPath()}/${selectedMsg.key}`).remove(); closePopups(); }
-    async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
-    function processFile(i) { /* Сжатие и отправка как в прошлых версиях */ }
+    async function togglePin() {
+        const path = `${getPinnedPath()}/${selectedMsg.key}`;
+        const snap = await db.ref(path).once('value');
+        if (snap.exists()) await db.ref(path).remove();
+        else await db.ref(path).set({ text: selectedMsg.text, time: Date.now() });
+        closePopups();
+    }
+    function unpinMessage(e, k) { e.stopPropagation(); db.ref(`${getPinnedPath()}/${k}`).remove(); }
+    function jumpToMessage(k) { const el = document.getElementById(`msg-${k}`); if(el) el.scrollIntoView({behavior:'smooth', block:'center'}); }
 </script>
 </body>
 </html>
