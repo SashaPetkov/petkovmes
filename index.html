@@ -35,6 +35,7 @@
         #sidebar { width: 350px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; position: relative; }
         #chat-area { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100%; background: var(--tg-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') fixed center; position: relative; }
 
+        /* ВХОД */
         #auth-screen { position: fixed; inset: 0; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .auth-card { width: 320px; padding: 40px; text-align: center; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); background: #fff; }
         .auth-title { color: var(--tg-accent); font-size: 36px; font-weight: 900; margin-bottom: 25px; letter-spacing: -1px; }
@@ -48,23 +49,21 @@
         #search-container { padding: 10px 20px; position: relative; }
         #search-input { width: 100%; padding: 12px 18px; border: 1.5px solid transparent; background: var(--input-bg); border-radius: 25px; outline: none; box-sizing: border-box; }
         #search-results { position: absolute; top: 60px; left: 20px; right: 20px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 500; display: none; overflow-y: auto; max-height: 300px; border: 1px solid #eee; }
-        .search-item { padding: 12px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f5f5f5; color: #333; }
+        .search-item { padding: 12px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f5f5f5; }
 
         #contacts { flex-grow: 1; overflow-y: auto; }
-        .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.02); }
+        .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.02); transition: 0.2s; }
         .user-item.active { background: var(--tg-accent) !important; color: #fff !important; }
         
         .avatar-wrapper { position: relative; width: 50px; height: 50px; flex-shrink: 0; }
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; }
         .status-dot { width: 13px; height: 13px; border-radius: 50%; background: #ccc; position: absolute; bottom: 0; right: 0; border: 2.5px solid #fff; }
         .status-dot.online { background: var(--online); }
-        
         .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; }
         .user-item:hover .del-btn { opacity: 1; }
 
-        /* ФИКС НИЖНЕЙ АВАТАРКИ */
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #fff; }
-        #my-avatar { width: 50px !important; height: 50px !important; border-radius: 50%; object-fit: cover; }
+        #my-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
 
         #chat-placeholder-box { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; }
         #chat-placeholder-box span { background: rgba(0,0,0,0.2); color: #fff; padding: 12px 28px; border-radius: 50px; font-size: 15px; backdrop-filter: blur(5px); }
@@ -77,15 +76,23 @@
         .msg-row.received { align-self: flex-start; }
         .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; }
         
-        .msg { padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; }
+        /* СООБЩЕНИЯ С ПОДСВЕТКОЙ */
+        .msg { padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; transition: background 0.3s; }
         .sent .msg { background: var(--tg-sent); border-bottom-right-radius: 4px; }
         .received .msg { background: var(--tg-received); border-bottom-left-radius: 4px; }
         
+        /* ЭФФЕКТ МИГАНИЯ */
         .msg.highlight { animation: highlight-flash 2s ease; }
-        @keyframes highlight-flash { 0% { background: #fff59d !important; } 100% { } }
+        @keyframes highlight-flash { 
+            0% { background: #fff59d !important; transform: scale(1.02); }
+            100% { transform: scale(1); } 
+        }
 
         .reply-box { background: rgba(0,0,0,0.04); border-left: 3px solid var(--tg-accent); padding: 5px 8px; margin-bottom: 5px; border-radius: 5px; font-size: 13px; cursor: pointer; }
         .reply-box b { color: var(--tg-accent); display: block; font-size: 11px; }
+
+        /* КРАСИВОЕ ВРЕМЯ ПОД СООБЩЕНИЕМ */
+        .msg-meta { position: absolute; right: 10px; bottom: 5px; font-size: 11px; opacity: 0.5; font-family: monospace; }
 
         #form-container { display: none; padding: 15px; border-top: 1px solid rgba(0,0,0,0.05); background: var(--glass); position: relative; }
         #input { flex-grow: 1; min-width: 0; padding: 12px 20px; border-radius: 25px; border: 1px solid #e0e0e0; background: var(--input-bg); outline: none; }
@@ -94,6 +101,8 @@
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
+        
+        /* КРАСИВЫЕ ОКОШКИ ТЕКСТА */
         .modal-input { border: 1.5px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; margin-top: 8px; outline: none; transition: 0.3s; }
         .gray-block { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-top: 15px; }
 
@@ -122,10 +131,10 @@
 <div id="app-screen">
     <div id="sidebar">
         <div class="sidebar-top"><span class="sidebar-header">Petmess</span><button class="group-add-btn" onclick="createGroup()">+</button></div>
-        <div id="search-container"><input type="text" id="search-input" placeholder="Найти пользователя..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
+        <div id="search-container"><input type="text" id="search-input" placeholder="ID пользователя..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
         <div id="my-profile" onclick="openProfile(me)">
-            <img id="my-avatar" src="">
+            <img id="my-avatar" class="avatar" src="">
             <div style="flex-grow:1;overflow:hidden;margin-left:12px;"><b id="my-name-display">...</b></div>
         </div>
     </div>
@@ -135,17 +144,20 @@
         <div id="chat-header">
             <button id="back-btn" onclick="goBack(event)" style="display:none; font-size:24px; border:none; background:none; color:var(--tg-accent); cursor:pointer;">←</button>
             <img id="header-avatar" class="avatar" style="width:40px;height:40px; cursor:pointer;" onclick="openProfile(targetId)">
-            <div style="flex-grow:1;overflow:hidden; margin-left: 10px; cursor:pointer;" onclick="openProfile(targetId)">
+            <div style="flex-grow:1;overflow:hidden; margin-left: 10px;" onclick="openProfile(targetId)">
                 <div id="header-title" style="font-weight:700"></div>
                 <div id="header-subtitle" style="font-size:12px; color:#888;"></div>
             </div>
             <button id="group-invite-btn" style="display:none; padding:5px 12px; background:var(--tg-accent); color:white; border:none; border-radius:10px; font-weight:bold;" onclick="inviteToGroup(event)">+</button>
         </div>
+
         <div id="pinned-bar" style="display:none; align-items:center; padding:10px 20px; background:rgba(255,255,255,0.9); border-bottom:1px solid #eee; font-size:14px; cursor:pointer; color:var(--tg-accent); z-index:150;" onclick="jumpToPinned()">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📌 <span id="pinned-text"></span></div>
             <div onclick="unpin(event)" style="font-size:20px; margin-left:10px;">×</div>
         </div>
+
         <div id="messages"></div>
+
         <div id="form-container">
             <div id="emoji-picker" style="display:none; position:absolute; bottom:80px; left:20px; background:white; padding:10px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1); z-index:100; flex-wrap:wrap; width:200px; gap:8px;"></div>
             <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); background:rgba(0,0,0,0.03); margin-bottom:8px; border-radius:8px; align-items:center;"><div id="action-text" style="flex-grow:1; font-size:12px;"></div><div onclick="cancelAction()" style="cursor:pointer; font-size:20px;">×</div></div>
@@ -182,13 +194,13 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let me = '', targetId = '', isGroup = false, selectedMsg = null, editingKey = null, replyData = null, avatarCache = {};
+    let me = '', targetId = '', isGroup = false, selectedMsg = null, editingKey = null, replyData = null, uploadTarget = '', avatarCache = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout;
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
     
-    // КРАСИВОЕ ВРЕМЯ
+    // ФИКС КРАСИВОГО ВРЕМЕНИ
     const formatTime = (t) => {
         const d = new Date(t);
         return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
@@ -223,7 +235,7 @@
                 const d = s.val(); if(!d) return; document.getElementById('header-title').innerText = d.name; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
                 document.getElementById('group-invite-btn').style.display = (d.owner===me || (d.admins && d.admins[me])) ? 'block' : 'none';
-                document.getElementById('header-subtitle').innerText = "Группа";
+                document.getElementById('header-subtitle').innerText = "Групповой чат";
             });
         } else {
             db.ref(`users/${id}`).on('value', s => { 
@@ -267,11 +279,21 @@
         });
     }
 
+    // ФИКС ВЫДЕЛЕНИЯ И ПЕРЕХОДА
+    function jumpToMessage(k, e) {
+        if(e) e.stopPropagation();
+        const el = document.getElementById('msg-'+k);
+        if(el){ 
+            el.scrollIntoView({behavior:'smooth', block:'center'}); 
+            el.querySelector('.msg').classList.add('highlight'); 
+            setTimeout(()=>el.querySelector('.msg').classList.remove('highlight'), 2000); 
+        }
+    }
+
     function handleMsgClick(e, k, s, t) {
         e.stopPropagation(); selectedMsg={key:k, sender:s, text:t};
         const menu=document.getElementById('context-menu'); menu.style.display='block';
         menu.style.left=e.clientX+'px'; menu.style.top=e.clientY+'px';
-        // ПОЛНЫЙ ФИКС БЕЗОПАСНОСТИ: Только владелец видит кнопки правки и удаления
         document.getElementById('menu-edit').style.display=(s===me)?'block':'none';
         document.getElementById('menu-del').style.display=(s===me)?'block':'none';
     }
@@ -283,8 +305,8 @@
             let membersHtml = ''; 
             for(let m in d.members) {
                 const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m];
-                membersHtml += `<div class="member-item">
-                    <span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${m} ${isOwner ? '<small style="color:orange">(Владелец)</small>' : (isAdmin ? '<small>(Админ)</small>' : '')}</span>
+                membersHtml += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;">
+                    <span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${m} ${isOwner ? '<small style="color:orange">(Владелец)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Админ)</small>' : '')}</span>
                     ${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer;">${isAdmin?'Разжаловать':'Дать админа'}</span>` : ''}
                 </div>`;
             }
@@ -297,8 +319,7 @@
                 <div class="gray-block" style="background:#fff; margin-top:5px; padding:5px 15px;">${membersHtml}</div>`;
         } else {
             const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val(); uploadTarget = 'avatar';
-            modal.innerHTML = `
-                <img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px; box-shadow: 0 10px 25px rgba(51,144,236,0.2);" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
+            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px; box-shadow: 0 10px 25px rgba(51,144,236,0.2);" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
                 <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">О СЕБЕ</span>
                 <div class="gray-block" style="background:#fff; border: 1px solid #eee; margin-top:5px; padding:15px;">
                     <textarea id="m-desc" class="modal-input" style="border:none; background:transparent; padding:0; margin-top:0; height:auto; min-height:40px;" placeholder="Нет информации" ${!isMe?'disabled':''} onchange="updateProfile()">${d.description||''}</textarea>
@@ -312,7 +333,7 @@
                 ${!isMe ? `<button onclick="startDirectChat('${uid}')" style="width:100%;margin-top:15px;padding:16px;background:var(--tg-accent);color:white;border:none;border-radius:18px;font-weight:bold;cursor:pointer;">Написать сообщение</button>` : ''}
                 ${isMe ? `
                     <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">БЕЗОПАСНОСТЬ</span>
-                    <div class="gray-block" style="background:#fff; border:1px solid #eee; margin-top:5px; padding:10px;">
+                    <div class="gray-block" style="background:#fff; border: 1px solid #eee; margin-top:5px; padding:10px;">
                         <input type="password" id="old-p" class="modal-input" style="background:#eef5ff; border:none; border-radius:12px;" placeholder="Старый пароль">
                         <input type="password" id="new-p" class="modal-input" style="border:1.5px solid #eee; margin-top:10px;" placeholder="Новый пароль">
                     </div>
@@ -322,19 +343,18 @@
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
-    // ЛОГИКА И СИСТЕМНЫЕ ФУНКЦИИ
+    // Системные функции
     async function groupAction(uid, action) { if(action === 'makeAdmin') await db.ref(`groups/${targetId}/admins/${uid}`).set(true); if(action === 'demoteAdmin') await db.ref(`groups/${targetId}/admins/${uid}`).remove(); if(action === 'kick') { await db.ref(`groups/${targetId}/members/${uid}`).remove(); await db.ref(`contacts/${uid}/${targetId}`).remove(); } openProfile(targetId); }
     function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
     async function changePass() { const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; const s=await db.ref(`users/${me}/password`).once('value'); if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); alert("ОК!"); } else alert("Ошибка!"); }
     async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
-    function jumpToMessage(k, e) { if(e) e.stopPropagation(); const el = document.getElementById('msg-'+k); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.classList.add('highlight'); setTimeout(()=>el.classList.remove('highlight'),2000); } }
-    function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
-    function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
+    function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
+    function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-text').innerText="Редактирование"; document.getElementById('action-preview').style.display='flex'; closePopups(); }
     function deleteMsg() { if(confirm("Удалить?")) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
-    function cancelAction() { replyData=null; editingKey=null; document.getElementById('action-preview').style.display='none'; document.getElementById('input').value=''; }
     function pinMsg() { db.ref(getPinnedPath()).set({key:selectedMsg.key, text:selectedMsg.text}); closePopups(); }
     function unpin(e) { e.stopPropagation(); db.ref(getPinnedPath()).remove(); }
     function jumpToPinned() { db.ref(getPinnedPath()).once('value', s => { if(s.exists()) jumpToMessage(s.val().key); }); }
+    function cancelAction() { replyData=null; editingKey=null; document.getElementById('action-preview').style.display='none'; document.getElementById('input').value=''; }
     function closePopups() { document.getElementById('context-menu').style.display='none'; document.getElementById('emoji-picker').style.display='none'; }
     function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; }
     function toggleEmoji(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; }
@@ -346,9 +366,8 @@
     async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
     function sendMessage(e) { e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim() && !editingKey) return; if(editingKey){ db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); } else { const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text'}; if(replyData) o.replyTo=replyData; db.ref(getChatPath()+'/messages').push(o); if(!isGroup) db.ref(`contacts/${targetId}/${me}`).set(true); } i.value=''; cancelAction(); }
     async function createGroup() { const n = prompt("Имя группы:"); if(n){ const id='grp_'+Date.now(); await db.ref(`groups/${id}`).set({name:n, owner:me, members:{[me]:true}}); await db.ref(`contacts/${me}/${id}`).set(true); selectChat(id,true); } }
-    async function inviteToGroup() { const i = prompt("ID пользователя:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
+    async function inviteToGroup() { const i = prompt("ID:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
     function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
-    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now()}); }; }
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snap => {
             const div = document.getElementById('contacts'); div.innerHTML = '';
@@ -363,6 +382,8 @@
             });
         });
     }
+    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now()}); }; }
+
     const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
     const ep = document.getElementById('emoji-picker');
     emojis.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
