@@ -28,37 +28,19 @@
 
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
-        /* ГЛАВНЫЙ ФИКС ЭКРАНА */
+        /* ВЕРСТКА НА ВЕСЬ ЭКРАН */
         #app-screen { 
-            display: none; 
-            width: 100vw; 
-            height: 100vh; 
-            flex-direction: row; 
-            position: fixed; 
-            top: 0; left: 0;
+            display: none; width: 100vw; height: 100vh; flex-direction: row; position: fixed; top: 0; left: 0; 
         }
 
-        #sidebar { 
-            width: 350px; 
-            background: #fff; 
-            border-right: 1px solid #eee; 
-            display: flex; 
-            flex-direction: column; 
-            flex-shrink: 0; 
-            z-index: 100;
-        }
-
+        #sidebar { width: 350px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; position: relative; }
+        
         #chat-area { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            min-width: 0; 
-            height: 100%; 
-            background: var(--tg-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') fixed center; 
-            position: relative; 
+            flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100%; 
+            background: var(--tg-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') fixed center; position: relative; 
         }
 
-        /* ВХОД */
+        /* ЭЛЕМЕНТЫ */
         #auth-screen { position: fixed; inset: 0; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9000; }
         .auth-card { width: 320px; padding: 40px; text-align: center; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
         .auth-title { color: var(--tg-accent); font-size: 36px; font-weight: 900; margin-bottom: 30px; }
@@ -72,17 +54,16 @@
         #search-container { padding: 10px 20px 15px; position: relative; }
         #search-input { width: 100%; padding: 12px 18px; border: none; background: #f2f2f2; border-radius: 25px; outline: none; box-sizing: border-box; font-size: 14px; }
         #search-results { position: absolute; top: 60px; left: 20px; right: 20px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 500; display: none; overflow-y: auto; max-height: 250px; border: 1px solid #eee; }
-        .search-item { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f5f5f5; color: #333; }
+        .search-item { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f5f5f5; }
 
         #contacts { flex-grow: 1; overflow-y: auto; }
-        .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(0,0,0,0.02); transition: 0.2s; }
+        .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.02); transition: 0.2s; }
         .user-item.active { background: var(--tg-accent) !important; color: #fff !important; }
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; flex-shrink: 0; }
-        
-        /* Крестики удаления строго справа в столбик */
-        .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; width: 25px; text-align: right; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #ccc; position: absolute; left: 54px; top: 46px; border: 2px solid #fff; }
+        .status-dot.online { background: var(--online); }
+        .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; transition: 0.2s; cursor: pointer; }
         .user-item:hover .del-btn { opacity: 1; }
-        .del-btn:hover { color: #ff4d4d; }
         
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; }
 
@@ -92,42 +73,27 @@
         #chat-header { display: none; padding: 10px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); align-items: center; min-height: 60px; z-index: 200; gap: 12px; }
         #back-btn { display: none; font-size: 24px; cursor: pointer; background: none; border: none; color: var(--tg-accent); }
 
-        #pinned-bar { display: none; align-items: center; padding: 10px 20px; background: rgba(255,255,255,0.95); border-bottom: 1px solid rgba(0,0,0,0.08); font-size: 14px; cursor: pointer; color: var(--tg-accent); z-index: 150; height: 45px; flex-shrink: 0; }
-        #pinned-content { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid var(--tg-accent); padding-left: 10px; }
-
         #messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; visibility: hidden; }
-        
         .msg { max-width: 75%; padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; }
         .msg.sent { background: var(--tg-sent); align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg.received { background: var(--tg-received); align-self: flex-start; border-bottom-left-radius: 4px; }
-        
         .msg.highlight { animation: highlight-flash 2s ease; }
         @keyframes highlight-flash { 0% { background: #fff59d; } 100% { } }
 
-        .reply-box { background: rgba(0,0,0,0.05); border-left: 3px solid var(--tg-accent); padding: 5px 8px; margin-bottom: 8px; border-radius: 4px; font-size: 13px; color: #666; cursor: pointer; }
-        .msg-meta { position: absolute; right: 12px; bottom: 6px; font-size: 10px; opacity: 0.6; display: flex; align-items: center; gap: 4px; }
-
         /* ВВОД */
-        #form-container { display: none; background: var(--glass); padding: 12px 18px; border-top: 1px solid rgba(0,0,0,0.05); position: relative; }
-        #action-preview { display: none; padding: 10px; border-left: 4px solid var(--tg-accent); background: rgba(0,0,0,0.03); border-radius: 8px; align-items: center; margin-bottom: 8px; }
+        #form-container { display: none; background: var(--glass); padding: 12px 18px; border-top: 1px solid rgba(0,0,0,0.05); }
         #input { flex-grow: 1; min-width: 0; padding: 12px 18px; border-radius: 25px; border: 1px solid #e0e0e0; background: #f5f5f5; outline: none; font-size: 15px; }
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
-        #send-btn { background: var(--tg-accent); color: #fff; }
-
-        #emoji-picker { display: none; position: absolute; bottom: 80px; left: 20px; background: white; border-radius: 15px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 500; width: 220px; flex-wrap: wrap; gap: 10px; justify-content: center; border: 1px solid #eee; }
-        .emoji-item { font-size: 24px; cursor: pointer; }
 
         /* МОДАЛКА */
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-avatar { width: 110px; height: 110px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
-        .modal-label { font-size: 11px; color: #aaa; text-transform: uppercase; font-weight: 700; margin-top: 15px; display: block; }
-        .modal-input { border: 1px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 12px; width: 100%; box-sizing: border-box; margin-top: 5px; outline: none; }
         .gray-block { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-top: 15px; }
-
-        /* Список участников в столбик */
         .member-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .role-tag { font-size: 11px; font-weight: bold; color: var(--tg-accent); }
+        .member-name { cursor: pointer; font-weight: 500; color: var(--tg-accent); }
+        .member-actions { display: flex; gap: 10px; }
+        .action-link { font-size: 11px; cursor: pointer; color: var(--tg-accent); text-decoration: underline; }
 
         #context-menu { display: none; position: fixed; background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 9999; min-width: 170px; border: 1px solid #eee; overflow: hidden; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
@@ -157,9 +123,7 @@
             <span class="sidebar-header">Petmess</span>
             <button class="group-add-btn" onclick="createGroup()">+</button>
         </div>
-        <div id="search-container"><input type="text" id="search-input" placeholder="ID пользователя..." oninput="searchUser(this.value)">
-            <div id="search-results"></div>
-        </div>
+        <div id="search-container"><input type="text" id="search-input" placeholder="ID пользователя..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
         <div id="my-profile" onclick="openProfile(me)">
             <img id="my-avatar" class="avatar" src="">
@@ -178,26 +142,23 @@
             </div>
             <button id="group-invite-btn" style="display:none; padding:5px 12px; background:var(--tg-accent); color:white; border:none; border-radius:10px;" onclick="inviteToGroup(event)">+ Участник</button>
         </div>
-
-        <div id="pinned-bar" onclick="jumpToPinned()">
-            <div id="pinned-content">📌 <span id="pinned-text"></span></div>
-            <div onclick="unpin(event)" style="font-size:20px; padding:0 10px;">×</div>
+        <div id="pinned-bar" style="display:none; align-items:center; padding:10px 20px; background:rgba(255,255,255,0.9); border-bottom:1px solid #eee; font-size:14px; cursor:pointer; color:var(--tg-accent); z-index:150;" onclick="jumpToPinned()">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📌 <span id="pinned-text"></span></div>
+            <div onclick="unpin(event)" style="font-size:20px; margin-left:10px;">×</div>
         </div>
-
         <div id="messages"></div>
-
         <div id="form-container">
-            <div id="emoji-picker"></div>
-            <div id="action-preview">
-                <div id="action-text" style="flex-grow:1; font-size:12px; color:#888;"></div>
+            <div id="emoji-picker" style="display:none; position:absolute; bottom:80px; left:20px; background:white; padding:10px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1); z-index:500; display:flex; flex-wrap:wrap; width:200px; gap:8px;"></div>
+            <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); background:rgba(0,0,0,0.03); margin-bottom:8px; border-radius:8px; align-items:center;">
+                <div id="action-text" style="flex-grow:1; font-size:12px;"></div>
                 <div onclick="cancelAction()" style="cursor:pointer; font-size:20px;">×</div>
             </div>
             <form id="form" onsubmit="sendMessage(event)" style="display:flex; align-items:center; gap:10px;">
                 <label for="chat-file" style="font-size:24px; cursor:pointer; color:#bbb;">📎</label>
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer;">😊</div>
-                <input id="input" autocomplete="off" placeholder="Написать сообщение...">
-                <button type="submit" id="send-btn" class="action-btn">➤</button>
+                <input id="input" autocomplete="off" placeholder="Сообщение..." oninput="handleTyping()">
+                <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white;">➤</button>
             </form>
         </div>
     </div>
@@ -226,7 +187,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let me = '', targetId = '', isGroup = false, selectedMsg = null, editingKey = null, replyData = null, uploadTarget = '';
-    let typingStatus = false, onlineStatus = 'offline';
+    let typingStatus = false, onlineStatus = 'offline', typingTimeout;
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
@@ -236,7 +197,7 @@
         if (!u || !p) return;
         const snap = await db.ref(`users/${u}`).once('value');
         if (snap.val() && snap.val().password !== p) return alert("Неверный пароль");
-        if (!snap.val()) await db.ref(`users/${u}`).set({ password: p, nickname: u });
+        if (!snap.val()) await db.ref(`users/${u}`).set({ password: p, nickname: u, avatar: "" });
         me = u;
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('auth-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'flex';
@@ -246,12 +207,8 @@
         loadContacts();
     }
 
-    function getChatId(a, b) { return a < b ? a+'_'+b : b+'_'+a; }
-    function getChatPath() { return isGroup ? `groups/${targetId}` : `chats/${getChatId(me, targetId)}`; }
-    function getPinnedPath() { return getChatPath() + '/pinned'; }
-
     function selectChat(id, isGrp = false) {
-        if (targetId) { db.ref(getChatPath()+'/messages').off(); db.ref(getPinnedPath()).off(); }
+        if (targetId) { db.ref(getChatPath()+'/messages').off(); db.ref(getPinnedPath()).off(); if(!isGroup) db.ref(`status/${targetId}`).off(); }
         targetId = id; isGroup = isGrp;
         document.body.classList.add('chat-open');
         document.getElementById('chat-placeholder-box').style.display = 'none';
@@ -271,7 +228,12 @@
                 const d = s.val(); if(!d) return; document.getElementById('header-title').innerText = d.nickname || id; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
             });
-            db.ref(`status/${id}`).on('value', s => { document.getElementById('header-subtitle').innerText = s.val() === 'online' ? 'В сети' : 'был(а) в сети недавно'; });
+            // ФИКС ОНЛАЙНА: Слушаем статус пользователя
+            db.ref(`status/${id}`).on('value', s => { 
+                onlineStatus = s.val() || 'offline'; 
+                document.getElementById('header-subtitle').innerText = onlineStatus === 'online' ? 'В сети' : 'был(а) в сети недавно';
+                document.getElementById('header-subtitle').style.color = onlineStatus === 'online' ? 'var(--tg-accent)' : '#888';
+            });
         }
         db.ref(getPinnedPath()).on('value', s => { if(s.exists()){ document.getElementById('pinned-bar').style.display='flex'; document.getElementById('pinned-text').innerText = s.val().text; } else document.getElementById('pinned-bar').style.display='none'; });
         loadMessages();
@@ -302,24 +264,43 @@
                 const isOwner = d.owner === m;
                 const isAdmin = d.admins && d.admins[m];
                 membersHtml += `<div class="member-item">
-                    <span>${m} ${isOwner ? '<span class="role-tag">(Владелец)</span>' : (isAdmin ? '<span class="role-tag">(Админ)</span>' : '')}</span>
-                    ${d.owner === me && m !== me && !isAdmin ? `<span onclick="makeAdmin('${m}')" style="color:var(--tg-accent); font-size:11px; cursor:pointer;">Сделать админом</span>` : ''}
+                    <span class="member-name" onclick="openProfile('${m}')">${m} ${isOwner ? '<span style="color:orange">(Владелец)</span>' : (isAdmin ? '<span style="color:var(--tg-accent)">(Админ)</span>' : '')}</span>
+                    <div class="member-actions">
+                        ${d.owner === me && m !== me ? `
+                            ${!isAdmin ? `<span class="action-link" onclick="groupAction('${m}', 'makeAdmin')">Дать админа</span>` : `<span class="action-link" onclick="groupAction('${m}', 'demoteAdmin')">Убрать админа</span>`}
+                            <span class="action-link" style="color:red" onclick="groupAction('${m}', 'kick')">Удалить</span>
+                        ` : ''}
+                    </div>
                 </div>`;
             }
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
-                <span class="modal-label">Название группы</span><input type="text" class="modal-input" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)">
-                <span class="modal-label">Участники</span><div class="gray-block" style="padding-top:0;">${membersHtml}</div>`;
+                <span class="modal-label">Группа</span><input type="text" class="modal-input" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)">
+                <span class="modal-label">Участники</span><div class="gray-block" style="padding:10px">${membersHtml}</div>`;
         } else {
             const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val(); uploadTarget = 'avatar';
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
                 <span class="modal-label">О себе</span><textarea id="m-desc" class="modal-input" ${!isMe?'disabled':''} onchange="updateProfile()">${d.description||''}</textarea>
                 <div class="gray-block">ID: @${uid}<br><span class="modal-label">Никнейм</span><input type="text" id="m-nick" class="modal-input" value="${d.nickname}" ${!isMe?'disabled':''} onchange="updateProfile()"></div>
-                ${isMe?`<span class="modal-label">Безопасность</span><input type="password" id="old-p" class="modal-input" placeholder="Старый пароль"><input type="password" id="new-p" class="modal-input" placeholder="Новый пароль"><button onclick="changePass()" style="width:100%;margin-top:10px;padding:12px;background:var(--tg-accent);color:white;border:none;border-radius:12px;">Изменить</button>`:''}`;
+                ${!isMe ? `<button onclick="startDirectChat('${uid}')" style="width:100%;margin-top:10px;padding:12px;background:var(--tg-accent);color:white;border:none;border-radius:12px;">Написать сообщение</button>` : ''}
+                ${isMe ? `<span class="modal-label">Безопасность</span><input type="password" id="old-p" class="modal-input" placeholder="Старый пароль"><input type="password" id="new-p" class="modal-input" placeholder="Новый пароль"><button onclick="changePass()" style="width:100%;margin-top:10px;padding:12px;background:var(--tg-accent);color:white;border:none;border-radius:12px;">Сменить пароль</button>` : ''}`;
         }
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
-    // Системные функции
+    async function groupAction(uid, action) {
+        if(action === 'makeAdmin') await db.ref(`groups/${targetId}/admins/${uid}`).set(true);
+        if(action === 'demoteAdmin') await db.ref(`groups/${targetId}/admins/${uid}`).remove();
+        if(action === 'kick') { await db.ref(`groups/${targetId}/members/${uid}`).remove(); await db.ref(`groups/${targetId}/admins/${uid}`).remove(); await db.ref(`contacts/${uid}/${targetId}`).remove(); }
+        openProfile(targetId);
+    }
+
+    function startDirectChat(uid) {
+        closeProfileModal();
+        db.ref(`contacts/${me}/${uid}`).set(true);
+        selectChat(uid);
+    }
+
+    // Системные функции (сохранены из прошлой версии)
     function handleMsgClick(e, k, s, t) { e.stopPropagation(); selectedMsg={key:k, sender:s, text:t}; const menu=document.getElementById('context-menu'); menu.style.display='block'; menu.style.left=e.clientX+'px'; menu.style.top=e.clientY+'px'; document.getElementById('menu-edit').style.display=(s===me)?'block':'none'; }
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snap => {
@@ -327,12 +308,15 @@
             snap.forEach(c => {
                 const id = c.key, isGrp = id.startsWith('grp_'); const item = document.createElement('div'); item.className=`user-item ${id === targetId ? 'active' : ''}`;
                 item.innerHTML = `<img src="https://robohash.org/${id}" class="avatar" id="av-${id}"><div class="status-dot" id="dot-${id}" style="${isGrp?'display:none':''}"></div><div style="flex-grow:1;overflow:hidden"><b>${isGrp ? '👥 ' : ''}${id}</b></div><span class="del-btn" onclick="removeContact(event,'${id}')">×</span>`;
-                if(!isGrp) db.ref('users/'+id+'/avatar').on('value', s => { if(s.val()) document.getElementById('av-'+id).src=s.val(); }); item.onclick=()=>selectChat(id,isGrp); div.appendChild(item);
+                if(!isGrp) {
+                    db.ref('users/'+id+'/avatar').on('value', s => { if(s.val()) document.getElementById('av-'+id).src=s.val(); });
+                    db.ref('status/'+id).on('value', s => { if(document.getElementById('dot-'+id)) document.getElementById('dot-'+id).className = `status-dot ${s.val()==='online'?'online':''}`; });
+                }
+                item.onclick=()=>selectChat(id,isGrp); div.appendChild(item);
             });
         });
     }
-    async function makeAdmin(u) { await db.ref(`groups/${targetId}/admins/${u}`).set(true); openProfile(targetId); }
-    async function changePass() { const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; const s=await db.ref(`users/${me}/password`).once('value'); if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); alert("ОК!"); } else alert("Ошибка!"); }
+    async function changePass() { const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; const s=await db.ref(`users/${me}/password`).once('value'); if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); alert("Пароль изменен!"); } else alert("Ошибка!"); }
     async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
     async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
     function sendMessage(e) { e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim() && !editingKey) return; if(editingKey){ db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); } else { const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text'}; if(replyData) o.replyTo=replyData; db.ref(getChatPath()+'/messages').push(o); if(!isGroup) db.ref(`contacts/${targetId}/${me}`).set(true); } i.value=''; cancelAction(); }
@@ -341,20 +325,25 @@
     function jumpToPinned() { db.ref(getPinnedPath()).once('value', s => { if(s.exists()) jumpToMessage(s.val().key); }); }
     function jumpToMessage(k, e) { if(e) e.stopPropagation(); const el = document.getElementById('msg-'+k); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.classList.add('highlight'); setTimeout(()=>el.classList.remove('highlight'),2000); } }
     function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
-    function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
+    function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-text').innerText="Редактирование"; document.getElementById('action-preview').style.display='flex'; closePopups(); }
     function deleteMsg() { if(confirm("Удалить?")) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
     function cancelAction() { replyData=null; editingKey=null; document.getElementById('action-preview').style.display='none'; document.getElementById('input').value=''; }
     function closePopups() { document.getElementById('context-menu').style.display='none'; document.getElementById('emoji-picker').style.display='none'; }
     function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; }
     function toggleEmoji(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; }
     function goBack(e) { e.stopPropagation(); document.body.classList.remove('chat-open'); }
-    async function createGroup() { const n = prompt("Имя:"); if(n){ const id='grp_'+Date.now(); await db.ref(`groups/${id}`).set({name:n, owner:me, members:{[me]:true}}); await db.ref(`contacts/${me}/${id}`).set(true); selectChat(id,true); } }
-    async function inviteToGroup() { const i = prompt("ID:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
+    async function createGroup() { const n = prompt("Имя группы:"); if(n){ const id='grp_'+Date.now(); await db.ref(`groups/${id}`).set({name:n, owner:me, members:{[me]:true}}); await db.ref(`contacts/${me}/${id}`).set(true); selectChat(id,true); } }
+    async function inviteToGroup() { const i = prompt("ID пользователя:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("Добавлен!"); } } }
+    function handleTyping() { if(isGroup) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
     function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}');"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
-    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now()}); }; }
-    
+    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else if(uploadTarget==='group_avatar') db.ref(`groups/${targetId}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now()}); }; }
+    function getChatId(a, b) { return a < b ? a+'_'+b : b+'_'+a; }
+    function getChatPath() { return isGroup ? `groups/${targetId}` : `chats/${getChatId(me, targetId)}`; }
+    function getPinnedPath() { return getChatPath() + '/pinned'; }
+
     const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
-    emojis.forEach(e => { const d = document.createElement('div'); d.className="emoji-item"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; document.getElementById('emoji-picker').appendChild(d); });
+    const ep = document.getElementById('emoji-picker');
+    emojis.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
 </script>
 <input type="file" id="modal-upload" style="display:none" accept="image/*" onchange="processFile(this)">
 </body>
