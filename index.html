@@ -27,7 +27,36 @@
         }
 
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { display: flex; background: #fff; }
+        
+        /* ГЛАВНЫЙ ФИКС ЭКРАНА */
+        #app-screen { 
+            display: none; 
+            width: 100vw; 
+            height: 100vh; 
+            flex-direction: row; 
+            position: fixed; 
+            top: 0; left: 0;
+        }
+
+        #sidebar { 
+            width: 350px; 
+            background: #fff; 
+            border-right: 1px solid #eee; 
+            display: flex; 
+            flex-direction: column; 
+            flex-shrink: 0; 
+            z-index: 100;
+        }
+
+        #chat-area { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            min-width: 0; 
+            height: 100%; 
+            background: var(--tg-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') fixed center; 
+            position: relative; 
+        }
 
         /* ВХОД */
         #auth-screen { position: fixed; inset: 0; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9000; }
@@ -36,11 +65,8 @@
         .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #eee; border-radius: 12px; outline: none; background: #f9f9f9; box-sizing: border-box; }
         .auth-card button { width: 100%; padding: 14px; background: var(--tg-accent); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* САЙДБАР */
-        #sidebar { width: 350px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; position: relative; }
         .sidebar-top { padding: 20px 25px 15px; display: flex; justify-content: space-between; align-items: center; }
         .sidebar-header { color: var(--tg-accent); font-size: 26px; font-weight: 900; }
-        
         .group-add-btn { background: rgba(51, 144, 236, 0.1); color: var(--tg-accent); border: none; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; font-weight: bold; }
 
         #search-container { padding: 10px 20px 15px; position: relative; }
@@ -49,24 +75,16 @@
         .search-item { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f5f5f5; color: #333; }
 
         #contacts { flex-grow: 1; overflow-y: auto; }
-        .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; position: relative; border-bottom: 1px solid rgba(0,0,0,0.02); }
+        .user-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(0,0,0,0.02); transition: 0.2s; }
         .user-item.active { background: var(--tg-accent) !important; color: #fff !important; }
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; flex-shrink: 0; }
-        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #ccc; position: absolute; left: 54px; top: 46px; border: 2px solid #fff; }
-        .status-dot.online { background: var(--online); }
         
-        /* Крестики в столбик справа */
-        .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; }
+        /* Крестики удаления строго справа в столбик */
+        .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; width: 25px; text-align: right; }
         .user-item:hover .del-btn { opacity: 1; }
         .del-btn:hover { color: #ff4d4d; }
         
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-
-        /* ЧАТ AREA */
-        #chat-area { 
-            flex-grow: 1; display: flex; flex-direction: column; min-width: 0; height: 100%; 
-            background: var(--tg-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') fixed center; position: relative; 
-        }
 
         #chat-placeholder-box { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; }
         #chat-placeholder-box span { background: rgba(0,0,0,0.2); color: #fff; padding: 12px 28px; border-radius: 50px; font-size: 15px; }
@@ -107,16 +125,15 @@
         .modal-input { border: 1px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 12px; width: 100%; box-sizing: border-box; margin-top: 5px; outline: none; }
         .gray-block { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-top: 15px; }
 
-        /* Роли в группе */
+        /* Список участников в столбик */
         .member-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
         .role-tag { font-size: 11px; font-weight: bold; color: var(--tg-accent); }
 
         #context-menu { display: none; position: fixed; background: #fff; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 9999; min-width: 170px; border: 1px solid #eee; overflow: hidden; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
-        .menu-item:hover { background: #f8f9fa; }
 
         @media (max-width: 768px) {
-            #sidebar { width: 100%; position: absolute; inset: 0; }
+            #sidebar { width: 100%; position: absolute; inset: 0; transition: 0.3s; }
             #chat-area { width: 100%; position: absolute; inset: 0; transform: translateX(100%); transition: 0.3s; z-index: 150; }
             body.chat-open #chat-area { transform: translateX(0); }
             #back-btn { display: block !important; }
@@ -140,7 +157,7 @@
             <span class="sidebar-header">Petmess</span>
             <button class="group-add-btn" onclick="createGroup()">+</button>
         </div>
-        <div id="search-container"><input type="text" id="search-input" placeholder="Поиск людей..." oninput="searchUser(this.value)">
+        <div id="search-container"><input type="text" id="search-input" placeholder="ID пользователя..." oninput="searchUser(this.value)">
             <div id="search-results"></div>
         </div>
         <div id="contacts"></div>
@@ -179,7 +196,7 @@
                 <label for="chat-file" style="font-size:24px; cursor:pointer; color:#bbb;">📎</label>
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer;">😊</div>
-                <input id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()">
+                <input id="input" autocomplete="off" placeholder="Написать сообщение...">
                 <button type="submit" id="send-btn" class="action-btn">➤</button>
             </form>
         </div>
@@ -209,7 +226,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let me = '', targetId = '', isGroup = false, selectedMsg = null, editingKey = null, replyData = null, uploadTarget = '';
-    let typingStatus = false, onlineStatus = 'offline', typingTimeout;
+    let typingStatus = false, onlineStatus = 'offline';
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
@@ -254,8 +271,7 @@
                 const d = s.val(); if(!d) return; document.getElementById('header-title').innerText = d.nickname || id; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
             });
-            db.ref(`status/${id}`).on('value', s => { onlineStatus = s.val() || 'offline'; updateHeader(); });
-            db.ref(`typing/${getChatId(me, id)}/${id}`).on('value', s => { typingStatus = s.val(); updateHeader(); });
+            db.ref(`status/${id}`).on('value', s => { document.getElementById('header-subtitle').innerText = s.val() === 'online' ? 'В сети' : 'был(а) в сети недавно'; });
         }
         db.ref(getPinnedPath()).on('value', s => { if(s.exists()){ document.getElementById('pinned-bar').style.display='flex'; document.getElementById('pinned-text').innerText = s.val().text; } else document.getElementById('pinned-bar').style.display='none'; });
         loadMessages();
@@ -291,7 +307,7 @@
                 </div>`;
             }
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
-                <span class="modal-label">Группа</span><input type="text" class="modal-input" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)">
+                <span class="modal-label">Название группы</span><input type="text" class="modal-input" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)">
                 <span class="modal-label">Участники</span><div class="gray-block" style="padding-top:0;">${membersHtml}</div>`;
         } else {
             const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val(); uploadTarget = 'avatar';
@@ -303,7 +319,7 @@
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
-    // Вспомогательные
+    // Системные функции
     function handleMsgClick(e, k, s, t) { e.stopPropagation(); selectedMsg={key:k, sender:s, text:t}; const menu=document.getElementById('context-menu'); menu.style.display='block'; menu.style.left=e.clientX+'px'; menu.style.top=e.clientY+'px'; document.getElementById('menu-edit').style.display=(s===me)?'block':'none'; }
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snap => {
@@ -318,7 +334,7 @@
     async function makeAdmin(u) { await db.ref(`groups/${targetId}/admins/${u}`).set(true); openProfile(targetId); }
     async function changePass() { const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; const s=await db.ref(`users/${me}/password`).once('value'); if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); alert("ОК!"); } else alert("Ошибка!"); }
     async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
-    async function removeContact(e, n) { e.stopPropagation(); if(confirm("Удалить?")) await db.ref(`contacts/${me}/${n}`).remove(); }
+    async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
     function sendMessage(e) { e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim() && !editingKey) return; if(editingKey){ db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); } else { const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text'}; if(replyData) o.replyTo=replyData; db.ref(getChatPath()+'/messages').push(o); if(!isGroup) db.ref(`contacts/${targetId}/${me}`).set(true); } i.value=''; cancelAction(); }
     function pinMsg() { db.ref(getPinnedPath()).set({key:selectedMsg.key, text:selectedMsg.text}); closePopups(); }
     function unpin(e) { e.stopPropagation(); db.ref(getPinnedPath()).remove(); }
@@ -333,11 +349,9 @@
     function toggleEmoji(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; }
     function goBack(e) { e.stopPropagation(); document.body.classList.remove('chat-open'); }
     async function createGroup() { const n = prompt("Имя:"); if(n){ const id='grp_'+Date.now(); await db.ref(`groups/${id}`).set({name:n, owner:me, members:{[me]:true}}); await db.ref(`contacts/${me}/${id}`).set(true); selectChat(id,true); } }
-    async function inviteToGroup() { const i = prompt("ID:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("Добавлен!"); } } }
-    function handleTyping() { if(isGroup) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
+    async function inviteToGroup() { const i = prompt("ID:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
     function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}');"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
     async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now()}); }; }
-    function updateHeader() { const s = document.getElementById('header-subtitle'); if (isGroup) return; if (typingStatus) { s.innerText = "печатает..."; s.style.color = "#3390ec"; } else if (onlineStatus === 'online') { s.innerText = "В сети"; s.style.color = "#3390ec"; } else { s.innerText = "был(а) в сети недавно"; s.style.color = "#888"; } }
     
     const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
     emojis.forEach(e => { const d = document.createElement('div'); d.className="emoji-item"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; document.getElementById('emoji-picker').appendChild(d); });
