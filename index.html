@@ -78,7 +78,6 @@
         .msg-row.received { align-self: flex-start; }
         .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; }
         
-        /* ДОБАВЛЕН white-space: pre-wrap ДЛЯ ПЕРЕНОСОВ СТРОК */
         .msg { padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; white-space: pre-wrap; }
         
         .sent .msg { background: var(--tg-sent); border-bottom-right-radius: 4px; }
@@ -94,7 +93,6 @@
 
         #form-container { display: none; padding: 15px; border-top: 1px solid rgba(0,0,0,0.05); background: var(--glass); position: relative; }
         
-        /* ИЗМЕНЕНО ПОЛЕ ВВОДА (ТЕПЕРЬ ЭТО TEXTAREA) */
         #input { 
             flex-grow: 1; min-width: 0; padding: 12px 20px; border-radius: 25px; 
             border: 1px solid #e0e0e0; background: var(--input-bg); outline: none; 
@@ -166,9 +164,7 @@
                 <label for="chat-file" style="font-size:24px; cursor:pointer; color:#bbb; padding-bottom:8px;">📎</label>
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
-                
                 <textarea id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()" onkeydown="handleEnter(event)"></textarea>
-                
                 <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">➤</button>
             </form>
         </div>
@@ -255,6 +251,7 @@
         loadMessages();
     }
 
+    // ИСПРАВЛЕНА ПРОБЛЕМА С ПУСТЫМИ СТРОКАМИ ЗДЕСЬ
     function loadMessages() {
         db.ref(getChatPath()+'/messages').on('value', snap => {
             let html = ''; snap.forEach(c => {
@@ -264,11 +261,11 @@
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
                 let content = m.type === 'image' ? `<img src="${data}" style="max-width:100%; border-radius:10px">` : `<div>${data}</div>`;
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
+                
+                // Строка ниже "сплющена", чтобы убрать случайные пробелы из pre-wrap
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
-                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}', '${(data||'').substring(0,30)}')">
-                        ${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}
-                        ${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}</div></div>
+                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}', '${(data||'').substring(0,30)}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}</div></div>
                 </div>`;
             });
             const div = document.getElementById('messages'); div.innerHTML = html; div.scrollTop = div.scrollHeight;
@@ -353,7 +350,6 @@
     function getPinnedPath() { return getChatPath() + '/pinned'; }
     function getChatId(a, b) { return a < b ? a+'_'+b : b+'_'+a; }
     
-    // ЛОГИКА ОТПРАВКИ И ПЕРЕНОСОВ
     function handleEnter(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -364,7 +360,7 @@
     function handleTyping() { 
         const i = document.getElementById('input');
         i.style.height = '20px';
-        i.style.height = Math.min(i.scrollHeight - 24, 120) + 'px'; // Авторасширение поля
+        i.style.height = Math.min(i.scrollHeight - 24, 120) + 'px'; 
         
         if(isGroup) return; 
         db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); 
@@ -388,7 +384,7 @@
             if(!isGroup) db.ref(`contacts/${targetId}/${me}`).set(true); 
         } 
         i.value=''; 
-        i.style.height='20px'; // Возвращаем высоту обратно
+        i.style.height='20px'; 
         cancelAction(); 
     }
     
