@@ -204,11 +204,18 @@
         return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
     };
 
+    // ФУНКЦИЯ ДЛЯ ВЫДАЧИ/ИЗЪЯТИЯ ГАЛОЧКИ
+    async function toggleVerify(uid, state) {
+        if (me === 'sanya' || me === 'misha') {
+            await db.ref(`users/${uid}/verified`).set(state);
+            openProfile(uid); // Обновляем окошко профиля сразу
+        }
+    }
+
     async function login() {
         const u = document.getElementById('auth-user').value.trim().toLowerCase(), p = document.getElementById('auth-pass').value.trim();
         if (!u || !p) return;
         
-        // Скрываем экран логина, чтобы избежать моргания при авто-входе
         document.getElementById('auth-screen').style.display = 'none';
         
         const snap = await db.ref(`users/${u}`).once('value');
@@ -222,7 +229,6 @@
         if (!snap.val()) await db.ref(`users/${u}`).set({ password: p, nickname: u, avatar: "" });
         me = u;
         
-        // Сохраняем данные для входа на 30 дней
         const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
         localStorage.setItem('petmess_user', u);
         localStorage.setItem('petmess_pass', p);
@@ -231,7 +237,11 @@
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('app-screen').style.display = 'flex';
         db.ref(`users/${me}`).on('value', s => { 
-            const d = s.val(); if(d){ document.getElementById('my-name-display').innerText = d.nickname || me; document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; }
+            const d = s.val(); if(d){ 
+                const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;" title="Подтверждённый аккаунт">✔</span>' : '';
+                document.getElementById('my-name-display').innerHTML = (d.nickname || me) + tick; 
+                document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; 
+            }
         });
         loadContacts();
     }
@@ -254,7 +264,9 @@
             });
         } else {
             db.ref(`users/${id}`).on('value', s => { 
-                const d = s.val(); if(!d) return; document.getElementById('header-title').innerText = d.nickname || id; 
+                const d = s.val(); if(!d) return; 
+                const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;" title="Подтверждённый аккаунт">✔</span>' : '';
+                document.getElementById('header-title').innerHTML = (d.nickname || id) + tick; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
             });
             db.ref(`status/${id}`).on('value', s => { 
@@ -277,6 +289,7 @@
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
                 let content = m.type === 'image' ? `<img src="${data}" style="max-width:100%; border-radius:10px">` : `<div>${data}</div>`;
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
+                
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
                     <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}', '${(data||'').substring(0,30)}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}</div></div>
@@ -306,7 +319,11 @@
                     db.ref('users/'+id).on('value', s => { 
                         const d = s.val(); if(d) {
                             if(d.avatar) { document.getElementById('av-'+id).src=d.avatar; avatarCache[id] = d.avatar; }
-                            const label = document.getElementById(nameId); if(d.nickname && label) label.innerText = d.nickname;
+                            const label = document.getElementById(nameId); 
+                            if(label) {
+                                const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;" title="Подтверждённый аккаунт">✔</span>' : '';
+                                label.innerHTML = (d.nickname || id) + tick;
+                            }
                         }
                     });
                     db.ref('status/'+id).on('value', s => { if(document.getElementById('dot-'+id)) document.getElementById('dot-'+id).className = `status-dot ${s.val()==='online'?'online':''}`; });
@@ -333,12 +350,14 @@
                 <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">УЧАСТНИКИ</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:5px 15px;">${membersHtml}</div>`;
         } else {
             const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val(); uploadTarget = 'avatar';
+            const isVer = (uid === 'sanya' || uid === 'misha' || d.verified);
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px; box-shadow: 0 10px 25px rgba(51,144,236,0.2);" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
                 <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">О СЕБЕ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; margin-top:5px; padding:15px;">
                 <textarea id="m-desc" class="modal-input" style="border:none; background:transparent; padding:0; height:auto; min-height:40px;" ${!isMe?'disabled':''} onchange="updateProfile()">${d.description||''}</textarea></div>
-                <div class="gray-block" style="background:#f8f9fa; border:none; margin-top:15px; padding:20px; border-radius:25px;"><span style="font-size:10px; color:#aaa; font-weight:bold;">ID</span><div style="font-weight:bold; color:var(--tg-accent); margin-bottom:15px; font-size:17px;">@${uid}</div>
+                <div class="gray-block" style="background:#f8f9fa; border:none; margin-top:15px; padding:20px; border-radius:25px;"><span style="font-size:10px; color:#aaa; font-weight:bold;">ID</span><div style="font-weight:bold; color:var(--tg-accent); margin-bottom:15px; font-size:17px;">@${uid} ${isVer ? '<span style="color:var(--tg-accent);" title="Подтверждённый аккаунт">✔</span>' : ''}</div>
                 <span style="font-size:10px; color:#aaa; font-weight:bold;">НИКНЕЙМ</span><input type="text" id="m-nick" class="modal-input" style="border:1.5px solid #eee; background:#fff;" value="${d.nickname}" ${!isMe?'disabled':''} onchange="updateProfile()"></div>
                 ${!isMe ? `<button onclick="startDirectChat('${uid}')" style="width:100%;margin-top:15px;padding:16px;background:var(--tg-accent);color:white;border:none;border-radius:18px;font-weight:bold;cursor:pointer;">Написать сообщение</button>` : ''}
+                ${(me === 'sanya' || me === 'misha') && uid !== me ? `<button onclick="toggleVerify('${uid}', ${!d.verified})" style="width:100%;margin-top:10px;padding:12px;background:#fff;color:var(--tg-accent);border:1.5px solid var(--tg-accent);border-radius:15px;font-weight:bold;cursor:pointer;">${d.verified ? 'Забрать галочку' : 'Выдать галочку'}</button>` : ''}
                 ${isMe ? `<span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">БЕЗОПАСНОСТЬ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; padding:10px;"><input type="password" id="old-p" class="modal-input" style="background:#eef5ff; border:none;" placeholder="Старый"><input type="password" id="new-p" class="modal-input" style="border:1.5px solid #eee; margin-top:10px;" placeholder="Новый"></div><button onclick="changePass()" style="width:100%;margin-top:15px;padding:14px;background:var(--tg-accent);color:white;border:none;border-radius:15px;font-weight:bold;cursor:pointer;">Сохранить пароль</button>` : ''}`;
         }
         document.getElementById('modal-overlay').style.display = 'flex';
@@ -353,7 +372,7 @@
         const s=await db.ref(`users/${me}/password`).once('value'); 
         if(s.val()===o && n){ 
             await db.ref(`users/${me}/password`).set(n); 
-            localStorage.setItem('petmess_pass', n); // Обновляем пароль в авто-входе
+            localStorage.setItem('petmess_pass', n);
             alert("ОК!"); 
         } else alert("Ошибка!"); 
     }
@@ -421,7 +440,6 @@
     const ep = document.getElementById('emoji-picker');
     emojis.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
 
-    // --- ФУНКЦИЯ АВТОВХОДА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
     window.onload = () => {
         const savedU = localStorage.getItem('petmess_user');
         const savedP = localStorage.getItem('petmess_pass');
@@ -430,9 +448,8 @@
         if (savedU && savedP && expiry && Date.now() < parseInt(expiry)) {
             document.getElementById('auth-user').value = savedU;
             document.getElementById('auth-pass').value = savedP;
-            login(); // Запускаем вход автоматически
+            login();
         } else {
-            // Если данные устарели (прошло 30 дней), чистим память
             localStorage.removeItem('petmess_user');
             localStorage.removeItem('petmess_pass');
             localStorage.removeItem('petmess_expiry');
