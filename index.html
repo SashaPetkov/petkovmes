@@ -207,12 +207,29 @@
     async function login() {
         const u = document.getElementById('auth-user').value.trim().toLowerCase(), p = document.getElementById('auth-pass').value.trim();
         if (!u || !p) return;
+        
+        // Скрываем экран логина, чтобы избежать моргания при авто-входе
+        document.getElementById('auth-screen').style.display = 'none';
+        
         const snap = await db.ref(`users/${u}`).once('value');
-        if (snap.val() && snap.val().password !== p) return alert("Неверный пароль");
+        if (snap.val() && snap.val().password !== p) {
+            document.getElementById('auth-screen').style.display = 'flex';
+            localStorage.removeItem('petmess_user');
+            localStorage.removeItem('petmess_pass');
+            localStorage.removeItem('petmess_expiry');
+            return alert("Неверный пароль");
+        }
         if (!snap.val()) await db.ref(`users/${u}`).set({ password: p, nickname: u, avatar: "" });
         me = u;
+        
+        // Сохраняем данные для входа на 30 дней
+        const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+        localStorage.setItem('petmess_user', u);
+        localStorage.setItem('petmess_pass', p);
+        localStorage.setItem('petmess_expiry', expiry);
+        
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
-        document.getElementById('auth-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'flex';
+        document.getElementById('app-screen').style.display = 'flex';
         db.ref(`users/${me}`).on('value', s => { 
             const d = s.val(); if(d){ document.getElementById('my-name-display').innerText = d.nickname || me; document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; }
         });
@@ -308,8 +325,6 @@
             let membersHtml = ''; 
             for(let m in d.members) {
                 const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m];
-                
-                // ДОБАВЛЕНА КНОПКА "ВЫГНАТЬ" СЮДА
                 membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${m} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
             }
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px;" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
@@ -332,7 +347,17 @@
     function handleMsgClick(e, k, s, t) { e.stopPropagation(); selectedMsg={key:k, sender:s, text:t}; const menu=document.getElementById('context-menu'); menu.style.display='block'; menu.style.left=e.clientX+'px'; menu.style.top=e.clientY+'px'; document.getElementById('menu-edit').style.display=(s===me)?'block':'none'; document.getElementById('menu-del').style.display=(s===me)?'block':'none'; }
     async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
     function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
-    async function changePass() { const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; const s=await db.ref(`users/${me}/password`).once('value'); if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); alert("ОК!"); } else alert("Ошибка!"); }
+    
+    async function changePass() { 
+        const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; 
+        const s=await db.ref(`users/${me}/password`).once('value'); 
+        if(s.val()===o && n){ 
+            await db.ref(`users/${me}/password`).set(n); 
+            localStorage.setItem('petmess_pass', n); // Обновляем пароль в авто-входе
+            alert("ОК!"); 
+        } else alert("Ошибка!"); 
+    }
+    
     async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
     function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
     function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
@@ -395,6 +420,24 @@
     const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
     const ep = document.getElementById('emoji-picker');
     emojis.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
+
+    // --- ФУНКЦИЯ АВТОВХОДА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
+    window.onload = () => {
+        const savedU = localStorage.getItem('petmess_user');
+        const savedP = localStorage.getItem('petmess_pass');
+        const expiry = localStorage.getItem('petmess_expiry');
+        
+        if (savedU && savedP && expiry && Date.now() < parseInt(expiry)) {
+            document.getElementById('auth-user').value = savedU;
+            document.getElementById('auth-pass').value = savedP;
+            login(); // Запускаем вход автоматически
+        } else {
+            // Если данные устарели (прошло 30 дней), чистим память
+            localStorage.removeItem('petmess_user');
+            localStorage.removeItem('petmess_pass');
+            localStorage.removeItem('petmess_expiry');
+        }
+    };
 </script>
 <input type="file" id="modal-upload" style="display:none" accept="image/*" onchange="processFile(this)">
 </body>
