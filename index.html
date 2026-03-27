@@ -251,7 +251,6 @@
         loadMessages();
     }
 
-    // ИСПРАВЛЕНА ПРОБЛЕМА С ПУСТЫМИ СТРОКАМИ ЗДЕСЬ
     function loadMessages() {
         db.ref(getChatPath()+'/messages').on('value', snap => {
             let html = ''; snap.forEach(c => {
@@ -261,8 +260,6 @@
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
                 let content = m.type === 'image' ? `<img src="${data}" style="max-width:100%; border-radius:10px">` : `<div>${data}</div>`;
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
-                
-                // Строка ниже "сплющена", чтобы убрать случайные пробелы из pre-wrap
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
                     <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}', '${(data||'').substring(0,30)}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}</div></div>
@@ -303,6 +300,7 @@
     }
 
     function jumpToMessage(k, e) { if(e) e.stopPropagation(); const el = document.getElementById('msg-'+k); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); const msgEl = el.querySelector('.msg'); msgEl.classList.add('highlight'); setTimeout(()=>msgEl.classList.remove('highlight'), 2000); } }
+    
     async function openProfile(uid) {
         if (!uid) return; const isGrp = uid.startsWith('grp_'); const modal = document.getElementById('modal-content');
         if(isGrp) {
@@ -310,8 +308,9 @@
             let membersHtml = ''; 
             for(let m in d.members) {
                 const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m];
-                membersHtml += `<div class="member-item"><span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${m} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span>
-                ${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer;">${isAdmin?'Разж.':'Админ'}</span>` : ''}</div>`;
+                
+                // ДОБАВЛЕНА КНОПКА "ВЫГНАТЬ" СЮДА
+                membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${m} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
             }
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px;" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
                 <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:10px;">НАЗВАНИЕ ГРУППЫ</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:10px;">
