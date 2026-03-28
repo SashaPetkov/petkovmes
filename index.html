@@ -101,6 +101,14 @@
         }
         
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+        
+        /* СТИЛЬ ДЛЯ НОВОЙ ИКОНКИ ОТПРАВКИ */
+        #send-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            filter: brightness(0) invert(1); /* Превращает синий в белый */
+        }
 
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
@@ -165,7 +173,11 @@
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
                 <textarea id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()" onkeydown="handleEnter(event)"></textarea>
-                <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">➤</button>
+                
+                <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">
+                    <img id="send-icon" src="image_37.png" alt="➤">
+                </button>
+                
             </form>
         </div>
     </div>
@@ -195,7 +207,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    // ДОБАВИЛ msgCache ДЛЯ БЕЗОПАСНОГО ХРАНЕНИЯ ТЕКСТА
     let me = '', targetId = '', isGroup = false, selectedMsg = null, editingKey = null, replyData = null, avatarCache = {}, msgCache = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout;
 
@@ -289,14 +300,12 @@
                 const msgClass = m.sender === me ? 'sent' : 'received';
                 const data = m.type === 'text' ? decompress(m.text) : m.file;
                 
-                // СОХРАНЯЕМ ТЕКСТ В ПАМЯТЬ БЕЗОПАСНО
                 msgCache[key] = m.type === 'text' ? data : 'Фотография';
                 
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
                 let content = m.type === 'image' ? `<img src="${data}" style="max-width:100%; border-radius:10px">` : `<div>${data}</div>`;
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
                 
-                // ТЕКСТ БОЛЬШЕ НЕ ВСТРАИВАЕТСЯ В КНОПКУ
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
                     <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}</div></div>
@@ -370,10 +379,9 @@
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
-    // УМНОЕ ОТКРЫТИЕ МЕНЮ (чтобы не улетало за экран)
     function handleMsgClick(e, k, s) { 
         e.stopPropagation(); 
-        selectedMsg = {key:k, sender:s, text:msgCache[k]}; // Берем текст из памяти
+        selectedMsg = {key:k, sender:s, text:msgCache[k]}; 
         
         const menu = document.getElementById('context-menu'); 
         menu.style.display = 'block'; 
@@ -381,9 +389,8 @@
         let x = e.clientX;
         let y = e.clientY;
         const mw = menu.offsetWidth || 170;
-        const mh = menu.offsetHeight || 220; // Примерная высота меню
+        const mh = menu.offsetHeight || 220;
         
-        // Сдвигаем, если клик был слишком близко к правому или нижнему краю
         if (x + mw > window.innerWidth) x = window.innerWidth - mw - 10;
         if (y + mh > window.innerHeight) y = window.innerHeight - mh - 10;
         
@@ -394,7 +401,6 @@
         document.getElementById('menu-del').style.display = (s===me) ? 'block' : 'none'; 
     }
     
-    // ФУНКЦИЯ КОПИРОВАНИЯ
     function copyMsg() {
         if (selectedMsg && selectedMsg.text) {
             navigator.clipboard.writeText(selectedMsg.text).catch(err => console.log('Ошибка:', err));
