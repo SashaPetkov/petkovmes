@@ -175,6 +175,7 @@
 
 <div id="context-menu">
     <div class="menu-item" onclick="prepareReply()">↩ Ответить</div>
+    <div class="menu-item" onclick="copyMsg()">📋 Копировать</div>
     <div class="menu-item" onclick="pinMsg()">📌 Закрепить</div>
     <div class="menu-item" id="menu-edit" onclick="prepareEdit()">✎ Изменить</div>
     <div class="menu-item" id="menu-del" style="color:red;" onclick="deleteMsg()">🗑 Удалить</div>
@@ -193,7 +194,9 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let me = '', targetId = '', isGroup = false, selectedMsg = null, editingKey = null, replyData = null, avatarCache = {};
+    
+    // ДОБАВИЛ msgCache ДЛЯ БЕЗОПАСНОГО ХРАНЕНИЯ ТЕКСТА
+    let me = '', targetId = '', isGroup = false, selectedMsg = null, editingKey = null, replyData = null, avatarCache = {}, msgCache = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout;
 
     const compress = (v) => LZString.compressToUTF16(v);
@@ -204,11 +207,10 @@
         return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
     };
 
-    // ФУНКЦИЯ ДЛЯ ВЫДАЧИ/ИЗЪЯТИЯ ГАЛОЧКИ
     async function toggleVerify(uid, state) {
         if (me === 'sanya' || me === 'misha') {
             await db.ref(`users/${uid}/verified`).set(state);
-            openProfile(uid); // Обновляем окошко профиля сразу
+            openProfile(uid); 
         }
     }
 
@@ -286,13 +288,18 @@
                 const m = c.val(), key = c.key;
                 const msgClass = m.sender === me ? 'sent' : 'received';
                 const data = m.type === 'text' ? decompress(m.text) : m.file;
+                
+                // СОХРАНЯЕМ ТЕКСТ В ПАМЯТЬ БЕЗОПАСНО
+                msgCache[key] = m.type === 'text' ? data : 'Фотография';
+                
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
                 let content = m.type === 'image' ? `<img src="${data}" style="max-width:100%; border-radius:10px">` : `<div>${data}</div>`;
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
                 
+                // ТЕКСТ БОЛЬШЕ НЕ ВСТРАИВАЕТСЯ В КНОПКУ
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
-                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}', '${(data||'').substring(0,30)}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}</div></div>
+                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}</div></div>
                 </div>`;
             });
             const div = document.getElementById('messages'); div.innerHTML = html; div.scrollTop = div.scrollHeight;
@@ -363,7 +370,38 @@
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
-    function handleMsgClick(e, k, s, t) { e.stopPropagation(); selectedMsg={key:k, sender:s, text:t}; const menu=document.getElementById('context-menu'); menu.style.display='block'; menu.style.left=e.clientX+'px'; menu.style.top=e.clientY+'px'; document.getElementById('menu-edit').style.display=(s===me)?'block':'none'; document.getElementById('menu-del').style.display=(s===me)?'block':'none'; }
+    // УМНОЕ ОТКРЫТИЕ МЕНЮ (чтобы не улетало за экран)
+    function handleMsgClick(e, k, s) { 
+        e.stopPropagation(); 
+        selectedMsg = {key:k, sender:s, text:msgCache[k]}; // Берем текст из памяти
+        
+        const menu = document.getElementById('context-menu'); 
+        menu.style.display = 'block'; 
+        
+        let x = e.clientX;
+        let y = e.clientY;
+        const mw = menu.offsetWidth || 170;
+        const mh = menu.offsetHeight || 220; // Примерная высота меню
+        
+        // Сдвигаем, если клик был слишком близко к правому или нижнему краю
+        if (x + mw > window.innerWidth) x = window.innerWidth - mw - 10;
+        if (y + mh > window.innerHeight) y = window.innerHeight - mh - 10;
+        
+        menu.style.left = x + 'px'; 
+        menu.style.top = y + 'px'; 
+        
+        document.getElementById('menu-edit').style.display = (s===me) ? 'block' : 'none'; 
+        document.getElementById('menu-del').style.display = (s===me) ? 'block' : 'none'; 
+    }
+    
+    // ФУНКЦИЯ КОПИРОВАНИЯ
+    function copyMsg() {
+        if (selectedMsg && selectedMsg.text) {
+            navigator.clipboard.writeText(selectedMsg.text).catch(err => console.log('Ошибка:', err));
+        }
+        closePopups();
+    }
+
     async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
     function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
     
