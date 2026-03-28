@@ -101,14 +101,6 @@
         }
         
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
-        
-        /* СТИЛЬ ДЛЯ НОВОЙ ИКОНКИ ОТПРАВКИ */
-        #send-icon {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            filter: brightness(0) invert(1); /* Превращает синий в белый */
-        }
 
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
@@ -173,11 +165,7 @@
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
                 <textarea id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()" onkeydown="handleEnter(event)"></textarea>
-                
-                <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">
-                    <img id="send-icon" src="image_37.png" alt="➤">
-                </button>
-                
+                <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">➤</button>
             </form>
         </div>
     </div>
