@@ -412,7 +412,7 @@
     async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
     function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
     function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
-    function deleteMsg() { if(confirm("Удалить?")) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
+    function deleteMsg() { db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
     function pinMsg() { db.ref(getPinnedPath()).set({key:selectedMsg.key, text:selectedMsg.text}); closePopups(); }
     function unpin(e) { e.stopPropagation(); db.ref(getPinnedPath()).remove(); }
     function jumpToPinned() { db.ref(getPinnedPath()).once('value', s => { if(s.exists()) jumpToMessage(s.val().key); }); }
