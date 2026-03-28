@@ -173,7 +173,7 @@
 
 <div id="modal-overlay" onclick="closeProfileModal()"><div class="profile-card" onclick="event.stopPropagation()" id="modal-content"></div></div>
 
-<div id="context-menu">
+<div id="context-menu" onclick="event.stopPropagation()">
     <div class="menu-item" onclick="prepareReply()">↩ Ответить</div>
     <div class="menu-item" onclick="copyMsg()">📋 Копировать</div>
     <div class="menu-item" onclick="pinMsg()">📌 Закрепить</div>
