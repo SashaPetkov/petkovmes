@@ -89,7 +89,7 @@
         .reply-box { background: rgba(0,0,0,0.04); border-left: 3px solid var(--tg-accent); padding: 5px 8px; margin-bottom: 5px; border-radius: 5px; font-size: 13px; cursor: pointer; }
         .reply-box b { color: var(--tg-accent); display: block; font-size: 11px; }
 
-        .msg-meta { position: absolute; right: 10px; bottom: 5px; font-size: 10px; opacity: 0.5; }
+        .msg-meta { position: absolute; right: 10px; bottom: 5px; font-size: 10px; opacity: 0.6; display: flex; align-items: center; gap: 4px; }
 
         #form-container { display: none; padding: 15px; border-top: 1px solid rgba(0,0,0,0.05); background: var(--glass); position: relative; }
         
@@ -167,7 +167,6 @@
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
                 <textarea id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()" onkeydown="handleEnter(event)"></textarea>
-                
                 <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">➤</button>
             </form>
         </div>
@@ -179,7 +178,6 @@
 <div id="settings-modal" onclick="closeSettings()">
     <div class="profile-card" onclick="event.stopPropagation()">
         <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">⚙️ Настройки</h3>
-        
         <div class="gray-block">
             <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                 <input type="checkbox" id="set-strangers" style="width:18px; height:18px;" onchange="saveSettings()">
@@ -187,7 +185,6 @@
             </label>
             <div style="font-size:11px; color:#888; margin-top:5px; margin-left:28px;">Если выключить, написать смогут только те, кто уже добавлен в контакты.</div>
         </div>
-
         <div class="gray-block">
             <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                 <input type="checkbox" id="set-rename" style="width:18px; height:18px;" onchange="saveSettings()">
@@ -195,7 +192,6 @@
             </label>
             <div style="font-size:11px; color:#888; margin-top:5px; margin-left:28px;">Позволяет другим пользователям локально переименовывать вас для себя.</div>
         </div>
-
         <div class="gray-block" style="text-align:center;">
             <button onclick="changeMyId()" style="width:100%; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🔄 Сменить ID</button>
         </div>
@@ -242,7 +238,6 @@
         if (!u || !p) return;
         
         document.getElementById('auth-screen').style.display = 'none';
-        
         const snap = await db.ref(`users/${u}`).once('value');
         if (snap.val() && snap.val().password !== p) {
             document.getElementById('auth-screen').style.display = 'flex';
@@ -256,7 +251,6 @@
         localStorage.setItem('petmess_user', u); localStorage.setItem('petmess_pass', p); localStorage.setItem('petmess_expiry', expiry);
         
         db.ref(`localNames/${me}`).on('value', s => { localNames = s.val() || {}; });
-        
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('app-screen').style.display = 'flex';
         db.ref(`users/${me}`).on('value', s => { 
@@ -288,13 +282,11 @@
         });
     }
 
-    // ИЗМЕНЕНА ФУНКЦИЯ СМЕНЫ ID (без лимитов)
     async function changeMyId() {
         const newId = prompt("Введите новый ID (только английские буквы и цифры без пробелов):")?.trim().toLowerCase();
         if (!newId || newId === me) return;
         if (/[^a-z0-9_]/.test(newId)) return alert("Можно использовать только английские буквы и цифры!");
         
-        // Обязательная проверка на уникальность!
         const check = await db.ref(`users/${newId}`).once('value');
         if (check.exists()) return alert("Этот ID уже занят другим пользователем! Придумайте другой.");
         
@@ -302,7 +294,6 @@
         
         const s = await db.ref(`users/${me}`).once('value');
         const d = s.val();
-        
         await db.ref(`users/${newId}`).set(d);
         
         const myContacts = await db.ref(`contacts/${me}`).once('value');
@@ -354,7 +345,6 @@
         document.getElementById('chat-header').style.display = 'flex';
         document.getElementById('messages').style.visibility = 'visible';
         document.getElementById('form-container').style.display = 'block';
-
         document.getElementById('group-invite-btn').style.display = 'none';
 
         if (id === me) {
@@ -389,20 +379,41 @@
 
     function loadMessages() {
         db.ref(getChatPath()+'/messages').on('value', snap => {
-            let html = ''; snap.forEach(c => {
+            let html = ''; 
+            let unreadUpdates = {};
+
+            snap.forEach(c => {
                 const m = c.val(), key = c.key;
                 const msgClass = m.sender === me ? 'sent' : 'received';
                 const data = m.type === 'text' ? decompress(m.text) : m.file;
                 msgCache[key] = m.type === 'text' ? data : 'Фотография';
+                
+                // ЛОГИКА ПРОЧТЕНИЯ СООБЩЕНИЙ
+                if (m.sender !== me && !m.read) unreadUpdates[key + '/read'] = true;
+
+                let readIcon = '';
+                if (m.sender === me && targetId !== me) {
+                    readIcon = m.read 
+                        ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="var(--tg-accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
+                        : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#999" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+                }
+
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
                 let content = m.type === 'image' ? `<img src="${data}" style="max-width:100%; border-radius:10px">` : `<div>${data}</div>`;
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
+                
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
-                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}</div></div>
+                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
                 </div>`;
             });
+            
             const div = document.getElementById('messages'); div.innerHTML = html; div.scrollTop = div.scrollHeight;
+            
+            // Если есть непрочитанные сообщения от другого пользователя - помечаем как прочитанные
+            if (Object.keys(unreadUpdates).length > 0) {
+                db.ref(getChatPath()+'/messages').update(unreadUpdates);
+            }
         });
     }
 
@@ -541,7 +552,8 @@
         if(editingKey){ 
             db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); 
         } else { 
-            const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text'}; 
+            // ДОБАВЛЕНО ПОЛЕ READ: FALSE ПРИ ОТПРАВКЕ
+            const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text', read: false}; 
             if(replyData) o.replyTo=replyData; 
             db.ref(getChatPath()+'/messages').push(o); 
             if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
@@ -554,7 +566,9 @@
     async function createGroup() { const n = prompt("Имя группы:"); if(n){ const id='grp_'+Date.now(); await db.ref(`groups/${id}`).set({name:n, owner:me, members:{[me]:true}}); await db.ref(`contacts/${me}/${id}`).set(true); selectChat(id,true); } }
     async function inviteToGroup() { const i = prompt("ID пользователя:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
     function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
-    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now()}); }; }
+    
+    // ДОБАВЛЕНО ПОЛЕ READ: FALSE ПРИ ОТПРАВКЕ КАРТИНКИ
+    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now(), read: false}); }; }
 
     const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
     const ep = document.getElementById('emoji-picker');
