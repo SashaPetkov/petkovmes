@@ -85,6 +85,12 @@
         
         .msg.highlight { animation: highlight-flash 2s ease; }
         @keyframes highlight-flash { 0% { background: #fff59d !important; } 100% { } }
+        
+        /* СТИЛЬ ЗАПИСИ И ПЛЕЕРА */
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .recording { color: red !important; animation: blink 1.5s infinite; }
+        audio { height: 40px; outline: none; border-radius: 20px; max-width: 220px; }
+        audio::-webkit-media-controls-panel { background-color: rgba(255,255,255,0.7); }
 
         .reply-box { background: rgba(0,0,0,0.04); border-left: 3px solid var(--tg-accent); padding: 5px 8px; margin-bottom: 5px; border-radius: 5px; font-size: 13px; cursor: pointer; }
         .reply-box b { color: var(--tg-accent); display: block; font-size: 11px; }
@@ -169,6 +175,9 @@
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
                 <textarea id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()" onkeydown="handleEnter(event)"></textarea>
+                
+                <div id="mic-btn" onclick="toggleRecord(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px; color:#bbb; transition:0.3s;">🎤</div>
+                
                 <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">➤</button>
             </form>
         </div>
@@ -194,7 +203,6 @@
             </label>
             <div style="font-size:11px; color:#888; margin-top:5px; margin-left:28px;">Позволяет другим пользователям локально переименовывать вас для себя.</div>
         </div>
-        
         <div class="gray-block">
             <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
                 <span style="font-size:14px; font-weight:bold;">Автоудаление сообщений</span>
@@ -206,7 +214,6 @@
             </label>
             <div style="font-size:11px; color:#888; margin-top:5px;">Сообщения старше этого срока будут безвозвратно удаляться у всех. Максимум 3 дня.</div>
         </div>
-
         <div class="gray-block" style="text-align:center;">
             <button onclick="openIdModal()" style="width:100%; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🔄 Сменить ID</button>
         </div>
@@ -255,6 +262,11 @@
     
     let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null, avatarCache = {}, msgCache = {}, localNames = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout, myAutoDeleteDays = 3;
+    
+    // ПЕРЕМЕННЫЕ ЗАПИСИ АУДИО
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
@@ -307,7 +319,7 @@
         
         db.ref(`users/${me}`).on('value', s => { 
             const d = s.val(); if(d){ 
-                myAutoDeleteDays = d.settings?.autoDeleteDays || 3; // Подтягиваем настройки удаления
+                myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
                 const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 document.getElementById('my-name-display').innerHTML = (d.nickname || me) + tick; 
                 document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; 
@@ -322,7 +334,7 @@
             const d = s.val();
             document.getElementById('set-strangers').checked = d.settings?.allowStrangers !== false; 
             document.getElementById('set-rename').checked = d.settings?.allowRename !== false; 
-            document.getElementById('set-autodelete').value = d.settings?.autoDeleteDays || 3; // Значение удаления
+            document.getElementById('set-autodelete').value = d.settings?.autoDeleteDays || 3;
             document.getElementById('settings-modal').style.display = 'flex';
         });
     }
@@ -467,23 +479,24 @@
             let html = ''; 
             let unreadUpdates = {};
             const now = Date.now();
-            
-            // Расчет лимита времени (в миллисекундах)
             const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000;
-            const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000; // Жёсткий лимит 3 дня
+            const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
 
             snap.forEach(c => {
                 const m = c.val(), key = c.key;
                 
-                // ЛОГИКА АВТОУДАЛЕНИЯ
                 if (now - m.time > maxMs || now - m.time > absoluteMaxMs) {
                     db.ref(getChatPath()+'/messages/'+key).remove();
-                    return; // Пропускаем рендер этого сообщения, оно удаляется
+                    return; 
                 }
 
                 const msgClass = m.sender === me ? 'sent' : 'received';
                 const data = m.type === 'text' ? decompress(m.text) : m.file;
-                msgCache[key] = m.type === 'text' ? data : 'Фотография';
+                
+                // СОХРАНЯЕМ ТИП ДЛЯ КЭША
+                if (m.type === 'audio') msgCache[key] = '🎤 Голосовое сообщение';
+                else if (m.type === 'image') msgCache[key] = '🖼️ Фотография';
+                else msgCache[key] = data;
                 
                 if (m.sender !== me && !m.read) unreadUpdates[key + '/read'] = true;
 
@@ -495,7 +508,13 @@
                 }
 
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
-                let content = m.type === 'image' ? `<img src="${data}" style="max-width:100%; border-radius:10px">` : `<div>${data}</div>`;
+                
+                // РЕНДЕР АУДИО ИЛИ КАРТИНКИ
+                let content = '';
+                if (m.type === 'image') content = `<img src="${data}" style="max-width:100%; border-radius:10px">`;
+                else if (m.type === 'audio') content = `<audio controls src="${m.file}" style="max-width: 100%;"></audio>`;
+                else content = `<div>${data}</div>`;
+                
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
                 
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
@@ -637,11 +656,7 @@
         
         const path = isGrp ? `groups/${target}` : `chats/${me < target ? me+'_'+target : target+'_'+me}`;
         db.ref(path + '/messages').push({
-            sender: me,
-            text: compress(fwdText),
-            time: Date.now(),
-            type: 'text',
-            read: false
+            sender: me, text: compress(fwdText), time: Date.now(), type: 'text', read: false
         });
         
         if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true);
@@ -670,6 +685,51 @@
     function handleTyping() { const i = document.getElementById('input'); i.style.height = '20px'; i.style.height = Math.min(i.scrollHeight - 24, 120) + 'px'; if(isGroup || targetId === me) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
     async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
     
+    // --- ЛОГИКА ЗАПИСИ ГОЛОСОВЫХ СООБЩЕНИЙ ---
+    async function toggleRecord(e) {
+        e.stopPropagation();
+        const btn = document.getElementById('mic-btn');
+        const inp = document.getElementById('input');
+        
+        if (!isRecording) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+                isRecording = true;
+                
+                btn.innerHTML = '⏹️';
+                btn.classList.add('recording');
+                inp.placeholder = "Идет запись...";
+                inp.disabled = true;
+
+                mediaRecorder.ondataavailable = e => { audioChunks.push(e.data); };
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    audioChunks = [];
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => {
+                        const base64Audio = reader.result;
+                        db.ref(getChatPath()+'/messages').push({ sender: me, file: base64Audio, time: Date.now(), type: 'audio', read: false });
+                        if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
+                    };
+                    stream.getTracks().forEach(track => track.stop());
+                };
+            } catch(err) {
+                alert("Нет доступа к микрофону! Разрешите доступ в настройках устройства.");
+            }
+        } else {
+            mediaRecorder.stop();
+            isRecording = false;
+            btn.innerHTML = '🎤';
+            btn.classList.remove('recording');
+            inp.placeholder = "Написать сообщение...";
+            inp.disabled = false;
+        }
+    }
+
     async function sendMessage(e) { 
         if(e) e.preventDefault(); 
         const i = document.getElementById('input'); 
