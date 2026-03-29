@@ -101,14 +101,9 @@
         }
         
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
-        
-        #send-icon {
-            width: 20px; height: 20px; object-fit: contain;
-            filter: brightness(0) invert(1);
-        }
 
         #modal-overlay, #settings-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        #settings-modal { z-index: 10005; } /* Настройки поверх всего */
+        #settings-modal { z-index: 10005; }
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
         .modal-input { border: 1.5px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; margin-top: 8px; outline: none; transition: 0.3s; }
@@ -172,9 +167,8 @@
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
                 <textarea id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()" onkeydown="handleEnter(event)"></textarea>
-                <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">
-                    <img id="send-icon" src="image_37.png" alt="➤">
-                </button>
+                
+                <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">➤</button>
             </form>
         </div>
     </div>
@@ -203,8 +197,7 @@
         </div>
 
         <div class="gray-block" style="text-align:center;">
-            <span style="font-size:12px; color:#888;">Сменить ID можно только <b id="id-changes-count">3</b> раз(а)</span>
-            <button onclick="changeMyId()" style="width:100%; margin-top:10px; padding:12px; background:#ff4d4d; color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">❗ Сменить ID</button>
+            <button onclick="changeMyId()" style="width:100%; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🔄 Сменить ID</button>
         </div>
         <button onclick="closeSettings()" style="width:100%; margin-top:15px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>
     </div>
@@ -262,7 +255,6 @@
         const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
         localStorage.setItem('petmess_user', u); localStorage.setItem('petmess_pass', p); localStorage.setItem('petmess_expiry', expiry);
         
-        // Загрузка локальных имен перед отображением контактов
         db.ref(`localNames/${me}`).on('value', s => { localNames = s.val() || {}; });
         
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
@@ -277,15 +269,12 @@
         loadContacts();
     }
 
-    // ЛОГИКА НАСТРОЕК
     function openSettingsUI(e) {
         e.stopPropagation();
         db.ref(`users/${me}`).once('value', s => {
             const d = s.val();
-            const left = d.idChangesLeft !== undefined ? d.idChangesLeft : 3;
-            document.getElementById('id-changes-count').innerText = left;
-            document.getElementById('set-strangers').checked = d.settings?.allowStrangers !== false; // По умолчанию true
-            document.getElementById('set-rename').checked = d.settings?.allowRename !== false; // По умолчанию true
+            document.getElementById('set-strangers').checked = d.settings?.allowStrangers !== false; 
+            document.getElementById('set-rename').checked = d.settings?.allowRename !== false; 
             document.getElementById('settings-modal').style.display = 'flex';
         });
     }
@@ -299,27 +288,23 @@
         });
     }
 
-    // СМЕНА ID С ПЕРЕНОСОМ ДАННЫХ
+    // ИЗМЕНЕНА ФУНКЦИЯ СМЕНЫ ID (без лимитов)
     async function changeMyId() {
-        const s = await db.ref(`users/${me}`).once('value');
-        const d = s.val();
-        let left = d.idChangesLeft !== undefined ? d.idChangesLeft : 3;
-        if (left <= 0) return alert("Вы исчерпали лимит смены ID (3 раза)!");
-        
         const newId = prompt("Введите новый ID (только английские буквы и цифры без пробелов):")?.trim().toLowerCase();
         if (!newId || newId === me) return;
         if (/[^a-z0-9_]/.test(newId)) return alert("Можно использовать только английские буквы и цифры!");
         
+        // Обязательная проверка на уникальность!
         const check = await db.ref(`users/${newId}`).once('value');
-        if (check.exists()) return alert("Этот ID уже занят другим пользователем!");
+        if (check.exists()) return alert("Этот ID уже занят другим пользователем! Придумайте другой.");
         
-        if (!confirm(`Вы уверены, что хотите сменить ID на @${newId}? У вас останется попыток: ${left - 1}`)) return;
+        if (!confirm(`Вы уверены, что хотите сменить свой ID на @${newId}?`)) return;
         
-        // 1. Копируем профиль
-        d.idChangesLeft = left - 1;
+        const s = await db.ref(`users/${me}`).once('value');
+        const d = s.val();
+        
         await db.ref(`users/${newId}`).set(d);
         
-        // 2. Копируем контакты и обновляем себя у других
         const myContacts = await db.ref(`contacts/${me}`).once('value');
         if (myContacts.exists()) {
             await db.ref(`contacts/${newId}`).set(myContacts.val());
@@ -334,7 +319,6 @@
             });
         }
         
-        // 3. Пытаемся перенести личные переписки
         const chatsSnap = await db.ref(`chats`).once('value');
         chatsSnap.forEach(c => {
             const parts = c.key.split('_');
@@ -345,8 +329,13 @@
                 db.ref(`chats/${c.key}`).remove();
             }
         });
+
+        const localNamesSnap = await db.ref(`localNames/${me}`).once('value');
+        if (localNamesSnap.exists()) {
+            await db.ref(`localNames/${newId}`).set(localNamesSnap.val());
+            await db.ref(`localNames/${me}`).remove();
+        }
         
-        // 4. Удаляем старый профиль
         await db.ref(`users/${me}`).remove();
         await db.ref(`contacts/${me}`).remove();
         
@@ -383,7 +372,7 @@
             db.ref(`users/${id}`).on('value', s => { 
                 const d = s.val(); if(!d) return; 
                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
-                const dispName = localNames[id] || d.nickname || id; // УЧЕТ ЛОКАЛЬНОГО ИМЕНИ
+                const dispName = localNames[id] || d.nickname || id; 
                 document.getElementById('header-title').innerHTML = dispName + tick; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
             });
@@ -421,7 +410,6 @@
         db.ref(`contacts/${me}`).on('value', snap => {
             const div = document.getElementById('contacts'); div.innerHTML = '';
             
-            // ДОБАВЛЕНИЕ ЧАТА "ИЗБРАННОЕ" ДЛЯ ВСЕХ
             const favItem = document.createElement('div'); 
             favItem.className=`user-item ${me === targetId ? 'active' : ''}`;
             favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b>🔖 Избранное</b></div>`;
@@ -431,7 +419,7 @@
 
             snap.forEach(c => {
                 const id = c.key, isGrp = id.startsWith('grp_'); 
-                if (id === me) return; // Пропускаем себя, т.к. избранное уже добавлено
+                if (id === me) return; 
                 const item = document.createElement('div'); 
                 item.className=`user-item ${id === targetId ? 'active' : ''}`;
                 const nameId = `name-${id}`;
@@ -450,7 +438,7 @@
                             const label = document.getElementById(nameId); 
                             if(label) {
                                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
-                                const dispName = localNames[id] || d.nickname || id; // УЧЕТ ЛОКАЛЬНОГО ИМЕНИ
+                                const dispName = localNames[id] || d.nickname || id; 
                                 label.innerHTML = dispName + tick;
                             }
                         }
@@ -471,7 +459,7 @@
             let membersHtml = ''; 
             for(let m in d.members) {
                 const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m];
-                const mDisp = localNames[m] || m; // Локальное имя для участников группы
+                const mDisp = localNames[m] || m; 
                 membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${mDisp} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
             }
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px;" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
@@ -533,7 +521,6 @@
     function handleTyping() { const i = document.getElementById('input'); i.style.height = '20px'; i.style.height = Math.min(i.scrollHeight - 24, 120) + 'px'; if(isGroup || targetId === me) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
     async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
     
-    // ИСПРАВЛЕНИЕ: Проверка прав при отправке (разрешение писать незнакомцам)
     async function sendMessage(e) { 
         if(e) e.preventDefault(); 
         const i = document.getElementById('input'); 
