@@ -78,7 +78,8 @@
         .msg-row.received { align-self: flex-start; }
         .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; }
         
-        .msg { padding: 10px 14px 22px; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; white-space: pre-wrap; }
+        /* ИСПРАВЛЕНА ШИРИНА: добавлено min-width и padding-right */
+        .msg { padding: 10px 40px 22px 14px; min-width: 80px; box-sizing: border-box; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; white-space: pre-wrap; }
         
         .sent .msg { background: var(--tg-sent); border-bottom-right-radius: 4px; }
         .received .msg { background: var(--tg-received); border-bottom-left-radius: 4px; }
@@ -102,8 +103,9 @@
         
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
 
-        #modal-overlay, #settings-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        #settings-modal { z-index: 10005; }
+        #modal-overlay, #settings-modal, #id-modal, #forward-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+        #settings-modal, #id-modal, #forward-modal { z-index: 10005; }
+        
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
         .modal-input { border: 1.5px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; margin-top: 8px; outline: none; transition: 0.3s; }
@@ -125,7 +127,9 @@
 <div id="auth-screen">
     <div class="auth-card">
         <div class="auth-title">Petmess</div>
-        <input type="text" id="auth-user" placeholder="Логин">
+        <input type="text" id="auth-user" placeholder="Логин" oninput="checkAuthId()">
+        <div id="auth-status" style="font-size:12px; height:15px; text-align:left; margin-left:10px; color:#888;"></div>
+        
         <input type="password" id="auth-pass" placeholder="Пароль">
         <button onclick="login()">Войти</button>
     </div>
@@ -193,14 +197,31 @@
             <div style="font-size:11px; color:#888; margin-top:5px; margin-left:28px;">Позволяет другим пользователям локально переименовывать вас для себя.</div>
         </div>
         <div class="gray-block" style="text-align:center;">
-            <button onclick="changeMyId()" style="width:100%; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🔄 Сменить ID</button>
+            <button onclick="openIdModal()" style="width:100%; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🔄 Сменить ID</button>
         </div>
         <button onclick="closeSettings()" style="width:100%; margin-top:15px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>
     </div>
 </div>
 
+<div id="id-modal" onclick="document.getElementById('id-modal').style.display='none'">
+    <div class="profile-card" onclick="event.stopPropagation()">
+        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🔄 Смена ID</h3>
+        <input type="text" id="new-id-input" class="modal-input" placeholder="Новый ID (англ. буквы и цифры)" oninput="checkNewId()">
+        <div id="id-status" style="font-size:12px; margin-top:8px; text-align:center; height:15px; font-weight:bold;"></div>
+        <button id="confirm-id-btn" onclick="confirmIdChange()" disabled style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer; opacity:0.5;">Подтвердить смену</button>
+    </div>
+</div>
+
+<div id="forward-modal" onclick="document.getElementById('forward-modal').style.display='none'">
+    <div class="profile-card" onclick="event.stopPropagation()" style="display:flex; flex-direction:column; max-height:80vh; padding:20px;">
+        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center; flex-shrink:0;">↪ Переслать сообщение</h3>
+        <div id="forward-contacts" style="overflow-y:auto; flex-grow:1; margin-top:10px; border-top:1px solid #eee;"></div>
+    </div>
+</div>
+
 <div id="context-menu" onclick="event.stopPropagation()">
     <div class="menu-item" onclick="prepareReply()">↩ Ответить</div>
+    <div class="menu-item" onclick="prepareForward()">↪ Переслать</div>
     <div class="menu-item" onclick="copyMsg()">📋 Копировать</div>
     <div class="menu-item" onclick="pinMsg()">📌 Закрепить</div>
     <div class="menu-item" id="menu-edit" onclick="prepareEdit()">✎ Изменить</div>
@@ -221,7 +242,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    let me = '', targetId = '', isGroup = false, selectedMsg = null, editingKey = null, replyData = null, avatarCache = {}, msgCache = {}, localNames = {};
+    let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null, avatarCache = {}, msgCache = {}, localNames = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout;
 
     const compress = (v) => LZString.compressToUTF16(v);
@@ -230,6 +251,26 @@
         const d = new Date(t);
         return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
     };
+
+    // --- ПРОВЕРКА ID ПРИ ВХОДЕ ---
+    let authTimer;
+    function checkAuthId() {
+        clearTimeout(authTimer);
+        const val = document.getElementById('auth-user').value.trim().toLowerCase();
+        const st = document.getElementById('auth-status');
+        if(!val) { st.innerText = ''; return; }
+        if(/[^a-z0-9_]/.test(val)) { st.style.color = 'red'; st.innerText = '❌ Только англ. буквы и цифры'; return; }
+        
+        st.style.color = '#888'; st.innerText = 'Проверка...';
+        authTimer = setTimeout(async () => {
+            const snap = await db.ref(`users/${val}`).once('value');
+            if(snap.exists()) {
+                st.style.color = 'var(--tg-accent)'; st.innerText = '🔹 Аккаунт найден (введите пароль)';
+            } else {
+                st.style.color = 'var(--online)'; st.innerText = '✨ Свободно (будет создан аккаунт)';
+            }
+        }, 500);
+    }
 
     async function toggleVerify(uid, state) { if (me === 'sanya' || me === 'misha') { await db.ref(`users/${uid}/verified`).set(state); openProfile(uid); } }
 
@@ -272,25 +313,49 @@
             document.getElementById('settings-modal').style.display = 'flex';
         });
     }
-    
     function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
-    
-    function saveSettings() {
-        db.ref(`users/${me}/settings`).update({
-            allowStrangers: document.getElementById('set-strangers').checked,
-            allowRename: document.getElementById('set-rename').checked
-        });
+    function saveSettings() { db.ref(`users/${me}/settings`).update({ allowStrangers: document.getElementById('set-strangers').checked, allowRename: document.getElementById('set-rename').checked }); }
+
+    // --- ЛОГИКА ОКНА СМЕНЫ ID ---
+    function openIdModal() {
+        document.getElementById('settings-modal').style.display = 'none';
+        document.getElementById('new-id-input').value = '';
+        document.getElementById('id-status').innerText = '';
+        document.getElementById('confirm-id-btn').disabled = true;
+        document.getElementById('confirm-id-btn').style.opacity = '0.5';
+        document.getElementById('id-modal').style.display = 'flex';
     }
 
-    async function changeMyId() {
-        const newId = prompt("Введите новый ID (только английские буквы и цифры без пробелов):")?.trim().toLowerCase();
-        if (!newId || newId === me) return;
-        if (/[^a-z0-9_]/.test(newId)) return alert("Можно использовать только английские буквы и цифры!");
-        
-        const check = await db.ref(`users/${newId}`).once('value');
-        if (check.exists()) return alert("Этот ID уже занят другим пользователем! Придумайте другой.");
-        
-        if (!confirm(`Вы уверены, что хотите сменить свой ID на @${newId}?`)) return;
+    let idTimer;
+    function checkNewId() {
+        clearTimeout(idTimer);
+        const val = document.getElementById('new-id-input').value.trim().toLowerCase();
+        const st = document.getElementById('id-status');
+        const btn = document.getElementById('confirm-id-btn');
+        btn.disabled = true; btn.style.opacity = '0.5';
+
+        if(!val) { st.innerText = ''; return; }
+        if(/[^a-z0-9_]/.test(val)) { st.style.color = 'red'; st.innerText = '❌ Только англ. буквы и цифры'; return; }
+        if(val === me) { st.style.color = '#888'; st.innerText = 'Это ваш текущий ID'; return; }
+
+        st.style.color = '#888'; st.innerText = 'Проверка...';
+        idTimer = setTimeout(async () => {
+            const snap = await db.ref(`users/${val}`).once('value');
+            if(snap.exists()) {
+                st.style.color = 'red'; st.innerText = '❌ Занято';
+            } else {
+                st.style.color = 'var(--online)'; st.innerText = '✨ Свободно!';
+                btn.disabled = false; btn.style.opacity = '1';
+            }
+        }, 500);
+    }
+
+    async function confirmIdChange() {
+        const newId = document.getElementById('new-id-input').value.trim().toLowerCase();
+        const btn = document.getElementById('confirm-id-btn');
+        btn.disabled = true; btn.innerText = "Обновление...";
+        document.getElementById('id-modal').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'none'; // Прячем экран на время загрузки
         
         const s = await db.ref(`users/${me}`).once('value');
         const d = s.val();
@@ -388,7 +453,6 @@
                 const data = m.type === 'text' ? decompress(m.text) : m.file;
                 msgCache[key] = m.type === 'text' ? data : 'Фотография';
                 
-                // ЛОГИКА ПРОЧТЕНИЯ СООБЩЕНИЙ
                 if (m.sender !== me && !m.read) unreadUpdates[key + '/read'] = true;
 
                 let readIcon = '';
@@ -410,10 +474,7 @@
             
             const div = document.getElementById('messages'); div.innerHTML = html; div.scrollTop = div.scrollHeight;
             
-            // Если есть непрочитанные сообщения от другого пользователя - помечаем как прочитанные
-            if (Object.keys(unreadUpdates).length > 0) {
-                db.ref(getChatPath()+'/messages').update(unreadUpdates);
-            }
+            if (Object.keys(unreadUpdates).length > 0) db.ref(getChatPath()+'/messages').update(unreadUpdates);
         });
     }
 
@@ -510,6 +571,52 @@
     }
     
     function copyMsg() { if (selectedMsg && selectedMsg.text) { navigator.clipboard.writeText(selectedMsg.text); } closePopups(); }
+    
+    // --- ЛОГИКА ПЕРЕСЫЛКИ СООБЩЕНИЙ ---
+    function prepareForward() {
+        msgToForward = selectedMsg;
+        closePopups();
+        
+        db.ref(`contacts/${me}`).once('value', snap => {
+            const div = document.getElementById('forward-contacts');
+            let h = `<div class="user-item" onclick="doForward('${me}', false)"><div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar"></div><div><b>🔖 Избранное</b></div></div>`;
+            
+            snap.forEach(c => {
+                const id = c.key;
+                if(id === me) return;
+                const isGrp = id.startsWith('grp_');
+                const domNode = document.getElementById('name-'+id);
+                const n = domNode ? domNode.innerText : (isGrp ? '👥 '+id : id);
+                const avNode = document.getElementById('av-'+id);
+                const avSrc = avNode ? avNode.src : `https://robohash.org/${id}`;
+                
+                h += `<div class="user-item" onclick="doForward('${id}', ${isGrp})">
+                    <div class="avatar-wrapper"><img src="${avSrc}" class="avatar"></div>
+                    <div><b>${n}</b></div>
+                </div>`;
+            });
+            div.innerHTML = h;
+            document.getElementById('forward-modal').style.display = 'flex';
+        });
+    }
+
+    function doForward(target, isGrp) {
+        document.getElementById('forward-modal').style.display = 'none';
+        const fwdText = `[Переслано от: ${msgToForward.sender}]\n${msgToForward.text}`;
+        
+        const path = isGrp ? `groups/${target}` : `chats/${me < target ? me+'_'+target : target+'_'+me}`;
+        db.ref(path + '/messages').push({
+            sender: me,
+            text: compress(fwdText),
+            time: Date.now(),
+            type: 'text',
+            read: false
+        });
+        
+        if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true);
+        selectChat(target, isGrp);
+    }
+
     async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
     function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
     async function changePass() { const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; const s=await db.ref(`users/${me}/password`).once('value'); if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); localStorage.setItem('petmess_pass', n); alert("ОК!"); } else alert("Ошибка!"); }
@@ -552,7 +659,6 @@
         if(editingKey){ 
             db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); 
         } else { 
-            // ДОБАВЛЕНО ПОЛЕ READ: FALSE ПРИ ОТПРАВКЕ
             const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text', read: false}; 
             if(replyData) o.replyTo=replyData; 
             db.ref(getChatPath()+'/messages').push(o); 
@@ -567,7 +673,6 @@
     async function inviteToGroup() { const i = prompt("ID пользователя:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
     function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
     
-    // ДОБАВЛЕНО ПОЛЕ READ: FALSE ПРИ ОТПРАВКЕ КАРТИНКИ
     async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now(), read: false}); }; }
 
     const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
