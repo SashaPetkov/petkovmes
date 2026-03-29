@@ -78,7 +78,6 @@
         .msg-row.received { align-self: flex-start; }
         .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; }
         
-        /* ИСПРАВЛЕНА ШИРИНА: добавлено min-width и padding-right */
         .msg { padding: 10px 40px 22px 14px; min-width: 80px; box-sizing: border-box; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; white-space: pre-wrap; }
         
         .sent .msg { background: var(--tg-sent); border-bottom-right-radius: 4px; }
@@ -129,7 +128,6 @@
         <div class="auth-title">Petmess</div>
         <input type="text" id="auth-user" placeholder="Логин" oninput="checkAuthId()">
         <div id="auth-status" style="font-size:12px; height:15px; text-align:left; margin-left:10px; color:#888;"></div>
-        
         <input type="password" id="auth-pass" placeholder="Пароль">
         <button onclick="login()">Войти</button>
     </div>
@@ -196,6 +194,19 @@
             </label>
             <div style="font-size:11px; color:#888; margin-top:5px; margin-left:28px;">Позволяет другим пользователям локально переименовывать вас для себя.</div>
         </div>
+        
+        <div class="gray-block">
+            <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+                <span style="font-size:14px; font-weight:bold;">Автоудаление сообщений</span>
+                <select id="set-autodelete" onchange="saveSettings()" class="modal-input" style="width:auto; margin:0; padding:8px; font-size:12px;">
+                    <option value="1">Через 1 день</option>
+                    <option value="2">Через 2 дня</option>
+                    <option value="3">Через 3 дня</option>
+                </select>
+            </label>
+            <div style="font-size:11px; color:#888; margin-top:5px;">Сообщения старше этого срока будут безвозвратно удаляться у всех. Максимум 3 дня.</div>
+        </div>
+
         <div class="gray-block" style="text-align:center;">
             <button onclick="openIdModal()" style="width:100%; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🔄 Сменить ID</button>
         </div>
@@ -243,7 +254,7 @@
     const db = firebase.database();
     
     let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null, avatarCache = {}, msgCache = {}, localNames = {};
-    let typingStatus = false, onlineStatus = 'offline', typingTimeout;
+    let typingStatus = false, onlineStatus = 'offline', typingTimeout, myAutoDeleteDays = 3;
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
@@ -252,7 +263,6 @@
         return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
     };
 
-    // --- ПРОВЕРКА ID ПРИ ВХОДЕ ---
     let authTimer;
     function checkAuthId() {
         clearTimeout(authTimer);
@@ -294,8 +304,10 @@
         db.ref(`localNames/${me}`).on('value', s => { localNames = s.val() || {}; });
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('app-screen').style.display = 'flex';
+        
         db.ref(`users/${me}`).on('value', s => { 
             const d = s.val(); if(d){ 
+                myAutoDeleteDays = d.settings?.autoDeleteDays || 3; // Подтягиваем настройки удаления
                 const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 document.getElementById('my-name-display').innerHTML = (d.nickname || me) + tick; 
                 document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; 
@@ -310,13 +322,21 @@
             const d = s.val();
             document.getElementById('set-strangers').checked = d.settings?.allowStrangers !== false; 
             document.getElementById('set-rename').checked = d.settings?.allowRename !== false; 
+            document.getElementById('set-autodelete').value = d.settings?.autoDeleteDays || 3; // Значение удаления
             document.getElementById('settings-modal').style.display = 'flex';
         });
     }
+    
     function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
-    function saveSettings() { db.ref(`users/${me}/settings`).update({ allowStrangers: document.getElementById('set-strangers').checked, allowRename: document.getElementById('set-rename').checked }); }
+    
+    function saveSettings() {
+        db.ref(`users/${me}/settings`).update({
+            allowStrangers: document.getElementById('set-strangers').checked,
+            allowRename: document.getElementById('set-rename').checked,
+            autoDeleteDays: parseInt(document.getElementById('set-autodelete').value) || 3
+        });
+    }
 
-    // --- ЛОГИКА ОКНА СМЕНЫ ID ---
     function openIdModal() {
         document.getElementById('settings-modal').style.display = 'none';
         document.getElementById('new-id-input').value = '';
@@ -355,7 +375,7 @@
         const btn = document.getElementById('confirm-id-btn');
         btn.disabled = true; btn.innerText = "Обновление...";
         document.getElementById('id-modal').style.display = 'none';
-        document.getElementById('app-screen').style.display = 'none'; // Прячем экран на время загрузки
+        document.getElementById('app-screen').style.display = 'none';
         
         const s = await db.ref(`users/${me}`).once('value');
         const d = s.val();
@@ -446,9 +466,21 @@
         db.ref(getChatPath()+'/messages').on('value', snap => {
             let html = ''; 
             let unreadUpdates = {};
+            const now = Date.now();
+            
+            // Расчет лимита времени (в миллисекундах)
+            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000;
+            const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000; // Жёсткий лимит 3 дня
 
             snap.forEach(c => {
                 const m = c.val(), key = c.key;
+                
+                // ЛОГИКА АВТОУДАЛЕНИЯ
+                if (now - m.time > maxMs || now - m.time > absoluteMaxMs) {
+                    db.ref(getChatPath()+'/messages/'+key).remove();
+                    return; // Пропускаем рендер этого сообщения, оно удаляется
+                }
+
                 const msgClass = m.sender === me ? 'sent' : 'received';
                 const data = m.type === 'text' ? decompress(m.text) : m.file;
                 msgCache[key] = m.type === 'text' ? data : 'Фотография';
@@ -572,7 +604,6 @@
     
     function copyMsg() { if (selectedMsg && selectedMsg.text) { navigator.clipboard.writeText(selectedMsg.text); } closePopups(); }
     
-    // --- ЛОГИКА ПЕРЕСЫЛКИ СООБЩЕНИЙ ---
     function prepareForward() {
         msgToForward = selectedMsg;
         closePopups();
@@ -602,7 +633,7 @@
 
     function doForward(target, isGrp) {
         document.getElementById('forward-modal').style.display = 'none';
-        const fwdText = `[Переслано от: ${msgToForward.sender}]\n${msgToForward.text}`;
+        const fwdText = `[Переслано от: @${msgToForward.sender}]\n${msgToForward.text}`;
         
         const path = isGrp ? `groups/${target}` : `chats/${me < target ? me+'_'+target : target+'_'+me}`;
         db.ref(path + '/messages').push({
