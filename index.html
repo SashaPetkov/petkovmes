@@ -86,7 +86,6 @@
         .msg.highlight { animation: highlight-flash 2s ease; }
         @keyframes highlight-flash { 0% { background: #fff59d !important; } 100% { } }
         
-        /* СТИЛЬ ЗАПИСИ И ПЛЕЕРА */
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .recording { color: red !important; animation: blink 1.5s infinite; }
         audio { height: 40px; outline: none; border-radius: 20px; max-width: 220px; }
@@ -108,8 +107,8 @@
         
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
 
-        #modal-overlay, #settings-modal, #id-modal, #forward-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        #settings-modal, #id-modal, #forward-modal { z-index: 10005; }
+        #modal-overlay, #settings-modal, #id-modal, #forward-modal, #create-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+        #settings-modal, #id-modal, #forward-modal, #create-modal { z-index: 10005; }
         
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
@@ -141,7 +140,7 @@
 
 <div id="app-screen">
     <div id="sidebar">
-        <div class="sidebar-top"><span class="sidebar-header">Petmess</span><button class="group-add-btn" onclick="createGroup()">+</button></div>
+        <div class="sidebar-top"><span class="sidebar-header">Petmess</span><button class="group-add-btn" onclick="openCreateModal(event)">+</button></div>
         <div id="search-container"><input type="text" id="search-input" placeholder="Найти пользователя..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
         <div id="my-profile">
@@ -175,9 +174,7 @@
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
                 <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
                 <textarea id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()" onkeydown="handleEnter(event)"></textarea>
-                
                 <div id="mic-btn" onclick="toggleRecord(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px; color:#bbb; transition:0.3s;">🎤</div>
-                
                 <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">➤</button>
             </form>
         </div>
@@ -185,6 +182,24 @@
 </div>
 
 <div id="modal-overlay" onclick="closeProfileModal()"><div class="profile-card" onclick="event.stopPropagation()" id="modal-content"></div></div>
+
+<div id="create-modal" onclick="document.getElementById('create-modal').style.display='none'">
+    <div class="profile-card" onclick="event.stopPropagation()">
+        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">Создать</h3>
+        <div id="create-options" style="display:flex; gap:10px; justify-content:center;">
+            <button onclick="showCreateForm(false)" style="flex:1; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Группу</button>
+            <button onclick="showCreateForm(true)" style="flex:1; padding:12px; background:var(--tg-bg); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Канал</button>
+        </div>
+        <div id="create-form" style="display:none; margin-top:15px;">
+            <input type="text" id="create-name" class="modal-input" placeholder="Название">
+            <select id="create-channel-type" class="modal-input" style="display:none; margin-top:10px;">
+                <option value="private">Частный канал (по приглашениям)</option>
+                <option value="public">Публичный канал (виден в поиске)</option>
+            </select>
+            <button onclick="confirmCreate()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Создать</button>
+        </div>
+    </div>
+</div>
 
 <div id="settings-modal" onclick="closeSettings()">
     <div class="profile-card" onclick="event.stopPropagation()">
@@ -194,14 +209,12 @@
                 <input type="checkbox" id="set-strangers" style="width:18px; height:18px;" onchange="saveSettings()">
                 <span style="font-size:14px; font-weight:bold;">Разрешить писать незнакомцам</span>
             </label>
-            <div style="font-size:11px; color:#888; margin-top:5px; margin-left:28px;">Если выключить, написать смогут только те, кто уже добавлен в контакты.</div>
         </div>
         <div class="gray-block">
             <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                 <input type="checkbox" id="set-rename" style="width:18px; height:18px;" onchange="saveSettings()">
                 <span style="font-size:14px; font-weight:bold;">Разрешить менять моё имя</span>
             </label>
-            <div style="font-size:11px; color:#888; margin-top:5px; margin-left:28px;">Позволяет другим пользователям локально переименовывать вас для себя.</div>
         </div>
         <div class="gray-block">
             <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
@@ -212,7 +225,6 @@
                     <option value="3">Через 3 дня</option>
                 </select>
             </label>
-            <div style="font-size:11px; color:#888; margin-top:5px;">Сообщения старше этого срока будут безвозвратно удаляться у всех. Максимум 3 дня.</div>
         </div>
         <div class="gray-block" style="text-align:center;">
             <button onclick="openIdModal()" style="width:100%; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🔄 Сменить ID</button>
@@ -238,6 +250,13 @@
 </div>
 
 <div id="context-menu" onclick="event.stopPropagation()">
+    <div style="display:flex; justify-content:space-around; padding:10px; border-bottom:1px solid #eee; font-size:22px; cursor:pointer; background:#f9f9f9;">
+        <span onclick="addReaction('👍')">👍</span>
+        <span onclick="addReaction('❤️')">❤️</span>
+        <span onclick="addReaction('😂')">😂</span>
+        <span onclick="addReaction('😢')">😢</span>
+        <span onclick="addReaction('🔥')">🔥</span>
+    </div>
     <div class="menu-item" onclick="prepareReply()">↩ Ответить</div>
     <div class="menu-item" onclick="prepareForward()">↪ Переслать</div>
     <div class="menu-item" onclick="copyMsg()">📋 Копировать</div>
@@ -263,10 +282,7 @@
     let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null, avatarCache = {}, msgCache = {}, localNames = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout, myAutoDeleteDays = 3;
     
-    // ПЕРЕМЕННЫЕ ЗАПИСИ АУДИО
-    let mediaRecorder;
-    let audioChunks = [];
-    let isRecording = false;
+    let mediaRecorder, audioChunks = [], isRecording = false;
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
@@ -434,6 +450,41 @@
 
     function saveLocalName(uid, val) { db.ref(`localNames/${me}/${uid}`).set(val.trim() || null); }
 
+    // --- СОЗДАНИЕ ГРУППЫ ИЛИ КАНАЛА ---
+    let isCreatingChannel = false;
+    function openCreateModal(e) {
+        e.stopPropagation();
+        document.getElementById('create-modal').style.display = 'flex';
+        document.getElementById('create-options').style.display = 'flex';
+        document.getElementById('create-form').style.display = 'none';
+        document.getElementById('create-name').value = '';
+    }
+    
+    function showCreateForm(isChannel) {
+        isCreatingChannel = isChannel;
+        document.getElementById('create-options').style.display = 'none';
+        document.getElementById('create-form').style.display = 'block';
+        document.getElementById('create-channel-type').style.display = isChannel ? 'block' : 'none';
+        document.getElementById('create-name').placeholder = isChannel ? "Название канала" : "Название группы";
+    }
+
+    async function confirmCreate() {
+        const n = document.getElementById('create-name').value.trim();
+        if(!n) return;
+        const id = 'grp_' + Date.now();
+        const data = { name: n, owner: me, members: {[me]: true} };
+        
+        if (isCreatingChannel) {
+            data.isChannel = true;
+            data.channelType = document.getElementById('create-channel-type').value;
+        }
+        
+        await db.ref(`groups/${id}`).set(data);
+        await db.ref(`contacts/${me}/${id}`).set(true);
+        document.getElementById('create-modal').style.display = 'none';
+        selectChat(id, true);
+    }
+
     function selectChat(id, isGrp = false) {
         if (targetId) { db.ref(getChatPath()+'/messages').off(); db.ref(getPinnedPath()).off(); if(!isGroup) db.ref(`status/${targetId}`).off(); }
         targetId = id; isGroup = isGrp;
@@ -441,6 +492,8 @@
         document.getElementById('chat-placeholder-box').style.display = 'none';
         document.getElementById('chat-header').style.display = 'flex';
         document.getElementById('messages').style.visibility = 'visible';
+        
+        // По умолчанию показываем форму ввода, но для каналов скроем, если не админ
         document.getElementById('form-container').style.display = 'block';
         document.getElementById('group-invite-btn').style.display = 'none';
 
@@ -452,7 +505,16 @@
             db.ref(`groups/${id}`).on('value', s => { 
                 const d = s.val(); if(!d) return; document.getElementById('header-title').innerText = d.name; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
-                document.getElementById('header-subtitle').innerText = "Групповой чат";
+                
+                // Проверка прав для канала
+                if (d.isChannel) {
+                    const canPost = (d.owner === me || (d.admins && d.admins[me]));
+                    document.getElementById('form-container').style.display = canPost ? 'block' : 'none';
+                    document.getElementById('header-subtitle').innerText = d.channelType === 'public' ? 'Публичный канал' : 'Частный канал';
+                } else {
+                    document.getElementById('form-container').style.display = 'block';
+                    document.getElementById('header-subtitle').innerText = "Групповой чат";
+                }
                 document.getElementById('group-invite-btn').style.display = (d.owner===me || (d.admins && d.admins[me])) ? 'block' : 'none';
             });
         } else {
@@ -474,6 +536,14 @@
         loadMessages();
     }
 
+    // --- РЕАКЦИИ ---
+    function addReaction(emoji) {
+        if(selectedMsg && selectedMsg.key) {
+            db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji);
+        }
+        closePopups();
+    }
+
     function loadMessages() {
         db.ref(getChatPath()+'/messages').on('value', snap => {
             let html = ''; 
@@ -493,7 +563,6 @@
                 const msgClass = m.sender === me ? 'sent' : 'received';
                 const data = m.type === 'text' ? decompress(m.text) : m.file;
                 
-                // СОХРАНЯЕМ ТИП ДЛЯ КЭША
                 if (m.type === 'audio') msgCache[key] = '🎤 Голосовое сообщение';
                 else if (m.type === 'image') msgCache[key] = '🖼️ Фотография';
                 else msgCache[key] = data;
@@ -509,17 +578,31 @@
 
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
                 
-                // РЕНДЕР АУДИО ИЛИ КАРТИНКИ
                 let content = '';
                 if (m.type === 'image') content = `<img src="${data}" style="max-width:100%; border-radius:10px">`;
                 else if (m.type === 'audio') content = `<audio controls src="${m.file}" style="max-width: 100%;"></audio>`;
                 else content = `<div>${data}</div>`;
+
+                // ОТРИСОВКА ПУЗЫРЬКОВ РЕАКЦИЙ
+                let reactionsHtml = '';
+                if (m.reactions) {
+                    const counts = {};
+                    for(let uid in m.reactions) {
+                        const e = m.reactions[uid];
+                        counts[e] = (counts[e]||0)+1;
+                    }
+                    let rBubbles = '';
+                    for(let e in counts) {
+                        rBubbles += `<span style="background:rgba(0,0,0,0.08); padding:3px 8px; border-radius:12px; font-size:13px; margin-right:4px;">${e} ${counts[e]}</span>`;
+                    }
+                    if(rBubbles) reactionsHtml = `<div style="margin-top:6px; display:flex; flex-wrap:wrap;">${rBubbles}</div>`;
+                }
                 
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
                 
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
-                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
+                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
                 </div>`;
             });
             
@@ -550,7 +633,10 @@
                 if(isGrp) {
                     db.ref(`groups/${id}`).on('value', s => {
                         const d = s.val(); if(d) {
-                            const label = document.getElementById(nameId); if(label) label.innerText = '👥 ' + (d.name || id);
+                            const label = document.getElementById(nameId); 
+                            // Для каналов ставим значок рупора, для групп - людей
+                            const iconTxt = d.isChannel ? '📢 ' : '👥 ';
+                            if(label) label.innerText = iconTxt + (d.name || id);
                             const icon = document.getElementById('av-'+id); if(d.avatar && icon) icon.src = d.avatar;
                         }
                     });
@@ -586,9 +672,9 @@
                 membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${mDisp} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
             }
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px;" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:10px;">НАЗВАНИЕ ГРУППЫ</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:10px;">
+                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:10px;">${d.isChannel ? 'НАЗВАНИЕ КАНАЛА' : 'НАЗВАНИЕ ГРУППЫ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:10px;">
                 <input type="text" class="modal-input" style="border:none; background:transparent; padding:0; margin-top:0;" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)"></div>
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">УЧАСТНИКИ</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:5px 15px;">${membersHtml}</div>`;
+                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">${d.isChannel ? 'ПОДПИСЧИКИ' : 'УЧАСТНИКИ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:5px 15px;">${membersHtml}</div>`;
         } else {
             const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val(); uploadTarget = 'avatar';
             const isVer = (uid === 'sanya' || uid === 'misha' || d.verified);
@@ -615,7 +701,7 @@
     function handleMsgClick(e, k, s) { 
         e.stopPropagation(); selectedMsg = {key:k, sender:s, text:msgCache[k]};
         const menu = document.getElementById('context-menu'); menu.style.display = 'block'; 
-        let x = e.clientX, y = e.clientY; const mw = 170, mh = 220;
+        let x = e.clientX, y = e.clientY; const mw = 170, mh = 280;
         if (x + mw > window.innerWidth) x = window.innerWidth - mw - 10; if (y + mh > window.innerHeight) y = window.innerHeight - mh - 10;
         menu.style.left = x + 'px'; menu.style.top = y + 'px'; 
         document.getElementById('menu-edit').style.display = (s===me) ? 'block' : 'none'; document.getElementById('menu-del').style.display = (s===me) ? 'block' : 'none'; 
@@ -675,7 +761,7 @@
     function jumpToPinned() { db.ref(getPinnedPath()).once('value', s => { if(s.exists()) jumpToMessage(s.val().key); }); }
     function cancelAction() { replyData=null; editingKey=null; document.getElementById('action-preview').style.display='none'; document.getElementById('input').value=''; document.getElementById('input').style.height='20px'; }
     function closePopups() { document.getElementById('context-menu').style.display='none'; document.getElementById('emoji-picker').style.display='none'; }
-    function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+    function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('create-modal').style.display = 'none'; }
     function toggleEmoji(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; }
     function goBack(e) { e.stopPropagation(); document.body.classList.remove('chat-open'); }
     function getChatPath() { return isGroup ? `groups/${targetId}` : `chats/${me < targetId ? me+'_'+targetId : targetId+'_'+me}`; }
@@ -685,7 +771,6 @@
     function handleTyping() { const i = document.getElementById('input'); i.style.height = '20px'; i.style.height = Math.min(i.scrollHeight - 24, 120) + 'px'; if(isGroup || targetId === me) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
     async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
     
-    // --- ЛОГИКА ЗАПИСИ ГОЛОСОВЫХ СООБЩЕНИЙ ---
     async function toggleRecord(e) {
         e.stopPropagation();
         const btn = document.getElementById('mic-btn');
@@ -760,7 +845,6 @@
         cancelAction(); 
     }
     
-    async function createGroup() { const n = prompt("Имя группы:"); if(n){ const id='grp_'+Date.now(); await db.ref(`groups/${id}`).set({name:n, owner:me, members:{[me]:true}}); await db.ref(`contacts/${me}/${id}`).set(true); selectChat(id,true); } }
     async function inviteToGroup() { const i = prompt("ID пользователя:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
     function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
     
