@@ -58,11 +58,17 @@
         .user-item.active { background: var(--tg-accent) !important; color: #fff !important; }
         
         .avatar-wrapper { position: relative; width: 50px; height: 50px; flex-shrink: 0; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; transition: border 0.3s; }
         .status-dot { width: 13px; height: 13px; border-radius: 50%; background: #ccc; position: absolute; bottom: 0; right: 0; border: 2.5px solid #fff; }
         .status-dot.online { background: var(--online); }
         .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; }
         .user-item:hover .del-btn { opacity: 1; }
+
+        /* МАГАЗИН: РАМКИ ДЛЯ АВАТАРОК */
+        .frame-gold { border: 3px solid #ffd700 !important; padding: 2px; background: #fff; box-shadow: 0 0 10px rgba(255,215,0,0.6); }
+        .frame-neon { border: 3px solid #00f3ff !important; padding: 2px; background: #fff; box-shadow: 0 0 12px #00f3ff; }
+        .frame-fire { border: 3px solid #ff4500 !important; padding: 2px; background: #fff; box-shadow: 0 0 12px #ff4500; }
+        .frame-diamond { border: 3px solid #b9f2ff !important; padding: 2px; background: #fff; box-shadow: 0 0 15px #b9f2ff; }
 
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; background: #fff; }
         #my-avatar { width: 50px !important; height: 50px !important; border-radius: 50%; object-fit: cover; cursor: pointer; }
@@ -76,7 +82,7 @@
         .msg-row { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; }
         .msg-row.sent { align-self: flex-end; flex-direction: row-reverse; }
         .msg-row.received { align-self: flex-start; }
-        .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; }
+        .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; transition: border 0.3s; }
         
         .msg { padding: 10px 40px 22px 14px; min-width: 80px; box-sizing: border-box; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; white-space: pre-wrap; }
         
@@ -107,15 +113,15 @@
         
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
 
-        #modal-overlay, #settings-modal, #id-modal, #forward-modal, #create-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        #settings-modal, #id-modal, #forward-modal, #create-modal { z-index: 10005; }
+        #modal-overlay, #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+        #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal { z-index: 10005; }
         
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
         .modal-input { border: 1.5px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; margin-top: 8px; outline: none; transition: 0.3s; }
         .gray-block { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-top: 15px; }
 
-        #context-menu { display: none; position: fixed; background: #fff; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; min-width: 170px; border: 1px solid #eee; overflow: hidden; }
+        #context-menu { display: none; position: fixed; background: #fff; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; min-width: 170px; max-width: 250px; border: 1px solid #eee; overflow: hidden; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
 
         @media (max-width: 768px) {
@@ -147,6 +153,7 @@
             <img id="my-avatar" src="" onclick="openProfile(me)">
             <div style="flex-grow:1;overflow:hidden;margin-left:12px; cursor:pointer;" onclick="openProfile(me)"><b id="my-name-display">...</b></div>
             <div onclick="openSettingsUI(event)" style="font-size:22px; cursor:pointer; color:var(--tg-accent); padding:5px;" title="Настройки">⚙️</div>
+            <div onclick="openQuestsModal(event)" style="font-size:22px; cursor:pointer; color:var(--tg-accent); padding:5px;" title="Задания">🎯</div>
         </div>
     </div>
 
@@ -233,6 +240,14 @@
     </div>
 </div>
 
+<div id="quests-modal" onclick="closeQuests()">
+    <div class="profile-card" onclick="event.stopPropagation()" id="quests-content"></div>
+</div>
+
+<div id="shop-modal" onclick="closeShop()">
+    <div class="profile-card" onclick="event.stopPropagation()" id="shop-content"></div>
+</div>
+
 <div id="id-modal" onclick="document.getElementById('id-modal').style.display='none'">
     <div class="profile-card" onclick="event.stopPropagation()">
         <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🔄 Смена ID</h3>
@@ -250,13 +265,7 @@
 </div>
 
 <div id="context-menu" onclick="event.stopPropagation()">
-    <div style="display:flex; justify-content:space-around; padding:10px; border-bottom:1px solid #eee; font-size:22px; cursor:pointer; background:#f9f9f9;">
-        <span onclick="addReaction('👍')">👍</span>
-        <span onclick="addReaction('❤️')">❤️</span>
-        <span onclick="addReaction('😂')">😂</span>
-        <span onclick="addReaction('😢')">😢</span>
-        <span onclick="addReaction('🔥')">🔥</span>
-    </div>
+    <div id="reaction-panel" style="display:flex; overflow-x:auto; padding:10px; border-bottom:1px solid #eee; font-size:24px; cursor:pointer; background:#f9f9f9; gap:15px;"></div>
     <div class="menu-item" onclick="prepareReply()">↩ Ответить</div>
     <div class="menu-item" onclick="prepareForward()">↪ Переслать</div>
     <div class="menu-item" onclick="copyMsg()">📋 Копировать</div>
@@ -279,10 +288,20 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null, avatarCache = {}, msgCache = {}, localNames = {};
+    let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null, avatarCache = {}, frameCache = {}, msgCache = {}, localNames = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout, myAutoDeleteDays = 3;
-    
     let mediaRecorder, audioChunks = [], isRecording = false;
+
+    // СИСТЕМА ЗАДАНИЙ И ЭКОНОМИКИ
+    let myCoins = 0, myInventory = { emojis: [] }, myStats = {}, myQuests = [], myEquippedFrame = '';
+    const shopItems = [
+        { id: 'emo_alien', type: 'emoji', name: 'Набор: 👽🤖👻', price: 30, value: '👽,🤖,👻' },
+        { id: 'emo_clown', type: 'emoji', name: 'Набор: 🤡💩🌚', price: 30, value: '🤡,💩,🌚' },
+        { id: 'frame_gold', type: 'frame', name: 'Золотая рамка', price: 50, value: 'frame-gold' },
+        { id: 'frame_neon', type: 'frame', name: 'Неоновая рамка', price: 100, value: 'frame-neon' },
+        { id: 'frame_fire', type: 'frame', name: 'Огненная рамка', price: 150, value: 'frame-fire' },
+        { id: 'frame_diamond', type: 'frame', name: 'Алмазная рамка', price: 200, value: 'frame-diamond' }
+    ];
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
@@ -336,12 +355,167 @@
         db.ref(`users/${me}`).on('value', s => { 
             const d = s.val(); if(d){ 
                 myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
+                myEquippedFrame = d.equippedFrame || '';
+                checkDailyQuests(d); // Проверка заданий
+                
                 const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 document.getElementById('my-name-display').innerHTML = (d.nickname || me) + tick; 
                 document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; 
+                document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
             }
         });
         loadContacts();
+    }
+
+    // --- СИСТЕМА ЗАДАНИЙ ---
+    function checkDailyQuests(d) {
+        const today = new Date().toDateString();
+        myStats = d.stats || { messagesToday: 0, reactionsToday: 0, loginStreak: 0, lastLogin: '' };
+        myCoins = d.coins || 0;
+        myInventory = d.inventory || { emojis: [] };
+        myQuests = d.quests || [];
+        
+        let isNewDay = (myStats.lastLogin !== today);
+        if (isNewDay) {
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            if (myStats.lastLogin === yesterday) myStats.loginStreak++;
+            else myStats.loginStreak = 1;
+            
+            myStats.lastLogin = today;
+            myStats.messagesToday = 0;
+            myStats.reactionsToday = 0;
+            
+            myQuests = [
+                { id: 'login', desc: 'Заходи 3 дня подряд', target: 3, progress: Math.min(myStats.loginStreak, 3), reward: 30, claimed: false },
+                { id: 'msg', desc: 'Отправь 5 сообщений', target: 5, progress: 0, reward: 10, claimed: false },
+                { id: 'react', desc: 'Поставь 3 реакции', target: 3, progress: 0, reward: 10, claimed: false }
+            ];
+            db.ref(`users/${me}/stats`).set(myStats);
+            db.ref(`users/${me}/quests`).set(myQuests);
+        }
+        updateDynamicEmojis();
+    }
+
+    async function updateQuestProgress(type, amount) {
+        if(type === 'msg') myStats.messagesToday += amount;
+        if(type === 'react') myStats.reactionsToday += amount;
+        
+        db.ref(`users/${me}/stats`).set(myStats);
+        
+        let changed = false;
+        myQuests.forEach(q => {
+            if(q.id === 'msg' && type === 'msg') { q.progress = myStats.messagesToday; changed = true; }
+            if(q.id === 'react' && type === 'react') { q.progress = myStats.reactionsToday; changed = true; }
+        });
+        if(changed) db.ref(`users/${me}/quests`).set(myQuests);
+    }
+
+    function openQuestsModal(e) {
+        if(e) e.stopPropagation();
+        let html = `<h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎯 Задания</h3>
+                    <div style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:18px;">Баланс: ${myCoins} 🪙</div>`;
+        
+        myQuests.forEach((q, i) => {
+            let progress = Math.min(q.progress, q.target);
+            let btnHtml = '';
+            if(q.claimed) btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Выполнено</button>`;
+            else if(progress >= q.target) btnHtml = `<button onclick="claimQuest(${i})" style="background:var(--online); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Забрать ${q.reward}🪙</button>`;
+            else btnHtml = `<div style="font-size:12px; color:#888;">${progress} / ${q.target}</div>`;
+            
+            html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;">
+                        <div style="font-size:14px; max-width:60%;">${q.desc}</div>
+                        ${btnHtml}
+                     </div>`;
+        });
+        
+        html += `<button onclick="openShopModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🛒 Магазин</button>
+                 <button onclick="closeQuests()" style="width:100%; margin-top:10px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>`;
+        
+        document.getElementById('quests-content').innerHTML = html;
+        document.getElementById('quests-modal').style.display = 'flex';
+    }
+
+    function closeQuests() { document.getElementById('quests-modal').style.display = 'none'; }
+
+    function claimQuest(index) {
+        const q = myQuests[index];
+        if(q.progress >= q.target && !q.claimed) {
+            q.claimed = true;
+            myCoins += q.reward;
+            db.ref(`users/${me}/coins`).set(myCoins);
+            db.ref(`users/${me}/quests`).set(myQuests);
+            openQuestsModal(); 
+        }
+    }
+
+    // --- МАГАЗИН ---
+    function openShopModal() {
+        document.getElementById('quests-modal').style.display = 'none';
+        let html = `<h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🛒 Магазин</h3>
+                    <div style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:18px;">Баланс: ${myCoins} 🪙</div>`;
+        
+        shopItems.forEach(item => {
+            let btnHtml = '';
+            if(myInventory[item.id]) {
+                if(item.type === 'frame') {
+                    let isEq = (myEquippedFrame === item.value);
+                    btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipFrame('${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Надеть</button>`;
+                } else {
+                    btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Куплено</button>`;
+                }
+            } else {
+                btnHtml = `<button onclick="buyItem('${item.id}', ${item.price}, '${item.type}', '${item.value}')" style="background:#ffb703; color:black; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold;">${item.price} 🪙</button>`;
+            }
+            html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;">
+                        <div style="font-size:14px;">${item.name}</div>
+                        ${btnHtml}
+                     </div>`;
+        });
+        
+        if(myEquippedFrame) {
+             html += `<button onclick="equipFrame('')" style="width:100%; margin-top:10px; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять рамку</button>`;
+        }
+        html += `<button onclick="openQuestsModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">⬅ Назад</button>`;
+        document.getElementById('shop-content').innerHTML = html;
+        document.getElementById('shop-modal').style.display = 'flex';
+    }
+
+    function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
+
+    function buyItem(id, price, type, val) {
+        if(myCoins < price) return alert("Недостаточно монет!");
+        if(myInventory[id]) return;
+        if(confirm(`Купить за ${price} монет?`)) {
+            myCoins -= price;
+            myInventory[id] = true;
+            if(type === 'emoji') {
+                if(!myInventory.emojis) myInventory.emojis = [];
+                myInventory.emojis.push(...val.split(','));
+            }
+            db.ref(`users/${me}/coins`).set(myCoins);
+            db.ref(`users/${me}/inventory`).set(myInventory);
+            openShopModal();
+            updateDynamicEmojis();
+        }
+    }
+
+    function equipFrame(val) {
+        db.ref(`users/${me}/equippedFrame`).set(val);
+        openShopModal();
+    }
+
+    function updateDynamicEmojis() {
+        const baseEmojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
+        let all = [...baseEmojis];
+        if(myInventory.emojis) all = all.concat(myInventory.emojis);
+        
+        const ep = document.getElementById('emoji-picker');
+        ep.innerHTML = '';
+        all.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
+        
+        const rp = document.getElementById('reaction-panel');
+        rp.innerHTML = '';
+        all.forEach(e => { const d = document.createElement('span'); d.innerText=e; d.onclick=()=>addReaction(e); rp.appendChild(d); });
     }
 
     function openSettingsUI(e) {
@@ -354,17 +528,8 @@
             document.getElementById('settings-modal').style.display = 'flex';
         });
     }
-    
     function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
     
-    function saveSettings() {
-        db.ref(`users/${me}/settings`).update({
-            allowStrangers: document.getElementById('set-strangers').checked,
-            allowRename: document.getElementById('set-rename').checked,
-            autoDeleteDays: parseInt(document.getElementById('set-autodelete').value) || 3
-        });
-    }
-
     function openIdModal() {
         document.getElementById('settings-modal').style.display = 'none';
         document.getElementById('new-id-input').value = '';
@@ -372,30 +537,6 @@
         document.getElementById('confirm-id-btn').disabled = true;
         document.getElementById('confirm-id-btn').style.opacity = '0.5';
         document.getElementById('id-modal').style.display = 'flex';
-    }
-
-    let idTimer;
-    function checkNewId() {
-        clearTimeout(idTimer);
-        const val = document.getElementById('new-id-input').value.trim().toLowerCase();
-        const st = document.getElementById('id-status');
-        const btn = document.getElementById('confirm-id-btn');
-        btn.disabled = true; btn.style.opacity = '0.5';
-
-        if(!val) { st.innerText = ''; return; }
-        if(/[^a-z0-9_]/.test(val)) { st.style.color = 'red'; st.innerText = '❌ Только англ. буквы и цифры'; return; }
-        if(val === me) { st.style.color = '#888'; st.innerText = 'Это ваш текущий ID'; return; }
-
-        st.style.color = '#888'; st.innerText = 'Проверка...';
-        idTimer = setTimeout(async () => {
-            const snap = await db.ref(`users/${val}`).once('value');
-            if(snap.exists()) {
-                st.style.color = 'red'; st.innerText = '❌ Занято';
-            } else {
-                st.style.color = 'var(--online)'; st.innerText = '✨ Свободно!';
-                btn.disabled = false; btn.style.opacity = '1';
-            }
-        }, 500);
     }
 
     async function confirmIdChange() {
@@ -450,7 +591,6 @@
 
     function saveLocalName(uid, val) { db.ref(`localNames/${me}/${uid}`).set(val.trim() || null); }
 
-    // --- СОЗДАНИЕ ГРУППЫ ИЛИ КАНАЛА ---
     let isCreatingChannel = false;
     function openCreateModal(e) {
         e.stopPropagation();
@@ -492,21 +632,19 @@
         document.getElementById('chat-placeholder-box').style.display = 'none';
         document.getElementById('chat-header').style.display = 'flex';
         document.getElementById('messages').style.visibility = 'visible';
-        
-        // По умолчанию показываем форму ввода, но для каналов скроем, если не админ
         document.getElementById('form-container').style.display = 'block';
         document.getElementById('group-invite-btn').style.display = 'none';
 
         if (id === me) {
             document.getElementById('header-title').innerHTML = "🔖 Избранное"; 
             document.getElementById('header-avatar').src = `https://robohash.org/${me}`;
+            document.getElementById('header-avatar').className = 'avatar ' + myEquippedFrame;
             document.getElementById('header-subtitle').innerText = "Сохраненные сообщения";
         } else if (isGroup) {
             db.ref(`groups/${id}`).on('value', s => { 
                 const d = s.val(); if(!d) return; document.getElementById('header-title').innerText = d.name; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
-                
-                // Проверка прав для канала
+                document.getElementById('header-avatar').className = 'avatar';
                 if (d.isChannel) {
                     const canPost = (d.owner === me || (d.admins && d.admins[me]));
                     document.getElementById('form-container').style.display = canPost ? 'block' : 'none';
@@ -524,6 +662,7 @@
                 const dispName = localNames[id] || d.nickname || id; 
                 document.getElementById('header-title').innerHTML = dispName + tick; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
+                document.getElementById('header-avatar').className = 'avatar ' + (frameCache[id] || '');
             });
             db.ref(`status/${id}`).on('value', s => { 
                 onlineStatus = s.val() || 'offline'; 
@@ -536,10 +675,10 @@
         loadMessages();
     }
 
-    // --- РЕАКЦИИ ---
     function addReaction(emoji) {
         if(selectedMsg && selectedMsg.key) {
             db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji);
+            updateQuestProgress('react', 1);
         }
         closePopups();
     }
@@ -554,7 +693,6 @@
 
             snap.forEach(c => {
                 const m = c.val(), key = c.key;
-                
                 if (now - m.time > maxMs || now - m.time > absoluteMaxMs) {
                     db.ref(getChatPath()+'/messages/'+key).remove();
                     return; 
@@ -577,13 +715,11 @@
                 }
 
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
-                
                 let content = '';
                 if (m.type === 'image') content = `<img src="${data}" style="max-width:100%; border-radius:10px">`;
                 else if (m.type === 'audio') content = `<audio controls src="${m.file}" style="max-width: 100%;"></audio>`;
                 else content = `<div>${data}</div>`;
 
-                // ОТРИСОВКА ПУЗЫРЬКОВ РЕАКЦИЙ
                 let reactionsHtml = '';
                 if (m.reactions) {
                     const counts = {};
@@ -598,7 +734,8 @@
                     if(rBubbles) reactionsHtml = `<div style="margin-top:6px; display:flex; flex-wrap:wrap;">${rBubbles}</div>`;
                 }
                 
-                let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar" onclick="openProfile('${m.sender}')">` : '';
+                let fClass = frameCache[m.sender] || '';
+                let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar ${fClass}" onclick="openProfile('${m.sender}')">` : '';
                 
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
@@ -607,7 +744,6 @@
             });
             
             const div = document.getElementById('messages'); div.innerHTML = html; div.scrollTop = div.scrollHeight;
-            
             if (Object.keys(unreadUpdates).length > 0) db.ref(getChatPath()+'/messages').update(unreadUpdates);
         });
     }
@@ -618,7 +754,7 @@
             
             const favItem = document.createElement('div'); 
             favItem.className=`user-item ${me === targetId ? 'active' : ''}`;
-            favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b>🔖 Избранное</b></div>`;
+            favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar ${myEquippedFrame}" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b>🔖 Избранное</b></div>`;
             favItem.onclick = () => selectChat(me, false); 
             div.appendChild(favItem);
             db.ref('users/'+me).on('value', s => { if(s.val() && s.val().avatar && document.getElementById('av-'+me)) document.getElementById('av-'+me).src = s.val().avatar; });
@@ -634,7 +770,6 @@
                     db.ref(`groups/${id}`).on('value', s => {
                         const d = s.val(); if(d) {
                             const label = document.getElementById(nameId); 
-                            // Для каналов ставим значок рупора, для групп - людей
                             const iconTxt = d.isChannel ? '📢 ' : '👥 ';
                             if(label) label.innerText = iconTxt + (d.name || id);
                             const icon = document.getElementById('av-'+id); if(d.avatar && icon) icon.src = d.avatar;
@@ -644,6 +779,10 @@
                     db.ref('users/'+id).on('value', s => { 
                         const d = s.val(); if(d) {
                             if(d.avatar) { document.getElementById('av-'+id).src=d.avatar; avatarCache[id] = d.avatar; }
+                            frameCache[id] = d.equippedFrame || '';
+                            const avEl = document.getElementById('av-'+id);
+                            if(avEl) avEl.className = 'avatar ' + frameCache[id];
+                            
                             const label = document.getElementById(nameId); 
                             if(label) {
                                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
@@ -679,7 +818,8 @@
             const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val(); uploadTarget = 'avatar';
             const isVer = (uid === 'sanya' || uid === 'misha' || d.verified);
             const locName = localNames[uid] || '';
-            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px; box-shadow: 0 10px 25px rgba(51,144,236,0.2);" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
+            const fClass = isMe ? myEquippedFrame : (frameCache[uid] || '');
+            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar ${fClass}" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
                 <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">О СЕБЕ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; margin-top:5px; padding:15px;">
                 <textarea id="m-desc" class="modal-input" style="border:none; background:transparent; padding:0; height:auto; min-height:40px;" ${!isMe?'disabled':''} onchange="updateProfile()">${d.description||''}</textarea></div>
                 
@@ -746,6 +886,7 @@
         });
         
         if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true);
+        updateQuestProgress('msg', 1);
         selectChat(target, isGrp);
     }
 
@@ -799,6 +940,7 @@
                         const base64Audio = reader.result;
                         db.ref(getChatPath()+'/messages').push({ sender: me, file: base64Audio, time: Date.now(), type: 'audio', read: false });
                         if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
+                        updateQuestProgress('msg', 1);
                     };
                     stream.getTracks().forEach(track => track.stop());
                 };
@@ -839,6 +981,7 @@
             if(replyData) o.replyTo=replyData; 
             db.ref(getChatPath()+'/messages').push(o); 
             if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
+            updateQuestProgress('msg', 1);
         } 
         i.value=''; 
         i.style.height='20px'; 
@@ -848,11 +991,7 @@
     async function inviteToGroup() { const i = prompt("ID пользователя:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
     function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
     
-    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now(), read: false}); }; }
-
-    const emojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
-    const ep = document.getElementById('emoji-picker');
-    emojis.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
+    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else { db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now(), read: false}); updateQuestProgress('msg', 1); } }; }
 
     window.onload = () => {
         const savedU = localStorage.getItem('petmess_user'); const savedP = localStorage.getItem('petmess_pass'); const expiry = localStorage.getItem('petmess_expiry');
