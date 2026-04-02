@@ -64,7 +64,6 @@
         .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; }
         .user-item:hover .del-btn { opacity: 1; }
 
-        /* МАГАЗИН: РАМКИ ДЛЯ АВАТАРОК */
         .frame-gold { border: 3px solid #ffd700 !important; padding: 2px; background: #fff; box-shadow: 0 0 10px rgba(255,215,0,0.6); }
         .frame-neon { border: 3px solid #00f3ff !important; padding: 2px; background: #fff; box-shadow: 0 0 12px #00f3ff; }
         .frame-fire { border: 3px solid #ff4500 !important; padding: 2px; background: #fff; box-shadow: 0 0 12px #ff4500; }
@@ -356,7 +355,7 @@
             const d = s.val(); if(d){ 
                 myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
                 myEquippedFrame = d.equippedFrame || '';
-                checkDailyQuests(d); // Проверка заданий
+                checkDailyQuests(d); 
                 
                 const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 document.getElementById('my-name-display').innerHTML = (d.nickname || me) + tick; 
@@ -367,7 +366,6 @@
         loadContacts();
     }
 
-    // --- СИСТЕМА ЗАДАНИЙ ---
     function checkDailyQuests(d) {
         const today = new Date().toDateString();
         myStats = d.stats || { messagesToday: 0, reactionsToday: 0, loginStreak: 0, lastLogin: '' };
@@ -376,19 +374,23 @@
         myQuests = d.quests || [];
         
         let isNewDay = (myStats.lastLogin !== today);
-        if (isNewDay) {
+        
+        // ИСПРАВЛЕНИЕ: Генерируем задания, если их нет вообще, даже если это не "Новый день"
+        if (isNewDay || !myQuests || myQuests.length === 0) {
             const yesterday = new Date(Date.now() - 86400000).toDateString();
             if (myStats.lastLogin === yesterday) myStats.loginStreak++;
-            else myStats.loginStreak = 1;
+            else if (isNewDay) myStats.loginStreak = 1; 
             
             myStats.lastLogin = today;
-            myStats.messagesToday = 0;
-            myStats.reactionsToday = 0;
+            if (isNewDay) {
+                myStats.messagesToday = 0;
+                myStats.reactionsToday = 0;
+            }
             
             myQuests = [
                 { id: 'login', desc: 'Заходи 3 дня подряд', target: 3, progress: Math.min(myStats.loginStreak, 3), reward: 30, claimed: false },
-                { id: 'msg', desc: 'Отправь 5 сообщений', target: 5, progress: 0, reward: 10, claimed: false },
-                { id: 'react', desc: 'Поставь 3 реакции', target: 3, progress: 0, reward: 10, claimed: false }
+                { id: 'msg', desc: 'Отправь 5 сообщений', target: 5, progress: myStats.messagesToday, reward: 10, claimed: false },
+                { id: 'react', desc: 'Поставь 3 реакции', target: 3, progress: myStats.reactionsToday, reward: 10, claimed: false }
             ];
             db.ref(`users/${me}/stats`).set(myStats);
             db.ref(`users/${me}/quests`).set(myQuests);
@@ -412,21 +414,27 @@
 
     function openQuestsModal(e) {
         if(e) e.stopPropagation();
+        document.getElementById('shop-modal').style.display = 'none'; // ИСПРАВЛЕНИЕ: закрываем магазин перед открытием заданий
+
         let html = `<h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎯 Задания</h3>
                     <div style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:18px;">Баланс: ${myCoins} 🪙</div>`;
         
-        myQuests.forEach((q, i) => {
-            let progress = Math.min(q.progress, q.target);
-            let btnHtml = '';
-            if(q.claimed) btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Выполнено</button>`;
-            else if(progress >= q.target) btnHtml = `<button onclick="claimQuest(${i})" style="background:var(--online); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Забрать ${q.reward}🪙</button>`;
-            else btnHtml = `<div style="font-size:12px; color:#888;">${progress} / ${q.target}</div>`;
-            
-            html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;">
-                        <div style="font-size:14px; max-width:60%;">${q.desc}</div>
-                        ${btnHtml}
-                     </div>`;
-        });
+        if (myQuests && myQuests.length > 0) {
+            myQuests.forEach((q, i) => {
+                let progress = Math.min(q.progress, q.target);
+                let btnHtml = '';
+                if(q.claimed) btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Выполнено</button>`;
+                else if(progress >= q.target) btnHtml = `<button onclick="claimQuest(${i})" style="background:var(--online); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Забрать ${q.reward}🪙</button>`;
+                else btnHtml = `<div style="font-size:12px; color:#888;">${progress} / ${q.target}</div>`;
+                
+                html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;">
+                            <div style="font-size:14px; max-width:60%;">${q.desc}</div>
+                            ${btnHtml}
+                         </div>`;
+            });
+        } else {
+            html += `<div style="text-align:center; color:#888; margin-bottom:15px;">Задания пока недоступны. Попробуйте обновить страницу.</div>`;
+        }
         
         html += `<button onclick="openShopModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🛒 Магазин</button>
                  <button onclick="closeQuests()" style="width:100%; margin-top:10px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>`;
@@ -448,7 +456,6 @@
         }
     }
 
-    // --- МАГАЗИН ---
     function openShopModal() {
         document.getElementById('quests-modal').style.display = 'none';
         let html = `<h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🛒 Магазин</h3>
