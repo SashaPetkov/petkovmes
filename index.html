@@ -64,7 +64,6 @@
         .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; }
         .user-item:hover .del-btn { opacity: 1; }
 
-        /* МАГАЗИННЫЕ РАМКИ */
         .frame-gold { border: 3px solid #ffd700 !important; box-shadow: 0 0 10px rgba(255,215,0,0.8); }
         .frame-neon { border: 3px solid #00f3ff !important; box-shadow: 0 0 12px #00f3ff; }
         .frame-fire { border: 3px solid #ff4500 !important; box-shadow: 0 0 12px #ff4500; }
@@ -72,7 +71,6 @@
         .frame-toxic { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14; }
         .frame-love { border: 3px solid #ff1493 !important; box-shadow: 0 0 15px #ff1493; }
         
-        /* НОВАЯ VIP РАМКА С АНИМАЦИЕЙ */
         @keyframes rgb-border { 
             0% {border-color: #ff0000; box-shadow: 0 0 15px #ff0000;} 
             33% {border-color: #00ff00; box-shadow: 0 0 15px #00ff00;} 
@@ -135,7 +133,6 @@
         #context-menu, #profile-menu { display: none; position: fixed; background: #fff; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; min-width: 170px; max-width: 250px; border: 1px solid #eee; overflow: hidden; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
 
-        /* ИГРЫ И МАГАЗИН */
         .tabs, .shop-tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 15px; }
         .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; color: #888; }
         .tab.active { color: var(--tg-accent); border-bottom: 2px solid var(--tg-accent); margin-bottom: -2px; }
@@ -213,12 +210,19 @@
         </div>
         <div id="messages"></div>
         <div id="form-container">
-            <div id="emoji-picker" style="display:none; position:absolute; bottom:80px; left:20px; background:white; padding:10px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1); z-index:100; flex-wrap:wrap; width:250px; max-height:200px; overflow-y:auto; gap:8px;"></div>
+            <div id="emoji-picker" style="display:none; position:absolute; bottom:80px; left:20px; background:white; padding:10px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1); z-index:100; width:260px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    <div id="ep-tab-emo" style="flex:1; text-align:center; cursor:pointer; font-weight:bold; color:var(--tg-accent);" onclick="switchEpTab('emo')">Эмодзи</div>
+                    <div id="ep-tab-st" style="flex:1; text-align:center; cursor:pointer; font-weight:bold; color:#888;" onclick="switchEpTab('st')">Стикеры</div>
+                </div>
+                <div id="ep-content-emo" style="display:flex; flex-wrap:wrap; gap:8px; max-height:150px; overflow-y:auto;"></div>
+                <div id="ep-content-st" style="display:none; flex-wrap:wrap; gap:8px; max-height:150px; overflow-y:auto;"></div>
+            </div>
             <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); background:rgba(0,0,0,0.03); margin-bottom:8px; border-radius:8px; align-items:center;"><div id="action-text" style="flex-grow:1; font-size:12px;"></div><div onclick="cancelAction()" style="cursor:pointer; font-size:20px;">×</div></div>
             <form id="form" onsubmit="sendMessage(event)" style="display:flex; align-items:flex-end; gap:12px;">
                 <label for="chat-file" style="font-size:24px; cursor:pointer; color:#bbb; padding-bottom:8px;">📎</label>
                 <input type="file" id="chat-file" style="display:none" accept="image/*" onchange="processFile(this)">
-                <div onclick="toggleEmoji(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
+                <div onclick="toggleEmojiWrapper(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px;">😊</div>
                 <textarea id="input" autocomplete="off" placeholder="Написать сообщение..." oninput="handleTyping()" onkeydown="handleEnter(event)"></textarea>
                 <div id="mic-btn" onclick="toggleRecord(event)" style="font-size:24px; cursor:pointer; padding-bottom:8px; color:#bbb; transition:0.3s;">🎤</div>
                 <button type="submit" id="send-btn" class="action-btn" style="background:var(--tg-accent); color:white; margin-bottom:2px;">➤</button>
@@ -301,8 +305,9 @@
         <div style="text-align:center; font-weight:bold; margin-bottom:10px; font-size:18px; flex-shrink:0;">Баланс: <span id="s-coins">0</span> 🪙</div>
         
         <div class="shop-tabs" style="flex-shrink:0;">
+            <div id="stab-set" class="shop-tab" onclick="switchShopTab('set')">Сеты 💎</div>
             <div id="stab-frame" class="shop-tab active" onclick="switchShopTab('frame')">Рамки</div>
-            <div id="stab-color" class="shop-tab" onclick="switchShopTab('color')">Цвет имени</div>
+            <div id="stab-color" class="shop-tab" onclick="switchShopTab('color')">Цвет</div>
             <div id="stab-status" class="shop-tab" onclick="switchShopTab('status')">Статусы</div>
             <div id="stab-sticker" class="shop-tab" onclick="switchShopTab('sticker')">Стикеры</div>
             <div id="stab-emoji" class="shop-tab" onclick="switchShopTab('emoji')">Эмодзи</div>
@@ -385,8 +390,11 @@
     let myEquippedFrame = '', myEquippedStatus = '', myEquippedColor = '';
     let currentShopTab = 'frame';
     
-    // БОЛЬШИЕ ЦЕНЫ И VIP ТОВАРЫ
+    // БОЛЬШИЕ ЦЕНЫ И СЕТЫ
     const shopItems = [
+        { id: 'set_starter', type: 'set', name: 'Набор Новичка (Неон + 2 пака эмодзи)', price: 400, items: ['frame_neon', 'emo_food', 'emo_sport'] },
+        { id: 'set_rgb', type: 'set', name: 'Сет Геймера (RGB рамка + VIP + 2 цвета)', price: 40000, items: ['frame_rainbow', 'stat_vip', 'col_magenta', 'col_cyan'] },
+        
         { id: 'stat_sleep', type: 'status', name: 'Статус: 💤', price: 100, value: '💤' },
         { id: 'stat_game', type: 'status', name: 'Статус: 🎮', price: 150, value: '🎮' },
         { id: 'stat_alien', type: 'status', name: 'Статус: 👽', price: 200, value: '👽' },
@@ -470,7 +478,6 @@
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('app-screen').style.display = 'flex';
         
-        // ЧТЕНИЕ ПРОФИЛЯ 1 РАЗ
         db.ref(`users/${me}`).once('value', s => { 
             const d = s.val() || {}; 
             myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
@@ -484,7 +491,6 @@
 
             checkDailyQuests(d); 
             
-            // ВЫДАЧА МОНЕТ БЕЗ ПЕТЛИ
             if (me === 'misha' || me === 'sanya') {
                 if (d.coins !== 999999999) { db.ref(`users/${me}/coins`).set(999999999); }
                 myCoins = 999999999;
@@ -493,7 +499,6 @@
             updateProfileUI(d);
         });
         
-        // Слушаем только важные апдейты
         db.ref(`users/${me}`).on('value', s => { updateProfileUI(s.val() || {}); });
         loadContacts();
     }
@@ -577,7 +582,7 @@
     // --- МАГАЗИН И ВКЛАДКИ ---
     function switchShopTab(tab) {
         currentShopTab = tab;
-        ['frame', 'color', 'status', 'sticker', 'emoji'].forEach(t => { document.getElementById('stab-'+t).className = (t === tab) ? 'shop-tab active' : 'shop-tab'; });
+        ['set', 'frame', 'color', 'status', 'sticker', 'emoji'].forEach(t => { document.getElementById('stab-'+t).className = (t === tab) ? 'shop-tab active' : 'shop-tab'; });
         renderShopItems();
     }
 
@@ -611,12 +616,13 @@
                         btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Куплено</button>`;
                     }
                 } else {
-                    btnHtml = `<button onclick="buyItem('${item.id}', ${item.price}, '${item.type}', '${item.value}')" style="background:#ffb703; color:black; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold;">${item.price} 🪙</button>`;
+                    btnHtml = `<button onclick="buyItem('${item.id}', ${item.price}, '${item.type}', '${item.value}')" style="background:#ffb703; color:black; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold; min-width:60px;">${item.price} 🪙</button>`;
                 }
                 
                 let displayName = item.name;
                 if(item.type === 'sticker') displayName = `<img src="${item.value}" height="30" style="vertical-align:middle; border-radius:5px; margin-right:5px;"> ${item.name}`;
                 if(item.type === 'color') displayName = `<span style="color:${item.value}; font-weight:bold;">${item.name}</span>`;
+                if(item.type === 'set') displayName = `<span style="font-weight:bold; color:var(--tg-accent);">${item.name}</span>`;
 
                 html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;"><div style="font-size:14px;">${displayName}</div>${btnHtml}</div>`;
             });
@@ -637,15 +643,33 @@
         if(myCoins < price) return customAlert("Недостаточно монет!");
         if(myInventory[id]) return;
         customConfirm(`Купить за ${price} монет?`, () => {
-            myCoins -= price; myInventory[id] = true;
+            myCoins -= price; 
+            myInventory[id] = true;
             
-            if(type === 'emoji') { 
-                let arr = myInventory.emojis ? (Array.isArray(myInventory.emojis) ? myInventory.emojis : Object.values(myInventory.emojis)) : [];
-                arr.push(...val.split(',')); myInventory.emojis = arr;
-            }
-            if(type === 'sticker') { 
-                let arr = myInventory.stickers ? (Array.isArray(myInventory.stickers) ? myInventory.stickers : Object.values(myInventory.stickers)) : [];
-                arr.push(val); myInventory.stickers = arr;
+            if(type === 'set') {
+                const setObj = shopItems.find(x => x.id === id);
+                setObj.items.forEach(itemId => {
+                    const subItem = shopItems.find(x => x.id === itemId);
+                    if(!subItem) return;
+                    myInventory[itemId] = true;
+                    if(subItem.type === 'emoji') { 
+                        let arr = myInventory.emojis ? (Array.isArray(myInventory.emojis) ? myInventory.emojis : Object.values(myInventory.emojis)) : [];
+                        arr.push(...subItem.value.split(',')); myInventory.emojis = arr;
+                    }
+                    if(subItem.type === 'sticker') { 
+                        let arr = myInventory.stickers ? (Array.isArray(myInventory.stickers) ? myInventory.stickers : Object.values(myInventory.stickers)) : [];
+                        arr.push(subItem.value); myInventory.stickers = arr;
+                    }
+                });
+            } else {
+                if(type === 'emoji') { 
+                    let arr = myInventory.emojis ? (Array.isArray(myInventory.emojis) ? myInventory.emojis : Object.values(myInventory.emojis)) : [];
+                    arr.push(...val.split(',')); myInventory.emojis = arr;
+                }
+                if(type === 'sticker') { 
+                    let arr = myInventory.stickers ? (Array.isArray(myInventory.stickers) ? myInventory.stickers : Object.values(myInventory.stickers)) : [];
+                    arr.push(val); myInventory.stickers = arr;
+                }
             }
             
             db.ref(`users/${me}/coins`).set(myCoins); db.ref(`users/${me}/inventory`).set(myInventory);
@@ -674,6 +698,21 @@
         renderShopItems(); loadContacts(); loadMessages(); 
     }
 
+    // --- ВКЛАДКИ ДЛЯ ЭМОДЗИ/СТИКЕРОВ ---
+    function toggleEmojiWrapper(e) {
+        e.stopPropagation();
+        const p = document.getElementById('emoji-picker');
+        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+        switchEpTab('emo'); // По умолчанию открываем эмодзи
+    }
+
+    function switchEpTab(tab) {
+        document.getElementById('ep-tab-emo').style.color = tab==='emo' ? 'var(--tg-accent)' : '#888';
+        document.getElementById('ep-tab-st').style.color = tab==='st' ? 'var(--tg-accent)' : '#888';
+        document.getElementById('ep-content-emo').style.display = tab==='emo' ? 'flex' : 'none';
+        document.getElementById('ep-content-st').style.display = tab==='st' ? 'flex' : 'none';
+    }
+
     function updateDynamicEmojis() {
         const baseEmojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
         let all = [...baseEmojis]; 
@@ -682,16 +721,19 @@
             all = all.concat(userEmojis);
         }
         
-        const ep = document.getElementById('emoji-picker'); ep.innerHTML = '';
-        all.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
+        const epEmo = document.getElementById('ep-content-emo'); epEmo.innerHTML = '';
+        all.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; epEmo.appendChild(d); });
         
-        if(myInventory.stickers) {
+        const epSt = document.getElementById('ep-content-st'); epSt.innerHTML = '';
+        if(myInventory.stickers && (Array.isArray(myInventory.stickers) ? myInventory.stickers.length > 0 : Object.keys(myInventory.stickers).length > 0)) {
             let userStickers = Array.isArray(myInventory.stickers) ? myInventory.stickers : Object.values(myInventory.stickers);
             userStickers.forEach(url => {
                 const img = document.createElement('img'); img.src = url; img.style.height="40px"; img.style.cursor="pointer"; img.style.borderRadius="8px";
-                img.onclick = () => { sendSticker(url); toggleEmoji({stopPropagation:()=>{}}); };
-                ep.appendChild(img);
+                img.onclick = () => { sendSticker(url); document.getElementById('emoji-picker').style.display='none'; };
+                epSt.appendChild(img);
             });
+        } else {
+            epSt.innerHTML = '<div style="font-size:12px; color:#888; width:100%; text-align:center; padding:10px;">Стикеры можно купить в магазине!</div>';
         }
         
         const rp = document.getElementById('reaction-panel'); rp.innerHTML = '';
@@ -750,7 +792,7 @@
         customAlert("Ваш ID успешно изменён! Приложение сейчас перезапустится.", () => { location.reload(); });
     }
 
-    // ИГРА WALL JUMPER С АНТИ-СПАМОМ ПРОБЕЛА
+    // ИГРА WALL JUMPER С АНТИ-СПАМОМ
     let isGamesOpen = false, canvas, ctx, gLoop, p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
     let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, lastJumpTime = 0;
 
@@ -788,9 +830,8 @@
 
     function gameJump() {
         const now = Date.now();
-        if(!isPlaying || !p.canJump || now - lastJumpTime < 250) return; // 250мс кулдаун - прощай спам пробелом
-        lastJumpTime = now;
-        p.vy = -9; p.vx = (p.x < 150) ? 4 : -4; p.canJump = false; 
+        if(!isPlaying || !p.canJump || now - lastJumpTime < 250) return; 
+        lastJumpTime = now; p.vy = -9; p.vx = (p.x < 150) ? 4 : -4; p.canJump = false; 
     }
 
     window.addEventListener('keydown', e => { if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); gameJump(); } });
@@ -872,17 +913,23 @@
             });
         } else {
             db.ref(`users/${id}`).on('value', s => { 
-                const d = s.val() || {}; if(!d.nickname && !d.avatar) return; 
-                const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
+                const d = s.val() || {}; 
+                // Создаем резервный ник, если нет nickname
                 const dispName = localNames[id] || d.nickname || id; 
+                const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 
                 colorCache[id] = d.equippedColor || '';
                 document.getElementById('header-title').innerHTML = dispName + tick; 
                 document.getElementById('header-title').style.color = colorCache[id] || 'inherit';
                 
                 document.getElementById('header-status').innerText = d.equippedStatus || '';
-                document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
-                document.getElementById('header-avatar').className = 'avatar ' + (frameCache[id] || '');
+                
+                // Фикс: всегда ставим аватар или заглушку
+                const avatarEl = document.getElementById('header-avatar');
+                if(avatarEl) {
+                    avatarEl.src = d.avatar || `https://robohash.org/${id}`;
+                    avatarEl.className = 'avatar ' + (frameCache[id] || '');
+                }
             });
             db.ref(`status/${id}`).on('value', s => { 
                 onlineStatus = s.val() || 'offline'; 
@@ -896,14 +943,18 @@
     }
 
     function addReaction(emoji) {
-        if(selectedMsg && selectedMsg.key) { db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji); updateQuestProgress('react', 1); }
+        if(selectedMsg && selectedMsg.key) {
+            db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji);
+            updateQuestProgress('react', 1);
+        }
         closePopups();
     }
 
     function loadMessages() {
         db.ref(getChatPath()+'/messages').on('value', snap => {
             let html = ''; let unreadUpdates = {}; const now = Date.now();
-            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000; const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
+            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000;
+            const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
 
             snap.forEach(c => {
                 const m = c.val(), key = c.key;
@@ -974,18 +1025,19 @@
                     });
                 } else {
                     db.ref('users/'+id).on('value', s => { 
-                        const d = s.val() || {}; if(d.nickname || d.avatar) {
-                            if(d.avatar) { document.getElementById('av-'+id).src=d.avatar; avatarCache[id] = d.avatar; }
-                            frameCache[id] = d.equippedFrame || ''; statusCache[id] = d.equippedStatus || ''; colorCache[id] = d.equippedColor || '';
-                            
-                            const avEl = document.getElementById('av-'+id); if(avEl) avEl.className = 'avatar ' + frameCache[id];
-                            const stEl = document.getElementById('st-'+id); if(stEl) stEl.innerText = statusCache[id];
-                            const label = document.getElementById(nameId); 
-                            if(label) {
-                                const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
-                                const dispName = localNames[id] || d.nickname || id; 
-                                label.innerHTML = `<span style="color:${colorCache[id]||'inherit'}">${dispName} ${tick}</span>`;
-                            }
+                        const d = s.val() || {}; 
+                        const icon = document.getElementById('av-'+id);
+                        if(icon) icon.src = d.avatar || `https://robohash.org/${id}`;
+                        
+                        frameCache[id] = d.equippedFrame || ''; statusCache[id] = d.equippedStatus || ''; colorCache[id] = d.equippedColor || '';
+                        
+                        if(icon) icon.className = 'avatar ' + frameCache[id];
+                        const stEl = document.getElementById('st-'+id); if(stEl) stEl.innerText = statusCache[id];
+                        const label = document.getElementById(nameId); 
+                        if(label) {
+                            const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
+                            const dispName = localNames[id] || d.nickname || id; 
+                            label.innerHTML = `<span style="color:${colorCache[id]||'inherit'}">${dispName} ${tick}</span>`;
                         }
                     });
                     db.ref('status/'+id).on('value', s => { if(document.getElementById('dot-'+id)) document.getElementById('dot-'+id).className = `status-dot ${s.val()==='online'?'online':''}`; });
@@ -1082,7 +1134,16 @@
     
     function closePopups() { document.getElementById('context-menu').style.display='none'; document.getElementById('emoji-picker').style.display='none'; document.getElementById('profile-menu').style.display='none'; }
     function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('create-modal').style.display = 'none'; }
-    function toggleEmoji(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; }
+    
+    // Вкладки Эмодзи/Стикеров
+    function toggleEmoji(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; switchEpTab('emo'); }
+    function switchEpTab(tab) {
+        document.getElementById('ep-tab-emo').style.color = tab==='emo' ? 'var(--tg-accent)' : '#888';
+        document.getElementById('ep-tab-st').style.color = tab==='st' ? 'var(--tg-accent)' : '#888';
+        document.getElementById('ep-content-emo').style.display = tab==='emo' ? 'flex' : 'none';
+        document.getElementById('ep-content-st').style.display = tab==='st' ? 'flex' : 'none';
+    }
+
     function goBack(e) { e.stopPropagation(); document.body.classList.remove('chat-open'); }
     function getChatPath() { return isGroup ? `groups/${targetId}` : `chats/${me < targetId ? me+'_'+targetId : targetId+'_'+me}`; }
     function getPinnedPath() { return getChatPath() + '/pinned'; }
@@ -1098,10 +1159,7 @@
     }
     
     async function toggleRecord(e) {
-        e.stopPropagation();
-        const btn = document.getElementById('mic-btn');
-        const inp = document.getElementById('input');
-        
+        e.stopPropagation(); const btn = document.getElementById('mic-btn'); const inp = document.getElementById('input');
         if (!isRecording) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1111,12 +1169,7 @@
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); audioChunks = [];
                     const reader = new FileReader(); reader.readAsDataURL(audioBlob);
-                    reader.onloadend = () => {
-                        const base64Audio = reader.result;
-                        db.ref(getChatPath()+'/messages').push({ sender: me, file: base64Audio, time: Date.now(), type: 'audio', read: false });
-                        if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
-                        updateQuestProgress('msg', 1);
-                    };
+                    reader.onloadend = () => { db.ref(getChatPath()+'/messages').push({ sender: me, file: reader.result, time: Date.now(), type: 'audio', read: false }); if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1); };
                     stream.getTracks().forEach(track => track.stop());
                 };
             } catch(err) { customAlert("Нет доступа к микрофону! Разрешите доступ в настройках устройства."); }
