@@ -24,7 +24,7 @@
                 --input-bg: #242f3d;
             }
             body { color: #fff; background: #0e1621; }
-            #sidebar, #chat-header, #form-container, .profile-card, #emoji-picker, #context-menu { background-color: #17212b !important; color: #fff; border-color: #0e1621 !important; }
+            #sidebar, #chat-header, #form-container, .profile-card, #emoji-picker, #context-menu, #profile-menu { background-color: #17212b !important; color: #fff; border-color: #0e1621 !important; }
             #input, #search-input { background: #242f3d !important; color: #fff; border-color: #101921 !important; }
             .modal-input { background: #1c2732 !important; color: #fff; border-color: #2b3948 !important; }
             .gray-block { background: #242f3d !important; border: 1px solid #101921; }
@@ -58,18 +58,19 @@
         .user-item.active { background: var(--tg-accent) !important; color: #fff !important; }
         
         .avatar-wrapper { position: relative; width: 50px; height: 50px; flex-shrink: 0; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; transition: border 0.3s; }
-        .status-dot { width: 13px; height: 13px; border-radius: 50%; background: #ccc; position: absolute; bottom: 0; right: 0; border: 2.5px solid #fff; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; transition: border 0.3s; box-sizing: border-box; }
+        .status-dot { width: 13px; height: 13px; border-radius: 50%; background: #ccc; position: absolute; bottom: 0; right: 0; border: 2.5px solid #fff; z-index: 2; }
         .status-dot.online { background: var(--online); }
         .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; }
         .user-item:hover .del-btn { opacity: 1; }
 
-        .frame-gold { border: 3px solid #ffd700 !important; padding: 2px; background: #fff; box-shadow: 0 0 10px rgba(255,215,0,0.6); }
-        .frame-neon { border: 3px solid #00f3ff !important; padding: 2px; background: #fff; box-shadow: 0 0 12px #00f3ff; }
-        .frame-fire { border: 3px solid #ff4500 !important; padding: 2px; background: #fff; box-shadow: 0 0 12px #ff4500; }
-        .frame-diamond { border: 3px solid #b9f2ff !important; padding: 2px; background: #fff; box-shadow: 0 0 15px #b9f2ff; }
+        /* ИСПРАВЛЕННЫЕ РАМКИ (четко ложатся на аватарку) */
+        .frame-gold { border: 3px solid #ffd700 !important; box-shadow: 0 0 8px rgba(255,215,0,0.8); }
+        .frame-neon { border: 3px solid #00f3ff !important; box-shadow: 0 0 10px #00f3ff; }
+        .frame-fire { border: 3px solid #ff4500 !important; box-shadow: 0 0 10px #ff4500; }
+        .frame-diamond { border: 3px solid #b9f2ff !important; box-shadow: 0 0 12px #b9f2ff; }
 
-        #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; background: #fff; }
+        #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; background: #fff; position: relative; }
         #my-avatar { width: 50px !important; height: 50px !important; border-radius: 50%; object-fit: cover; cursor: pointer; }
 
         #chat-placeholder-box { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; }
@@ -81,13 +82,11 @@
         .msg-row { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; }
         .msg-row.sent { align-self: flex-end; flex-direction: row-reverse; }
         .msg-row.received { align-self: flex-start; }
-        .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; transition: border 0.3s; }
+        .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; transition: border 0.3s; box-sizing: border-box; }
         
         .msg { padding: 10px 40px 22px 14px; min-width: 80px; box-sizing: border-box; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; white-space: pre-wrap; }
-        
         .sent .msg { background: var(--tg-sent); border-bottom-right-radius: 4px; }
         .received .msg { background: var(--tg-received); border-bottom-left-radius: 4px; }
-        
         .msg.highlight { animation: highlight-flash 2s ease; }
         @keyframes highlight-flash { 0% { background: #fff59d !important; } 100% { } }
         
@@ -112,16 +111,24 @@
         
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
 
-        #modal-overlay, #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal { z-index: 10005; }
+        #modal-overlay, #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal, #games-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+        #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal, #games-modal { z-index: 10005; }
         
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
         .modal-input { border: 1.5px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; margin-top: 8px; outline: none; transition: 0.3s; }
         .gray-block { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-top: 15px; }
 
-        #context-menu { display: none; position: fixed; background: #fff; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; min-width: 170px; max-width: 250px; border: 1px solid #eee; overflow: hidden; }
+        #context-menu, #profile-menu { display: none; position: fixed; background: #fff; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; min-width: 170px; max-width: 250px; border: 1px solid #eee; overflow: hidden; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
+        
+        /* ВКЛАДКИ ИГР */
+        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 15px; }
+        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; color: #888; }
+        .tab.active { color: var(--tg-accent); border-bottom: 2px solid var(--tg-accent); margin-bottom: -2px; }
+        
+        #gameCanvas { background: #e0f7fa; border-radius: 15px; width: 100%; height: 300px; display: block; margin: 0 auto; border: 2px solid #b2ebf2; cursor: pointer; }
+        .leaderboard-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
 
         @media (max-width: 768px) {
             #sidebar { width: 100%; position: absolute; inset: 0; transition: 0.3s; }
@@ -149,10 +156,13 @@
         <div id="search-container"><input type="text" id="search-input" placeholder="Найти пользователя..." oninput="searchUser(this.value)"><div id="search-results"></div></div>
         <div id="contacts"></div>
         <div id="my-profile">
-            <img id="my-avatar" src="" onclick="openProfile(me)">
-            <div style="flex-grow:1;overflow:hidden;margin-left:12px; cursor:pointer;" onclick="openProfile(me)"><b id="my-name-display">...</b></div>
-            <div onclick="openSettingsUI(event)" style="font-size:22px; cursor:pointer; color:var(--tg-accent); padding:5px;" title="Настройки">⚙️</div>
-            <div onclick="openQuestsModal(event)" style="font-size:22px; cursor:pointer; color:var(--tg-accent); padding:5px;" title="Задания">🎯</div>
+            <div class="avatar-wrapper" style="cursor:pointer;" onclick="openProfile(me)"><img id="my-avatar" src="" class="avatar"></div>
+            <div style="flex-grow:1;overflow:hidden;margin-left:12px; cursor:pointer; display:flex; align-items:center;" onclick="openProfile(me)">
+                <b id="my-name-display" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width: 140px;">...</b>
+                <span id="my-status-display" style="margin-left:5px; font-size:18px;"></span>
+            </div>
+            <!-- ЕДИНАЯ КНОПКА МЕНЮ -->
+            <div onclick="openProfileMenu(event)" style="font-size:24px; cursor:pointer; color:var(--tg-accent); padding:5px 15px; font-weight:bold;">⋮</div>
         </div>
     </div>
 
@@ -162,7 +172,10 @@
             <button id="back-btn" onclick="goBack(event)" style="display:none; font-size:24px; border:none; background:none; color:var(--tg-accent); cursor:pointer;">←</button>
             <img id="header-avatar" class="avatar" style="width:40px;height:40px; cursor:pointer;" onclick="openProfile(targetId)">
             <div style="flex-grow:1;overflow:hidden; margin-left: 10px; cursor:pointer;" onclick="openProfile(targetId)">
-                <div id="header-title" style="font-weight:700"></div>
+                <div style="display:flex; align-items:center;">
+                    <div id="header-title" style="font-weight:700"></div>
+                    <span id="header-status" style="margin-left:5px; font-size:14px;"></span>
+                </div>
                 <div id="header-subtitle" style="font-size:12px; color:#888;"></div>
             </div>
             <button id="group-invite-btn" style="display:none; padding:5px 12px; background:var(--tg-accent); color:white; border:none; border-radius:10px; font-weight:bold;" onclick="inviteToGroup(event)">+</button>
@@ -173,7 +186,7 @@
         </div>
         <div id="messages"></div>
         <div id="form-container">
-            <div id="emoji-picker" style="display:none; position:absolute; bottom:80px; left:20px; background:white; padding:10px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1); z-index:100; flex-wrap:wrap; width:200px; gap:8px;"></div>
+            <div id="emoji-picker" style="display:none; position:absolute; bottom:80px; left:20px; background:white; padding:10px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1); z-index:100; flex-wrap:wrap; width:250px; max-height:200px; overflow-y:auto; gap:8px;"></div>
             <div id="action-preview" style="display:none; padding:8px; border-left:4px solid var(--tg-accent); background:rgba(0,0,0,0.03); margin-bottom:8px; border-radius:8px; align-items:center;"><div id="action-text" style="flex-grow:1; font-size:12px;"></div><div onclick="cancelAction()" style="cursor:pointer; font-size:20px;">×</div></div>
             <form id="form" onsubmit="sendMessage(event)" style="display:flex; align-items:flex-end; gap:12px;">
                 <label for="chat-file" style="font-size:24px; cursor:pointer; color:#bbb; padding-bottom:8px;">📎</label>
@@ -188,6 +201,12 @@
 </div>
 
 <div id="modal-overlay" onclick="closeProfileModal()"><div class="profile-card" onclick="event.stopPropagation()" id="modal-content"></div></div>
+
+<div id="profile-menu" onclick="event.stopPropagation()">
+    <div class="menu-item" onclick="openSettingsUI(event)">⚙️ Настройки</div>
+    <div class="menu-item" onclick="openQuestsModal(event)">🎯 Задания</div>
+    <div class="menu-item" onclick="openGamesModal(event)">🎮 Игры</div>
+</div>
 
 <div id="create-modal" onclick="document.getElementById('create-modal').style.display='none'">
     <div class="profile-card" onclick="event.stopPropagation()">
@@ -224,7 +243,7 @@
         </div>
         <div class="gray-block">
             <label style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
-                <span style="font-size:14px; font-weight:bold;">Автоудаление сообщений</span>
+                <span style="font-size:14px; font-weight:bold;">Удаление сообщений</span>
                 <select id="set-autodelete" onchange="saveSettings()" class="modal-input" style="width:auto; margin:0; padding:8px; font-size:12px;">
                     <option value="1">Через 1 день</option>
                     <option value="2">Через 2 дня</option>
@@ -240,11 +259,40 @@
 </div>
 
 <div id="quests-modal" onclick="closeQuests()">
-    <div class="profile-card" onclick="event.stopPropagation()" id="quests-content"></div>
+    <div class="profile-card" onclick="event.stopPropagation()">
+        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎯 Задания</h3>
+        <div style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:18px;">Баланс: <span id="q-coins">0</span> 🪙</div>
+        <div id="quests-content" style="pointer-events: auto;"></div>
+        <button onclick="openShopModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🛒 Магазин</button>
+        <button onclick="closeQuests()" style="width:100%; margin-top:10px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>
+    </div>
 </div>
 
 <div id="shop-modal" onclick="closeShop()">
     <div class="profile-card" onclick="event.stopPropagation()" id="shop-content"></div>
+</div>
+
+<div id="games-modal" onclick="closeGames()">
+    <div class="profile-card" onclick="event.stopPropagation()" style="padding: 20px;">
+        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎮 Игры: Wall Jumper</h3>
+        <div class="tabs">
+            <div id="tab-offline" class="tab active" onclick="switchGameTab('offline')">Офлайн (Играть)</div>
+            <div id="tab-online" class="tab" onclick="switchGameTab('online')">Онлайн (Рейтинг)</div>
+        </div>
+        
+        <div id="game-offline-view">
+            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Жми на экран или на Пробел (отпуская его!), чтобы прыгать по стенам!</div>
+            <div style="text-align:center; font-weight:bold; font-size:20px; color:var(--tg-accent); margin-bottom:5px;">Счет: <span id="game-score">0</span></div>
+            <canvas id="gameCanvas" width="300" height="400"></canvas>
+            <button onclick="startGame()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Играть / Перезапуск</button>
+        </div>
+        
+        <div id="game-online-view" style="display:none; max-height:350px; overflow-y:auto;">
+            <div id="leaderboard-list">Загрузка...</div>
+        </div>
+
+        <button onclick="closeGames()" style="width:100%; margin-top:15px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>
+    </div>
 </div>
 
 <div id="id-modal" onclick="document.getElementById('id-modal').style.display='none'">
@@ -287,27 +335,30 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null, avatarCache = {}, frameCache = {}, msgCache = {}, localNames = {};
+    let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null;
+    let avatarCache = {}, frameCache = {}, statusCache = {}, msgCache = {}, localNames = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout, myAutoDeleteDays = 3;
     let mediaRecorder, audioChunks = [], isRecording = false;
 
     // СИСТЕМА ЗАДАНИЙ И ЭКОНОМИКИ
-    let myCoins = 0, myInventory = { emojis: [] }, myStats = {}, myQuests = [], myEquippedFrame = '';
+    let myCoins = 0, myInventory = { emojis: [], stickers: [] }, myStats = {}, myQuests = [], myEquippedFrame = '', myEquippedStatus = '';
+    
+    // В МАГАЗИН ДОБАВЛЕНЫ СТАТУСЫ И АНИМИРОВАННЫЕ СТИКЕРЫ (GIF)
     const shopItems = [
-        { id: 'emo_alien', type: 'emoji', name: 'Набор: 👽🤖👻', price: 30, value: '👽,🤖,👻' },
-        { id: 'emo_clown', type: 'emoji', name: 'Набор: 🤡💩🌚', price: 30, value: '🤡,💩,🌚' },
-        { id: 'frame_gold', type: 'frame', name: 'Золотая рамка', price: 50, value: 'frame-gold' },
-        { id: 'frame_neon', type: 'frame', name: 'Неоновая рамка', price: 100, value: 'frame-neon' },
-        { id: 'frame_fire', type: 'frame', name: 'Огненная рамка', price: 150, value: 'frame-fire' },
-        { id: 'frame_diamond', type: 'frame', name: 'Алмазная рамка', price: 200, value: 'frame-diamond' }
+        { id: 'stat_king', type: 'status', name: 'Статус: 👑', price: 50, value: '👑' },
+        { id: 'stat_fire', type: 'status', name: 'Статус: 🔥', price: 50, value: '🔥' },
+        { id: 'stat_alien', type: 'status', name: 'Статус: 👽', price: 50, value: '👽' },
+        { id: 'st_cat', type: 'sticker', name: 'Стикер: Крутой кот', price: 40, value: 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif' },
+        { id: 'st_dog', type: 'sticker', name: 'Стикер: Собака', price: 40, value: 'https://media.giphy.com/media/mCRJDo24UvJMA/giphy.gif' },
+        { id: 'emo_alien', type: 'emoji', name: 'Эмодзи: 👽🤖👻', price: 30, value: '👽,🤖,👻' },
+        { id: 'emo_clown', type: 'emoji', name: 'Эмодзи: 🤡💩🌚', price: 30, value: '🤡,💩,🌚' },
+        { id: 'frame_gold', type: 'frame', name: 'Золотая рамка', price: 100, value: 'frame-gold' },
+        { id: 'frame_neon', type: 'frame', name: 'Неоновая рамка', price: 150, value: 'frame-neon' }
     ];
 
     const compress = (v) => LZString.compressToUTF16(v);
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
-    const formatTime = (t) => {
-        const d = new Date(t);
-        return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
-    };
+    const formatTime = (t) => { const d = new Date(t); return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0'); };
 
     let authTimer;
     function checkAuthId() {
@@ -320,11 +371,8 @@
         st.style.color = '#888'; st.innerText = 'Проверка...';
         authTimer = setTimeout(async () => {
             const snap = await db.ref(`users/${val}`).once('value');
-            if(snap.exists()) {
-                st.style.color = 'var(--tg-accent)'; st.innerText = '🔹 Аккаунт найден (введите пароль)';
-            } else {
-                st.style.color = 'var(--online)'; st.innerText = '✨ Свободно (будет создан аккаунт)';
-            }
+            if(snap.exists()) { st.style.color = 'var(--tg-accent)'; st.innerText = '🔹 Аккаунт найден (введите пароль)'; } 
+            else { st.style.color = 'var(--online)'; st.innerText = '✨ Свободно (будет создан аккаунт)'; }
         }, 500);
     }
 
@@ -355,10 +403,12 @@
             const d = s.val(); if(d){ 
                 myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
                 myEquippedFrame = d.equippedFrame || '';
+                myEquippedStatus = d.equippedStatus || '';
                 checkDailyQuests(d); 
                 
                 const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 document.getElementById('my-name-display').innerHTML = (d.nickname || me) + tick; 
+                document.getElementById('my-status-display').innerText = myEquippedStatus;
                 document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; 
                 document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
             }
@@ -366,26 +416,33 @@
         loadContacts();
     }
 
+    // МЕНЮ ПРОФИЛЯ
+    function openProfileMenu(e) {
+        e.stopPropagation();
+        closePopups();
+        const menu = document.getElementById('profile-menu');
+        menu.style.display = 'block';
+        menu.style.bottom = '80px'; 
+        menu.style.left = '20px';
+    }
+
+    // ЗАДАНИЯ
     function checkDailyQuests(d) {
         const today = new Date().toDateString();
         myStats = d.stats || { messagesToday: 0, reactionsToday: 0, loginStreak: 0, lastLogin: '' };
         myCoins = d.coins || 0;
-        myInventory = d.inventory || { emojis: [] };
+        myInventory = d.inventory || { emojis: [], stickers: [] };
         myQuests = d.quests || [];
         
         let isNewDay = (myStats.lastLogin !== today);
         
-        // ИСПРАВЛЕНИЕ: Генерируем задания, если их нет вообще, даже если это не "Новый день"
         if (isNewDay || !myQuests || myQuests.length === 0) {
             const yesterday = new Date(Date.now() - 86400000).toDateString();
             if (myStats.lastLogin === yesterday) myStats.loginStreak++;
             else if (isNewDay) myStats.loginStreak = 1; 
             
             myStats.lastLogin = today;
-            if (isNewDay) {
-                myStats.messagesToday = 0;
-                myStats.reactionsToday = 0;
-            }
+            if (isNewDay) { myStats.messagesToday = 0; myStats.reactionsToday = 0; }
             
             myQuests = [
                 { id: 'login', desc: 'Заходи 3 дня подряд', target: 3, progress: Math.min(myStats.loginStreak, 3), reward: 30, claimed: false },
@@ -401,7 +458,6 @@
     async function updateQuestProgress(type, amount) {
         if(type === 'msg') myStats.messagesToday += amount;
         if(type === 'react') myStats.reactionsToday += amount;
-        
         db.ref(`users/${me}/stats`).set(myStats);
         
         let changed = false;
@@ -414,48 +470,46 @@
 
     function openQuestsModal(e) {
         if(e) e.stopPropagation();
-        document.getElementById('shop-modal').style.display = 'none'; // ИСПРАВЛЕНИЕ: закрываем магазин перед открытием заданий
-
-        let html = `<h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎯 Задания</h3>
-                    <div style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:18px;">Баланс: ${myCoins} 🪙</div>`;
+        closePopups();
+        document.getElementById('shop-modal').style.display = 'none';
+        document.getElementById('q-coins').innerText = myCoins;
         
-        if (myQuests && myQuests.length > 0) {
-            myQuests.forEach((q, i) => {
-                let progress = Math.min(q.progress, q.target);
-                let btnHtml = '';
-                if(q.claimed) btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Выполнено</button>`;
-                else if(progress >= q.target) btnHtml = `<button onclick="claimQuest(${i})" style="background:var(--online); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Забрать ${q.reward}🪙</button>`;
-                else btnHtml = `<div style="font-size:12px; color:#888;">${progress} / ${q.target}</div>`;
-                
-                html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;">
-                            <div style="font-size:14px; max-width:60%;">${q.desc}</div>
-                            ${btnHtml}
-                         </div>`;
-            });
-        } else {
-            html += `<div style="text-align:center; color:#888; margin-bottom:15px;">Задания пока недоступны. Попробуйте обновить страницу.</div>`;
-        }
-        
-        html += `<button onclick="openShopModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🛒 Магазин</button>
-                 <button onclick="closeQuests()" style="width:100%; margin-top:10px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>`;
-        
+        let html = '';
+        myQuests.forEach((q, i) => {
+            let progress = Math.min(q.progress, q.target);
+            let btnHtml = q.claimed ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Выполнено</button>`
+                                    : (progress >= q.target ? `<button onclick="claimQuest(${i}, this)" style="background:var(--online); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Забрать ${q.reward}🪙</button>`
+                                                            : `<div style="font-size:12px; color:#888;">${progress} / ${q.target}</div>`);
+            html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;">
+                        <div style="font-size:14px; max-width:60%;">${q.desc}</div>${btnHtml}
+                     </div>`;
+        });
         document.getElementById('quests-content').innerHTML = html;
         document.getElementById('quests-modal').style.display = 'flex';
     }
 
     function closeQuests() { document.getElementById('quests-modal').style.display = 'none'; }
 
-    function claimQuest(index) {
+    function claimQuest(index, btn) {
+        btn.disabled = true; // Защита от накрутки
+        btn.style.opacity = '0.5';
+        
         const q = myQuests[index];
         if(q.progress >= q.target && !q.claimed) {
             q.claimed = true;
             myCoins += q.reward;
-            db.ref(`users/${me}/coins`).set(myCoins);
-            db.ref(`users/${me}/quests`).set(myQuests);
-            openQuestsModal(); 
+            
+            let updates = {};
+            updates[`users/${me}/coins`] = myCoins;
+            updates[`users/${me}/quests`] = myQuests;
+            db.ref().update(updates).then(() => {
+                document.getElementById('q-coins').innerText = myCoins;
+                btn.outerHTML = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Выполнено</button>`;
+            });
         }
     }
 
+    // МАГАЗИН И СТАТУСЫ
     function openShopModal() {
         document.getElementById('quests-modal').style.display = 'none';
         let html = `<h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🛒 Магазин</h3>
@@ -466,7 +520,10 @@
             if(myInventory[item.id]) {
                 if(item.type === 'frame') {
                     let isEq = (myEquippedFrame === item.value);
-                    btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipFrame('${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Надеть</button>`;
+                    btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipItem('${item.type}', '${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Надеть</button>`;
+                } else if(item.type === 'status') {
+                    let isEq = (myEquippedStatus === item.value);
+                    btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipItem('${item.type}', '${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Поставить</button>`;
                 } else {
                     btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Куплено</button>`;
                 }
@@ -474,15 +531,18 @@
                 btnHtml = `<button onclick="buyItem('${item.id}', ${item.price}, '${item.type}', '${item.value}')" style="background:#ffb703; color:black; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold;">${item.price} 🪙</button>`;
             }
             html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;">
-                        <div style="font-size:14px;">${item.name}</div>
+                        <div style="font-size:14px;">${item.type==='sticker'?`<img src="${item.value}" height="30" style="vertical-align:middle"> `:''}${item.name}</div>
                         ${btnHtml}
                      </div>`;
         });
         
-        if(myEquippedFrame) {
-             html += `<button onclick="equipFrame('')" style="width:100%; margin-top:10px; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять рамку</button>`;
-        }
+        let resetBtns = '';
+        if(myEquippedFrame) resetBtns += `<button onclick="equipItem('frame', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять рамку</button>`;
+        if(myEquippedStatus) resetBtns += `<button onclick="equipItem('status', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять статус</button>`;
+        
+        if(resetBtns) html += `<div style="display:flex; gap:10px; margin-top:10px;">${resetBtns}</div>`;
         html += `<button onclick="openQuestsModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">⬅ Назад</button>`;
+        
         document.getElementById('shop-content').innerHTML = html;
         document.getElementById('shop-modal').style.display = 'flex';
     }
@@ -495,10 +555,9 @@
         if(confirm(`Купить за ${price} монет?`)) {
             myCoins -= price;
             myInventory[id] = true;
-            if(type === 'emoji') {
-                if(!myInventory.emojis) myInventory.emojis = [];
-                myInventory.emojis.push(...val.split(','));
-            }
+            if(type === 'emoji') { if(!myInventory.emojis) myInventory.emojis = []; myInventory.emojis.push(...val.split(',')); }
+            if(type === 'sticker') { if(!myInventory.stickers) myInventory.stickers = []; myInventory.stickers.push(val); }
+            
             db.ref(`users/${me}/coins`).set(myCoins);
             db.ref(`users/${me}/inventory`).set(myInventory);
             openShopModal();
@@ -506,8 +565,9 @@
         }
     }
 
-    function equipFrame(val) {
-        db.ref(`users/${me}/equippedFrame`).set(val);
+    function equipItem(type, val) {
+        if(type === 'frame') db.ref(`users/${me}/equippedFrame`).set(val);
+        if(type === 'status') db.ref(`users/${me}/equippedStatus`).set(val);
         openShopModal();
     }
 
@@ -520,13 +580,30 @@
         ep.innerHTML = '';
         all.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
         
+        if(myInventory.stickers) {
+            myInventory.stickers.forEach(url => {
+                const img = document.createElement('img'); img.src = url; img.style.height="40px"; img.style.cursor="pointer";
+                img.onclick = () => { sendSticker(url); toggleEmoji({stopPropagation:()=>{}}); };
+                ep.appendChild(img);
+            });
+        }
+        
         const rp = document.getElementById('reaction-panel');
         rp.innerHTML = '';
         all.forEach(e => { const d = document.createElement('span'); d.innerText=e; d.onclick=()=>addReaction(e); rp.appendChild(d); });
     }
 
+    function sendSticker(url) {
+        db.ref(getChatPath()+'/messages').push({ sender: me, file: url, time: Date.now(), type: 'image', read: false });
+        if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
+        updateQuestProgress('msg', 1);
+        document.getElementById('input').style.height='20px'; cancelAction();
+    }
+
+    // НАСТРОЙКИ
     function openSettingsUI(e) {
-        e.stopPropagation();
+        if(e) e.stopPropagation();
+        closePopups();
         db.ref(`users/${me}`).once('value', s => {
             const d = s.val();
             document.getElementById('set-strangers').checked = d.settings?.allowStrangers !== false; 
@@ -536,7 +613,9 @@
         });
     }
     function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
-    
+    function saveSettings() { db.ref(`users/${me}/settings`).update({ allowStrangers: document.getElementById('set-strangers').checked, allowRename: document.getElementById('set-rename').checked, autoDeleteDays: parseInt(document.getElementById('set-autodelete').value) || 3 }); }
+
+    // СМЕНА ID
     function openIdModal() {
         document.getElementById('settings-modal').style.display = 'none';
         document.getElementById('new-id-input').value = '';
@@ -550,24 +629,17 @@
         const newId = document.getElementById('new-id-input').value.trim().toLowerCase();
         const btn = document.getElementById('confirm-id-btn');
         btn.disabled = true; btn.innerText = "Обновление...";
-        document.getElementById('id-modal').style.display = 'none';
-        document.getElementById('app-screen').style.display = 'none';
+        document.getElementById('id-modal').style.display = 'none'; document.getElementById('app-screen').style.display = 'none';
         
-        const s = await db.ref(`users/${me}`).once('value');
-        const d = s.val();
+        const s = await db.ref(`users/${me}`).once('value'); const d = s.val();
         await db.ref(`users/${newId}`).set(d);
         
         const myContacts = await db.ref(`contacts/${me}`).once('value');
         if (myContacts.exists()) {
             await db.ref(`contacts/${newId}`).set(myContacts.val());
             myContacts.forEach(c => {
-                if (!c.key.startsWith('grp_')) {
-                    db.ref(`contacts/${c.key}/${me}`).remove();
-                    db.ref(`contacts/${c.key}/${newId}`).set(true);
-                } else {
-                    db.ref(`groups/${c.key}/members/${me}`).remove();
-                    db.ref(`groups/${c.key}/members/${newId}`).set(true);
-                }
+                if (!c.key.startsWith('grp_')) { db.ref(`contacts/${c.key}/${me}`).remove(); db.ref(`contacts/${c.key}/${newId}`).set(true); } 
+                else { db.ref(`groups/${c.key}/members/${me}`).remove(); db.ref(`groups/${c.key}/members/${newId}`).set(true); }
             });
         }
         
@@ -577,81 +649,185 @@
             if (parts[0] === me || parts[1] === me) {
                 const other = parts[0] === me ? parts[1] : parts[0];
                 const newKey = newId < other ? `${newId}_${other}` : `${other}_${newId}`;
-                db.ref(`chats/${newKey}`).set(c.val());
-                db.ref(`chats/${c.key}`).remove();
+                db.ref(`chats/${newKey}`).set(c.val()); db.ref(`chats/${c.key}`).remove();
             }
         });
 
         const localNamesSnap = await db.ref(`localNames/${me}`).once('value');
-        if (localNamesSnap.exists()) {
-            await db.ref(`localNames/${newId}`).set(localNamesSnap.val());
-            await db.ref(`localNames/${me}`).remove();
+        if (localNamesSnap.exists()) { await db.ref(`localNames/${newId}`).set(localNamesSnap.val()); await db.ref(`localNames/${me}`).remove(); }
+        
+        await db.ref(`users/${me}`).remove(); await db.ref(`contacts/${me}`).remove();
+        localStorage.setItem('petmess_user', newId);
+        alert("Ваш ID успешно изменён! Приложение сейчас перезапустится."); location.reload();
+    }
+
+    // ИГРА WALL JUMPER
+    let isGamesOpen = false;
+    let canvas, ctx, gLoop;
+    let p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
+    let gWalls = [];
+    let gScore = 0;
+    let gCameraY = 0;
+    let isPlaying = false;
+
+    function openGamesModal(e) {
+        if(e) e.stopPropagation();
+        closePopups();
+        document.getElementById('games-modal').style.display = 'flex';
+        isGamesOpen = true;
+        switchGameTab('offline');
+    }
+    
+    function closeGames() { 
+        document.getElementById('games-modal').style.display = 'none'; 
+        isGamesOpen = false;
+        isPlaying = false;
+        cancelAnimationFrame(gLoop);
+    }
+    
+    function switchGameTab(tab) {
+        document.getElementById('tab-offline').className = tab === 'offline' ? 'tab active' : 'tab';
+        document.getElementById('tab-online').className = tab === 'online' ? 'tab active' : 'tab';
+        document.getElementById('game-offline-view').style.display = tab === 'offline' ? 'block' : 'none';
+        document.getElementById('game-online-view').style.display = tab === 'online' ? 'block' : 'none';
+        
+        if(tab === 'online') {
+            document.getElementById('leaderboard-list').innerHTML = 'Загрузка...';
+            db.ref('leaderboards/walljumper').orderByValue().limitToLast(10).once('value', s => {
+                let html = '';
+                let arr = [];
+                s.forEach(c => { arr.unshift({id: c.key, score: c.val()}); });
+                arr.forEach((a, i) => {
+                    let medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1+'.');
+                    html += `<div class="leaderboard-item"><span>${medal} ${a.id}</span> <b>${a.score}</b></div>`;
+                });
+                document.getElementById('leaderboard-list').innerHTML = html || 'Пока нет рекордов!';
+            });
+        }
+    }
+
+    function startGame() {
+        canvas = document.getElementById('gameCanvas');
+        ctx = canvas.getContext('2d');
+        p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
+        gWalls = [ {x: 0, y: -1000, w: 40, h: 2000}, {x: 260, y: -1000, w: 40, h: 2000} ];
+        gScore = 0; gCameraY = 0; isPlaying = true;
+        document.getElementById('game-score').innerText = gScore;
+        
+        // Генерация случайных стен в центре
+        for(let i=0; i<15; i++) {
+            gWalls.push({x: 100 + Math.random()*60, y: 200 - i*150, w: 20 + Math.random()*20, h: 80});
         }
         
-        await db.ref(`users/${me}`).remove();
-        await db.ref(`contacts/${me}`).remove();
+        cancelAnimationFrame(gLoop);
+        updateGame();
+    }
+
+    function gameJump() {
+        if(!isPlaying || !p.canJump) return;
+        p.vy = -9;
+        p.vx = (p.x < 150) ? 4 : -4; 
+        p.canJump = false; // СТРОГО: Прыгать можно только один раз, пока не коснешься стены
+    }
+
+    // ИСПРАВЛЕНИЕ: Блокировка зажатия пробела (согласно User History "Я опять могу по стене вверх взлетать если при подлете буду пробел зажимать")
+    window.addEventListener('keydown', e => {
+        if(e.code === 'Space' && isGamesOpen) {
+            e.preventDefault();
+            if(!e.repeat) gameJump(); 
+        }
+    });
+    
+    // Для мобилок клик по канвасу
+    document.getElementById('gameCanvas')?.addEventListener('pointerdown', e => {
+        e.preventDefault(); gameJump();
+    });
+
+    function updateGame() {
+        if(!isPlaying) return;
+        p.vy += 0.4; // гравитация
+        p.x += p.vx;
+        p.y += p.vy;
         
-        localStorage.setItem('petmess_user', newId);
-        alert("Ваш ID успешно изменён! Приложение сейчас перезапустится.");
-        location.reload();
+        // Коллизии со стенами
+        let touchedWall = false;
+        gWalls.forEach(w => {
+            if(p.x < w.x + w.w && p.x + p.w > w.x && p.y < w.y + w.h && p.y + p.h > w.y) {
+                // Выталкиваем
+                if(p.vx > 0 && p.x < w.x) p.x = w.x - p.w;
+                else if(p.vx < 0 && p.x + p.w > w.x + w.w) p.x = w.x + w.w;
+                
+                p.vx = 0; p.vy = Math.min(p.vy, 2); // Скользим вниз
+                touchedWall = true;
+            }
+        });
+        
+        if(touchedWall) p.canJump = true; // Сброс прыжка только у стены
+        
+        if(p.y < 350 - gScore) { gScore = Math.floor(350 - p.y); document.getElementById('game-score').innerText = gScore; }
+        if(p.y < 200 + gCameraY) gCameraY = p.y - 200;
+        
+        if(p.y > gCameraY + 450) {
+            isPlaying = false;
+            alert("Счет: " + gScore);
+            db.ref(`leaderboards/walljumper/${me}`).once('value', s => {
+                if(!s.exists() || s.val() < gScore) db.ref(`leaderboards/walljumper/${me}`).set(gScore);
+            });
+        }
+        
+        ctx.fillStyle = '#e0f7fa'; ctx.fillRect(0,0,300,400);
+        ctx.fillStyle = '#4cc351'; 
+        gWalls.forEach(w => ctx.fillRect(w.x, w.y - gCameraY, w.w, w.h));
+        ctx.fillStyle = 'var(--tg-accent)';
+        ctx.fillRect(p.x, p.y - gCameraY, p.w, p.h);
+        
+        if(isPlaying) gLoop = requestAnimationFrame(updateGame);
     }
 
     function saveLocalName(uid, val) { db.ref(`localNames/${me}/${uid}`).set(val.trim() || null); }
 
     let isCreatingChannel = false;
     function openCreateModal(e) {
-        e.stopPropagation();
-        document.getElementById('create-modal').style.display = 'flex';
-        document.getElementById('create-options').style.display = 'flex';
-        document.getElementById('create-form').style.display = 'none';
+        e.stopPropagation(); document.getElementById('create-modal').style.display = 'flex';
+        document.getElementById('create-options').style.display = 'flex'; document.getElementById('create-form').style.display = 'none';
         document.getElementById('create-name').value = '';
     }
     
     function showCreateForm(isChannel) {
         isCreatingChannel = isChannel;
-        document.getElementById('create-options').style.display = 'none';
-        document.getElementById('create-form').style.display = 'block';
+        document.getElementById('create-options').style.display = 'none'; document.getElementById('create-form').style.display = 'block';
         document.getElementById('create-channel-type').style.display = isChannel ? 'block' : 'none';
         document.getElementById('create-name').placeholder = isChannel ? "Название канала" : "Название группы";
     }
 
     async function confirmCreate() {
-        const n = document.getElementById('create-name').value.trim();
-        if(!n) return;
+        const n = document.getElementById('create-name').value.trim(); if(!n) return;
         const id = 'grp_' + Date.now();
         const data = { name: n, owner: me, members: {[me]: true} };
-        
-        if (isCreatingChannel) {
-            data.isChannel = true;
-            data.channelType = document.getElementById('create-channel-type').value;
-        }
-        
-        await db.ref(`groups/${id}`).set(data);
-        await db.ref(`contacts/${me}/${id}`).set(true);
-        document.getElementById('create-modal').style.display = 'none';
-        selectChat(id, true);
+        if (isCreatingChannel) { data.isChannel = true; data.channelType = document.getElementById('create-channel-type').value; }
+        await db.ref(`groups/${id}`).set(data); await db.ref(`contacts/${me}/${id}`).set(true);
+        document.getElementById('create-modal').style.display = 'none'; selectChat(id, true);
     }
 
     function selectChat(id, isGrp = false) {
         if (targetId) { db.ref(getChatPath()+'/messages').off(); db.ref(getPinnedPath()).off(); if(!isGroup) db.ref(`status/${targetId}`).off(); }
         targetId = id; isGroup = isGrp;
-        document.body.classList.add('chat-open');
-        document.getElementById('chat-placeholder-box').style.display = 'none';
-        document.getElementById('chat-header').style.display = 'flex';
-        document.getElementById('messages').style.visibility = 'visible';
-        document.getElementById('form-container').style.display = 'block';
-        document.getElementById('group-invite-btn').style.display = 'none';
+        document.body.classList.add('chat-open'); document.getElementById('chat-placeholder-box').style.display = 'none';
+        document.getElementById('chat-header').style.display = 'flex'; document.getElementById('messages').style.visibility = 'visible';
+        document.getElementById('form-container').style.display = 'block'; document.getElementById('group-invite-btn').style.display = 'none';
 
         if (id === me) {
             document.getElementById('header-title').innerHTML = "🔖 Избранное"; 
             document.getElementById('header-avatar').src = `https://robohash.org/${me}`;
             document.getElementById('header-avatar').className = 'avatar ' + myEquippedFrame;
+            document.getElementById('header-status').innerText = '';
             document.getElementById('header-subtitle').innerText = "Сохраненные сообщения";
         } else if (isGroup) {
             db.ref(`groups/${id}`).on('value', s => { 
                 const d = s.val(); if(!d) return; document.getElementById('header-title').innerText = d.name; 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
                 document.getElementById('header-avatar').className = 'avatar';
+                document.getElementById('header-status').innerText = '';
                 if (d.isChannel) {
                     const canPost = (d.owner === me || (d.admins && d.admins[me]));
                     document.getElementById('form-container').style.display = canPost ? 'block' : 'none';
@@ -668,6 +844,7 @@
                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 const dispName = localNames[id] || d.nickname || id; 
                 document.getElementById('header-title').innerHTML = dispName + tick; 
+                document.getElementById('header-status').innerText = d.equippedStatus || '';
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
                 document.getElementById('header-avatar').className = 'avatar ' + (frameCache[id] || '');
             });
@@ -682,43 +859,28 @@
         loadMessages();
     }
 
-    function addReaction(emoji) {
-        if(selectedMsg && selectedMsg.key) {
-            db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji);
-            updateQuestProgress('react', 1);
-        }
-        closePopups();
-    }
-
     function loadMessages() {
         db.ref(getChatPath()+'/messages').on('value', snap => {
-            let html = ''; 
-            let unreadUpdates = {};
-            const now = Date.now();
+            let html = ''; let unreadUpdates = {}; const now = Date.now();
             const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000;
             const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
 
             snap.forEach(c => {
                 const m = c.val(), key = c.key;
-                if (now - m.time > maxMs || now - m.time > absoluteMaxMs) {
-                    db.ref(getChatPath()+'/messages/'+key).remove();
-                    return; 
-                }
+                if (now - m.time > maxMs || now - m.time > absoluteMaxMs) { db.ref(getChatPath()+'/messages/'+key).remove(); return; }
 
-                const msgClass = m.sender === me ? 'sent' : 'received';
-                const data = m.type === 'text' ? decompress(m.text) : m.file;
+                const msgClass = m.sender === me ? 'sent' : 'received'; const data = m.type === 'text' ? decompress(m.text) : m.file;
                 
                 if (m.type === 'audio') msgCache[key] = '🎤 Голосовое сообщение';
-                else if (m.type === 'image') msgCache[key] = '🖼️ Фотография';
+                else if (m.type === 'image') msgCache[key] = '🖼️ Фотография / Стикер';
                 else msgCache[key] = data;
                 
                 if (m.sender !== me && !m.read) unreadUpdates[key + '/read'] = true;
 
                 let readIcon = '';
                 if (m.sender === me && targetId !== me) {
-                    readIcon = m.read 
-                        ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="var(--tg-accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
-                        : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#999" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+                    readIcon = m.read ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="var(--tg-accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
+                                      : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#999" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
                 }
 
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
@@ -729,15 +891,8 @@
 
                 let reactionsHtml = '';
                 if (m.reactions) {
-                    const counts = {};
-                    for(let uid in m.reactions) {
-                        const e = m.reactions[uid];
-                        counts[e] = (counts[e]||0)+1;
-                    }
-                    let rBubbles = '';
-                    for(let e in counts) {
-                        rBubbles += `<span style="background:rgba(0,0,0,0.08); padding:3px 8px; border-radius:12px; font-size:13px; margin-right:4px;">${e} ${counts[e]}</span>`;
-                    }
+                    const counts = {}; for(let uid in m.reactions) { const e = m.reactions[uid]; counts[e] = (counts[e]||0)+1; }
+                    let rBubbles = ''; for(let e in counts) { rBubbles += `<span style="background:rgba(0,0,0,0.08); padding:3px 8px; border-radius:12px; font-size:13px; margin-right:4px;">${e} ${counts[e]}</span>`; }
                     if(rBubbles) reactionsHtml = `<div style="margin-top:6px; display:flex; flex-wrap:wrap;">${rBubbles}</div>`;
                 }
                 
@@ -746,7 +901,7 @@
                 
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
-                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender}</div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
+                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender} ${statusCache[m.sender]||''}</div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
                 </div>`;
             });
             
@@ -759,25 +914,19 @@
         db.ref(`contacts/${me}`).on('value', snap => {
             const div = document.getElementById('contacts'); div.innerHTML = '';
             
-            const favItem = document.createElement('div'); 
-            favItem.className=`user-item ${me === targetId ? 'active' : ''}`;
+            const favItem = document.createElement('div'); favItem.className=`user-item ${me === targetId ? 'active' : ''}`;
             favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar ${myEquippedFrame}" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b>🔖 Избранное</b></div>`;
-            favItem.onclick = () => selectChat(me, false); 
-            div.appendChild(favItem);
+            favItem.onclick = () => selectChat(me, false); div.appendChild(favItem);
             db.ref('users/'+me).on('value', s => { if(s.val() && s.val().avatar && document.getElementById('av-'+me)) document.getElementById('av-'+me).src = s.val().avatar; });
 
             snap.forEach(c => {
-                const id = c.key, isGrp = id.startsWith('grp_'); 
-                if (id === me) return; 
-                const item = document.createElement('div'); 
-                item.className=`user-item ${id === targetId ? 'active' : ''}`;
-                const nameId = `name-${id}`;
-                item.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${id}" class="avatar" id="av-${id}"><div class="status-dot" id="dot-${id}" style="${isGrp?'display:none':''}"></div></div><div style="flex-grow:1;overflow:hidden"><b id="${nameId}">${isGrp ? '👥 ' : ''}${id}</b></div><span class="del-btn" onclick="removeContact(event,'${id}')">×</span>`;
+                const id = c.key, isGrp = id.startsWith('grp_'); if (id === me) return; 
+                const item = document.createElement('div'); item.className=`user-item ${id === targetId ? 'active' : ''}`; const nameId = `name-${id}`;
+                item.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${id}" class="avatar" id="av-${id}"><div class="status-dot" id="dot-${id}" style="${isGrp?'display:none':''}"></div></div><div style="flex-grow:1;overflow:hidden; display:flex; align-items:center;"><b id="${nameId}" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${isGrp ? '👥 ' : ''}${id}</b><span id="st-${id}" style="margin-left:4px; font-size:14px;"></span></div><span class="del-btn" onclick="removeContact(event,'${id}')">×</span>`;
                 if(isGrp) {
                     db.ref(`groups/${id}`).on('value', s => {
                         const d = s.val(); if(d) {
-                            const label = document.getElementById(nameId); 
-                            const iconTxt = d.isChannel ? '📢 ' : '👥 ';
+                            const label = document.getElementById(nameId); const iconTxt = d.isChannel ? '📢 ' : '👥 ';
                             if(label) label.innerText = iconTxt + (d.name || id);
                             const icon = document.getElementById('av-'+id); if(d.avatar && icon) icon.src = d.avatar;
                         }
@@ -786,15 +935,13 @@
                     db.ref('users/'+id).on('value', s => { 
                         const d = s.val(); if(d) {
                             if(d.avatar) { document.getElementById('av-'+id).src=d.avatar; avatarCache[id] = d.avatar; }
-                            frameCache[id] = d.equippedFrame || '';
-                            const avEl = document.getElementById('av-'+id);
-                            if(avEl) avEl.className = 'avatar ' + frameCache[id];
-                            
+                            frameCache[id] = d.equippedFrame || ''; statusCache[id] = d.equippedStatus || '';
+                            const avEl = document.getElementById('av-'+id); if(avEl) avEl.className = 'avatar ' + frameCache[id];
+                            const stEl = document.getElementById('st-'+id); if(stEl) stEl.innerText = statusCache[id];
                             const label = document.getElementById(nameId); 
                             if(label) {
                                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
-                                const dispName = localNames[id] || d.nickname || id; 
-                                label.innerHTML = dispName + tick;
+                                const dispName = localNames[id] || d.nickname || id; label.innerHTML = dispName + tick;
                             }
                         }
                     });
@@ -807,109 +954,9 @@
 
     function jumpToMessage(k, e) { if(e) e.stopPropagation(); const el = document.getElementById('msg-'+k); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); const msgEl = el.querySelector('.msg'); msgEl.classList.add('highlight'); setTimeout(()=>msgEl.classList.remove('highlight'), 2000); } }
     
-    async function openProfile(uid) {
-        if (!uid) return; const isGrp = uid.startsWith('grp_'); const modal = document.getElementById('modal-content');
-        if(isGrp) {
-            const snap = await db.ref(`groups/${uid}`).once('value'); const d = snap.val(); uploadTarget = 'group_avatar';
-            let membersHtml = ''; 
-            for(let m in d.members) {
-                const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m];
-                const mDisp = localNames[m] || m; 
-                membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${mDisp} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
-            }
-            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px;" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:10px;">${d.isChannel ? 'НАЗВАНИЕ КАНАЛА' : 'НАЗВАНИЕ ГРУППЫ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:10px;">
-                <input type="text" class="modal-input" style="border:none; background:transparent; padding:0; margin-top:0;" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)"></div>
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">${d.isChannel ? 'ПОДПИСЧИКИ' : 'УЧАСТНИКИ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:5px 15px;">${membersHtml}</div>`;
-        } else {
-            const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val(); uploadTarget = 'avatar';
-            const isVer = (uid === 'sanya' || uid === 'misha' || d.verified);
-            const locName = localNames[uid] || '';
-            const fClass = isMe ? myEquippedFrame : (frameCache[uid] || '');
-            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar ${fClass}" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">О СЕБЕ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; margin-top:5px; padding:15px;">
-                <textarea id="m-desc" class="modal-input" style="border:none; background:transparent; padding:0; height:auto; min-height:40px;" ${!isMe?'disabled':''} onchange="updateProfile()">${d.description||''}</textarea></div>
-                
-                ${(!isMe && d.settings?.allowRename !== false && uid !== me) ? `
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">ЛОКАЛЬНОЕ ИМЯ (ВИДНО ТОЛЬКО ВАМ)</span>
-                <div class="gray-block" style="background:#fff; border: 1px solid #eee; padding:10px; margin-top:5px;">
-                    <input type="text" class="modal-input" style="border:none; padding:0; background:transparent; margin:0;" placeholder="Введите имя..." value="${locName}" onchange="saveLocalName('${uid}', this.value)">
-                </div>` : ''}
-
-                <div class="gray-block" style="background:#f8f9fa; border:none; margin-top:15px; padding:20px; border-radius:25px;"><span style="font-size:10px; color:#aaa; font-weight:bold;">ID</span><div style="font-weight:bold; color:var(--tg-accent); margin-bottom:15px; font-size:17px;">@${uid} ${isVer ? '<span style="color:var(--tg-accent);">✔</span>' : ''}</div>
-                <span style="font-size:10px; color:#aaa; font-weight:bold;">НИКНЕЙМ</span><input type="text" id="m-nick" class="modal-input" style="border:1.5px solid #eee; background:#fff;" value="${d.nickname}" ${!isMe?'disabled':''} onchange="updateProfile()"></div>
-                ${!isMe ? `<button onclick="startDirectChat('${uid}')" style="width:100%;margin-top:15px;padding:16px;background:var(--tg-accent);color:white;border:none;border-radius:18px;font-weight:bold;cursor:pointer;">Написать сообщение</button>` : ''}
-                ${(me === 'sanya' || me === 'misha') && uid !== me ? `<button onclick="toggleVerify('${uid}', ${!d.verified})" style="width:100%;margin-top:10px;padding:12px;background:#fff;color:var(--tg-accent);border:1.5px solid var(--tg-accent);border-radius:15px;font-weight:bold;cursor:pointer;">${d.verified ? 'Забрать галочку' : 'Выдать галочку'}</button>` : ''}
-                ${isMe ? `<span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">БЕЗОПАСНОСТЬ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; padding:10px;"><input type="password" id="old-p" class="modal-input" style="background:#eef5ff; border:none;" placeholder="Старый"><input type="password" id="new-p" class="modal-input" style="border:1.5px solid #eee; margin-top:10px;" placeholder="Новый"></div><button onclick="changePass()" style="width:100%;margin-top:15px;padding:14px;background:var(--tg-accent);color:white;border:none;border-radius:15px;font-weight:bold;cursor:pointer;">Сохранить пароль</button>` : ''}`;
-        }
-        document.getElementById('modal-overlay').style.display = 'flex';
-    }
-
-    function handleMsgClick(e, k, s) { 
-        e.stopPropagation(); selectedMsg = {key:k, sender:s, text:msgCache[k]};
-        const menu = document.getElementById('context-menu'); menu.style.display = 'block'; 
-        let x = e.clientX, y = e.clientY; const mw = 170, mh = 280;
-        if (x + mw > window.innerWidth) x = window.innerWidth - mw - 10; if (y + mh > window.innerHeight) y = window.innerHeight - mh - 10;
-        menu.style.left = x + 'px'; menu.style.top = y + 'px'; 
-        document.getElementById('menu-edit').style.display = (s===me) ? 'block' : 'none'; document.getElementById('menu-del').style.display = (s===me) ? 'block' : 'none'; 
-    }
-    
-    function copyMsg() { if (selectedMsg && selectedMsg.text) { navigator.clipboard.writeText(selectedMsg.text); } closePopups(); }
-    
-    function prepareForward() {
-        msgToForward = selectedMsg;
-        closePopups();
-        
-        db.ref(`contacts/${me}`).once('value', snap => {
-            const div = document.getElementById('forward-contacts');
-            let h = `<div class="user-item" onclick="doForward('${me}', false)"><div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar"></div><div><b>🔖 Избранное</b></div></div>`;
-            
-            snap.forEach(c => {
-                const id = c.key;
-                if(id === me) return;
-                const isGrp = id.startsWith('grp_');
-                const domNode = document.getElementById('name-'+id);
-                const n = domNode ? domNode.innerText : (isGrp ? '👥 '+id : id);
-                const avNode = document.getElementById('av-'+id);
-                const avSrc = avNode ? avNode.src : `https://robohash.org/${id}`;
-                
-                h += `<div class="user-item" onclick="doForward('${id}', ${isGrp})">
-                    <div class="avatar-wrapper"><img src="${avSrc}" class="avatar"></div>
-                    <div><b>${n}</b></div>
-                </div>`;
-            });
-            div.innerHTML = h;
-            document.getElementById('forward-modal').style.display = 'flex';
-        });
-    }
-
-    function doForward(target, isGrp) {
-        document.getElementById('forward-modal').style.display = 'none';
-        const fwdText = `[Переслано от: @${msgToForward.sender}]\n${msgToForward.text}`;
-        
-        const path = isGrp ? `groups/${target}` : `chats/${me < target ? me+'_'+target : target+'_'+me}`;
-        db.ref(path + '/messages').push({
-            sender: me, text: compress(fwdText), time: Date.now(), type: 'text', read: false
-        });
-        
-        if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true);
-        updateQuestProgress('msg', 1);
-        selectChat(target, isGrp);
-    }
-
-    async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
-    function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
-    async function changePass() { const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; const s=await db.ref(`users/${me}/password`).once('value'); if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); localStorage.setItem('petmess_pass', n); alert("ОК!"); } else alert("Ошибка!"); }
-    async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
-    function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
-    function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
-    function deleteMsg() { if(selectedMsg && selectedMsg.key) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
-    function pinMsg() { db.ref(getPinnedPath()).set({key:selectedMsg.key, text:selectedMsg.text}); closePopups(); }
-    function unpin(e) { e.stopPropagation(); db.ref(getPinnedPath()).remove(); }
-    function jumpToPinned() { db.ref(getPinnedPath()).once('value', s => { if(s.exists()) jumpToMessage(s.val().key); }); }
     function cancelAction() { replyData=null; editingKey=null; document.getElementById('action-preview').style.display='none'; document.getElementById('input').value=''; document.getElementById('input').style.height='20px'; }
-    function closePopups() { document.getElementById('context-menu').style.display='none'; document.getElementById('emoji-picker').style.display='none'; }
-    function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('create-modal').style.display = 'none'; }
+    function closePopups() { document.getElementById('context-menu').style.display='none'; document.getElementById('emoji-picker').style.display='none'; document.getElementById('profile-menu').style.display='none'; }
+    function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; }
     function toggleEmoji(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; }
     function goBack(e) { e.stopPropagation(); document.body.classList.remove('chat-open'); }
     function getChatPath() { return isGroup ? `groups/${targetId}` : `chats/${me < targetId ? me+'_'+targetId : targetId+'_'+me}`; }
@@ -918,87 +965,58 @@
     function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('send-btn').click(); } }
     function handleTyping() { const i = document.getElementById('input'); i.style.height = '20px'; i.style.height = Math.min(i.scrollHeight - 24, 120) + 'px'; if(isGroup || targetId === me) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
     async function removeContact(e, n) { e.stopPropagation(); if(confirm(`Удалить ${n}?`)) await db.ref(`contacts/${me}/${n}`).remove(); }
-    
+
     async function toggleRecord(e) {
-        e.stopPropagation();
-        const btn = document.getElementById('mic-btn');
-        const inp = document.getElementById('input');
-        
+        e.stopPropagation(); const btn = document.getElementById('mic-btn'); const inp = document.getElementById('input');
         if (!isRecording) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.start();
-                isRecording = true;
-                
-                btn.innerHTML = '⏹️';
-                btn.classList.add('recording');
-                inp.placeholder = "Идет запись...";
-                inp.disabled = true;
-
+                mediaRecorder = new MediaRecorder(stream); mediaRecorder.start(); isRecording = true;
+                btn.innerHTML = '⏹️'; btn.classList.add('recording'); inp.placeholder = "Идет запись..."; inp.disabled = true;
                 mediaRecorder.ondataavailable = e => { audioChunks.push(e.data); };
-                
                 mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    audioChunks = [];
-                    const reader = new FileReader();
-                    reader.readAsDataURL(audioBlob);
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); audioChunks = [];
+                    const reader = new FileReader(); reader.readAsDataURL(audioBlob);
                     reader.onloadend = () => {
-                        const base64Audio = reader.result;
-                        db.ref(getChatPath()+'/messages').push({ sender: me, file: base64Audio, time: Date.now(), type: 'audio', read: false });
-                        if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
-                        updateQuestProgress('msg', 1);
+                        db.ref(getChatPath()+'/messages').push({ sender: me, file: reader.result, time: Date.now(), type: 'audio', read: false });
+                        if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1);
                     };
                     stream.getTracks().forEach(track => track.stop());
                 };
-            } catch(err) {
-                alert("Нет доступа к микрофону! Разрешите доступ в настройках устройства.");
-            }
+            } catch(err) { alert("Нет доступа к микрофону!"); }
         } else {
-            mediaRecorder.stop();
-            isRecording = false;
-            btn.innerHTML = '🎤';
-            btn.classList.remove('recording');
-            inp.placeholder = "Написать сообщение...";
-            inp.disabled = false;
+            mediaRecorder.stop(); isRecording = false; btn.innerHTML = '🎤'; btn.classList.remove('recording'); inp.placeholder = "Написать сообщение..."; inp.disabled = false;
         }
     }
 
     async function sendMessage(e) { 
-        if(e) e.preventDefault(); 
-        const i = document.getElementById('input'); 
-        if(!i.value.trim() && !editingKey) return; 
+        if(e) e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim() && !editingKey) return; 
         
         if(!isGroup && targetId !== me && !editingKey) {
-            const tSnap = await db.ref(`users/${targetId}`).once('value');
-            const tSet = tSnap.val()?.settings || {};
+            const tSnap = await db.ref(`users/${targetId}`).once('value'); const tSet = tSnap.val()?.settings || {};
             if(tSet.allowStrangers === false) {
                 const tContact = await db.ref(`contacts/${targetId}/${me}`).once('value');
-                if(!tContact.exists()) {
-                    alert("Этот пользователь запретил писать ему без добавления в контакты!");
-                    return;
-                }
+                if(!tContact.exists()) { alert("Этот пользователь запретил писать ему без добавления в контакты!"); return; }
             }
         }
-
-        if(editingKey){ 
-            db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); 
-        } else { 
+        if(editingKey){ db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); } 
+        else { 
             const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text', read: false}; 
-            if(replyData) o.replyTo=replyData; 
-            db.ref(getChatPath()+'/messages').push(o); 
-            if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
-            updateQuestProgress('msg', 1);
+            if(replyData) o.replyTo=replyData; db.ref(getChatPath()+'/messages').push(o); 
+            if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1);
         } 
-        i.value=''; 
-        i.style.height='20px'; 
-        cancelAction(); 
+        i.value=''; i.style.height='20px'; cancelAction(); 
     }
     
-    async function inviteToGroup() { const i = prompt("ID пользователя:"); if(i){ const s=await db.ref('users/'+i).once('value'); if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); alert("OK"); } } }
-    function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
-    
     async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else { db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now(), read: false}); updateQuestProgress('msg', 1); } }; }
+    function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
+    async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
+    async function changePass() { const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; const s=await db.ref(`users/${me}/password`).once('value'); if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); localStorage.setItem('petmess_pass', n); alert("ОК!"); } else alert("Ошибка!"); }
+    
+    function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
+    function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
+    function deleteMsg() { if(selectedMsg && selectedMsg.key) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
+    function pinMsg() { db.ref(getPinnedPath()).set({key:selectedMsg.key, text:selectedMsg.text}); closePopups(); }
 
     window.onload = () => {
         const savedU = localStorage.getItem('petmess_user'); const savedP = localStorage.getItem('petmess_pass'); const expiry = localStorage.getItem('petmess_expiry');
