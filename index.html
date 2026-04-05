@@ -73,10 +73,10 @@
         .frame-love { border: 3px solid #ff1493 !important; box-shadow: 0 0 15px #ff1493; }
         
         @keyframes rgb-anim { 
-            0% {color: #ff0000; border-color: #ff0000; box-shadow: 0 0 10px #ff0000; text-shadow: 0 0 5px rgba(255,0,0,0.5);} 
-            33% {color: #00ff00; border-color: #00ff00; box-shadow: 0 0 10px #00ff00; text-shadow: 0 0 5px rgba(0,255,0,0.5);} 
-            66% {color: #0000ff; border-color: #0000ff; box-shadow: 0 0 10px #0000ff; text-shadow: 0 0 5px rgba(0,0,255,0.5);} 
-            100% {color: #ff0000; border-color: #ff0000; box-shadow: 0 0 10px #ff0000; text-shadow: 0 0 5px rgba(255,0,0,0.5);} 
+            0% {color: #ff0000; border-color: #ff0000; box-shadow: 0 0 15px #ff0000; text-shadow: 0 0 5px rgba(255,0,0,0.5);} 
+            33% {color: #00ff00; border-color: #00ff00; box-shadow: 0 0 15px #00ff00; text-shadow: 0 0 5px rgba(0,255,0,0.5);} 
+            66% {color: #0000ff; border-color: #0000ff; box-shadow: 0 0 15px #0000ff; text-shadow: 0 0 5px rgba(0,0,255,0.5);} 
+            100% {color: #ff0000; border-color: #ff0000; box-shadow: 0 0 15px #ff0000; text-shadow: 0 0 5px rgba(255,0,0,0.5);} 
         }
         .frame-rainbow { border: 3px solid #ff0000 !important; animation: rgb-anim 2s linear infinite; }
         .text-rgb { animation: rgb-anim 2s linear infinite !important; font-weight: bold; }
@@ -135,6 +135,7 @@
         #context-menu, #profile-menu { display: none; position: fixed; background: #fff; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; min-width: 170px; max-width: 250px; border: 1px solid #eee; overflow: hidden; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
 
+        /* ИГРЫ И МАГАЗИН */
         .tabs, .shop-tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 15px; }
         .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; color: #888; }
         .tab.active { color: var(--tg-accent); border-bottom: 2px solid var(--tg-accent); margin-bottom: -2px; }
@@ -331,7 +332,7 @@
             <div id="tab-online" class="tab" onclick="switchGameTab('online')">Онлайн (Рейтинг)</div>
         </div>
         <div id="game-offline-view">
-            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Кликай по экрану или зажимай Пробел, чтобы взлетать по стенам!</div>
+            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Кликай по экрану или Пробелу (не зажимая!), чтобы прыгать!</div>
             <div style="text-align:center; font-weight:bold; font-size:20px; color:var(--tg-accent); margin-bottom:5px;">Счет: <span id="game-score">0</span></div>
             <canvas id="gameCanvas" width="300" height="400"></canvas>
             <button onclick="startGame()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Играть / Перезапуск</button>
@@ -531,7 +532,7 @@
         const favAv = document.getElementById('av-'+me);
         if(favAv) favAv.className = 'avatar ' + myEquippedFrame;
         
-        // Если открыт чат "Сам с собой" (Избранное)
+        // Обновляем шапку, если открыто "Избранное"
         if(targetId === me) {
             const hTitle = document.getElementById('header-title');
             if(myEquippedColor === 'text-rgb') { hTitle.style.color = ''; hTitle.classList.add('text-rgb'); }
@@ -613,7 +614,7 @@
         }
     }
 
-    // --- МАГАЗИН И ВКЛАДКИ (Без перезагрузки списка) ---
+    // --- МАГАЗИН И ВКЛАДКИ ---
     function switchShopTab(tab) {
         currentShopTab = tab;
         ['set', 'frame', 'color', 'status', 'sticker', 'emoji'].forEach(t => { document.getElementById('stab-'+t).className = (t === tab) ? 'shop-tab active' : 'shop-tab'; });
@@ -671,7 +672,7 @@
         let resetBtns = '';
         if(currentShopTab === 'frame' && myEquippedFrame) resetBtns = `<button onclick="equipItem('frame', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять рамку</button>`;
         if(currentShopTab === 'status' && myEquippedStatus) resetBtns = `<button onclick="equipItem('status', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять статус</button>`;
-        if(currentShopTab === 'color' && myEquippedColor) resetBtns = `<button onclick="equipItem('color', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Вернуть обычный</button>`;
+        if(currentShopTab === 'color' && myEquippedColor) resetBtns = `<button onclick="equipItem('color', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Вернуть стандартный</button>`;
         
         document.getElementById('shop-reset-btns').innerHTML = resetBtns;
     }
@@ -721,17 +722,25 @@
         if(type === 'frame') {
             db.ref(`users/${me}/equippedFrame`).set(val);
             myEquippedFrame = val; frameCache[me] = val;
+            document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
+            if(document.getElementById('av-'+me)) document.getElementById('av-'+me).className = 'avatar ' + myEquippedFrame;
         }
         if(type === 'status') {
             db.ref(`users/${me}/equippedStatus`).set(val);
             myEquippedStatus = val; statusCache[me] = val;
+            const myStatEl = document.getElementById('my-status-display');
+            myStatEl.innerText = myEquippedStatus;
+            if(myEquippedStatus.includes('RGB')) myStatEl.classList.add('text-rgb');
+            else myStatEl.classList.remove('text-rgb');
         }
         if(type === 'color') {
             db.ref(`users/${me}/equippedColor`).set(val);
             myEquippedColor = val; colorCache[me] = val;
+            const myNameEl = document.getElementById('my-name-display');
+            if(myEquippedColor === 'text-rgb') { myNameEl.style.color = ''; myNameEl.classList.add('text-rgb'); }
+            else { myNameEl.classList.remove('text-rgb'); myNameEl.style.color = myEquippedColor || 'inherit'; }
         }
-        renderShopItems();
-        // UI обновится сам через on('value') для users/${me}
+        renderShopItems(); 
     }
 
     function equipSet(setId) {
@@ -745,16 +754,25 @@
                 if(subItem.type === 'frame') {
                     db.ref(`users/${me}/equippedFrame`).set(subItem.value);
                     myEquippedFrame = subItem.value; frameCache[me] = subItem.value;
+                    document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
+                    if(document.getElementById('av-'+me)) document.getElementById('av-'+me).className = 'avatar ' + myEquippedFrame;
                     visualChanged = true;
                 }
                 if(subItem.type === 'status') {
                     db.ref(`users/${me}/equippedStatus`).set(subItem.value);
                     myEquippedStatus = subItem.value; statusCache[me] = subItem.value;
+                    const myStatEl = document.getElementById('my-status-display');
+                    myStatEl.innerText = myEquippedStatus;
+                    if(myEquippedStatus.includes('RGB')) myStatEl.classList.add('text-rgb');
+                    else myStatEl.classList.remove('text-rgb');
                     visualChanged = true;
                 }
                 if(subItem.type === 'color') {
                     db.ref(`users/${me}/equippedColor`).set(subItem.value);
                     myEquippedColor = subItem.value; colorCache[me] = subItem.value;
+                    const myNameEl = document.getElementById('my-name-display');
+                    if(myEquippedColor === 'text-rgb') { myNameEl.style.color = ''; myNameEl.classList.add('text-rgb'); }
+                    else { myNameEl.classList.remove('text-rgb'); myNameEl.style.color = myEquippedColor || 'inherit'; }
                     visualChanged = true;
                 }
             }
@@ -862,9 +880,9 @@
         customAlert("Ваш ID успешно изменён! Приложение сейчас перезапустится.", () => { location.reload(); });
     }
 
-    // ИГРА WALL JUMPER С АНТИ-СПАМОМ
+    // ИГРА WALL JUMPER С АНТИ-СПАМОМ ПРОБЕЛА
     let isGamesOpen = false, canvas, ctx, gLoop, p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
-    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false;
+    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, spaceReleased = true;
 
     function openGamesModal(e) {
         if(e) e.stopPropagation(); closePopups(); document.getElementById('games-modal').style.display = 'flex';
@@ -898,7 +916,7 @@
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
         p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
         gWalls = [ {x: 0, y: -1000, w: 40, h: 2000}, {x: 260, y: -1000, w: 40, h: 2000} ];
-        gScore = 0; gCameraY = 0; isPlaying = true; document.getElementById('game-score').innerText = gScore;
+        gScore = 0; gCameraY = 0; isPlaying = true; spaceReleased = true; document.getElementById('game-score').innerText = gScore;
         for(let i=0; i<15; i++) { gWalls.push({x: 100 + Math.random()*60, y: 200 - i*150, w: 20 + Math.random()*20, h: 80}); }
         cancelAnimationFrame(gLoop); updateGame();
     }
@@ -908,7 +926,14 @@
         p.vy = -9; p.vx = (p.x < 150) ? 4 : -4; p.canJump = false; 
     }
 
-    window.addEventListener('keydown', e => { if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); gameJump(); } });
+    window.addEventListener('keydown', e => {
+        if(e.code === 'Space' && isGamesOpen) { 
+            e.preventDefault(); 
+            if(spaceReleased) { spaceReleased = false; gameJump(); }
+        }
+    });
+    
+    window.addEventListener('keyup', e => { if(e.code === 'Space') { spaceReleased = true; } });
     document.addEventListener('DOMContentLoaded', () => { document.getElementById('gameCanvas')?.addEventListener('pointerdown', e => { e.preventDefault(); gameJump(); }); });
 
     function updateGame() {
@@ -940,6 +965,8 @@
         if(isPlaying) gLoop = requestAnimationFrame(updateGame);
     }
 
+    function saveLocalName(uid, val) { db.ref(`localNames/${me}/${uid}`).set(val.trim() || null); }
+
     let isCreatingChannel = false;
     function openCreateModal(e) { e.stopPropagation(); document.getElementById('create-modal').style.display = 'flex'; document.getElementById('create-options').style.display = 'flex'; document.getElementById('create-form').style.display = 'none'; document.getElementById('create-name').value = ''; }
     function showCreateForm(isChannel) { isCreatingChannel = isChannel; document.getElementById('create-options').style.display = 'none'; document.getElementById('create-form').style.display = 'block'; document.getElementById('create-channel-type').style.display = isChannel ? 'block' : 'none'; document.getElementById('create-name').placeholder = isChannel ? "Название канала" : "Название группы"; }
@@ -949,7 +976,6 @@
         const id = 'grp_' + Date.now(); const data = { name: n, owner: me, members: {[me]: true} };
         if (isCreatingChannel) { data.isChannel = true; data.channelType = document.getElementById('create-channel-type').value; }
         
-        // Сразу ставим заглушку имени в localNames чтобы она не была пустой
         localNames[id] = (data.isChannel ? '📢 ' : '👥 ') + n;
         
         await db.ref(`groups/${id}`).set(data); await db.ref(`contacts/${me}/${id}`).set(true);
@@ -976,9 +1002,10 @@
         } else if (isGroup) {
             db.ref(`groups/${id}`).on('value', s => { 
                 const d = s.val() || {}; if(!d.name) return; 
-                document.getElementById('header-title').innerText = d.name; 
-                document.getElementById('header-title').style.color = 'inherit';
-                document.getElementById('header-title').className = '';
+                const hTitle = document.getElementById('header-title');
+                hTitle.innerText = d.name; 
+                hTitle.style.color = 'inherit';
+                hTitle.className = '';
                 
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
                 document.getElementById('header-avatar').className = 'avatar';
@@ -1025,6 +1052,71 @@
         }
         db.ref(getPinnedPath()).on('value', s => { if(s.exists()){ document.getElementById('pinned-bar').style.display='flex'; document.getElementById('pinned-text').innerText = s.val().text; } else document.getElementById('pinned-bar').style.display='none'; });
         loadMessages();
+    }
+
+    function addReaction(emoji) {
+        if(selectedMsg && selectedMsg.key) {
+            db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji);
+            updateQuestProgress('react', 1);
+        }
+        closePopups();
+    }
+
+    function loadMessages() {
+        db.ref(getChatPath()+'/messages').on('value', snap => {
+            let html = ''; let unreadUpdates = {}; const now = Date.now();
+            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000;
+            const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
+
+            snap.forEach(c => {
+                const m = c.val(), key = c.key;
+                if (now - m.time > maxMs || now - m.time > absoluteMaxMs) { db.ref(getChatPath()+'/messages/'+key).remove(); return; }
+
+                const msgClass = m.sender === me ? 'sent' : 'received'; const data = m.type === 'text' ? decompress(m.text) : m.file;
+                
+                if (m.type === 'audio') msgCache[key] = '🎤 Голосовое сообщение';
+                else if (m.type === 'image') msgCache[key] = '🖼️ Фотография / Стикер';
+                else msgCache[key] = data;
+                
+                if (m.sender !== me && !m.read) unreadUpdates[key + '/read'] = true;
+
+                let readIcon = '';
+                if (m.sender === me && targetId !== me) {
+                    readIcon = m.read ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="var(--tg-accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
+                                      : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#999" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+                }
+
+                let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
+                let content = '';
+                if (m.type === 'image') content = `<img src="${data}" style="max-width:100%; border-radius:10px">`;
+                else if (m.type === 'audio') content = `<audio controls src="${m.file}" style="max-width: 100%;"></audio>`;
+                else content = `<div>${data}</div>`;
+
+                let reactionsHtml = '';
+                if (m.reactions) {
+                    const counts = {}; for(let uid in m.reactions) { const e = m.reactions[uid]; counts[e] = (counts[e]||0)+1; }
+                    let rBubbles = ''; for(let e in counts) { rBubbles += `<span style="background:rgba(0,0,0,0.08); padding:3px 8px; border-radius:12px; font-size:13px; margin-right:4px;">${e} ${counts[e]}</span>`; }
+                    if(rBubbles) reactionsHtml = `<div style="margin-top:6px; display:flex; flex-wrap:wrap;">${rBubbles}</div>`;
+                }
+                
+                let fClass = frameCache[m.sender] || '';
+                let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar ${fClass}" onclick="openProfile('${m.sender}')">` : '';
+                
+                let nameColorMsg = colorCache[m.sender] || 'var(--tg-accent)';
+                let nameClassMsg = nameColorMsg === 'text-rgb' ? 'class="text-rgb"' : `style="color:${nameColorMsg}"`;
+                
+                let statText = statusCache[m.sender] || '';
+                let statClassMsg = statText.includes('RGB') ? 'class="text-rgb"' : '';
+                
+                html += `<div class="msg-row ${msgClass}" id="msg-${key}">
+                    ${avatarHTML}
+                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;margin-bottom:4px;" ${nameClassMsg}>${m.sender} <span ${statClassMsg}>${statText}</span></div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
+                </div>`;
+            });
+            
+            const div = document.getElementById('messages'); div.innerHTML = html; div.scrollTop = div.scrollHeight;
+            if (Object.keys(unreadUpdates).length > 0) db.ref(getChatPath()+'/messages').update(unreadUpdates);
+        });
     }
 
     function loadContacts() {
@@ -1084,62 +1176,166 @@
         });
     }
 
-    function loadMessages() {
-        db.ref(getChatPath()+'/messages').on('value', snap => {
-            let html = ''; let unreadUpdates = {}; const now = Date.now();
-            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000;
-            const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
-
-            snap.forEach(c => {
-                const m = c.val(), key = c.key;
-                if (now - m.time > maxMs || now - m.time > absoluteMaxMs) { db.ref(getChatPath()+'/messages/'+key).remove(); return; }
-
-                const msgClass = m.sender === me ? 'sent' : 'received'; const data = m.type === 'text' ? decompress(m.text) : m.file;
+    function jumpToMessage(k, e) { if(e) e.stopPropagation(); const el = document.getElementById('msg-'+k); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); const msgEl = el.querySelector('.msg'); msgEl.classList.add('highlight'); setTimeout(()=>msgEl.classList.remove('highlight'), 2000); } }
+    
+    async function openProfile(uid) {
+        if (!uid) return; const isGrp = uid.startsWith('grp_'); const modal = document.getElementById('modal-content');
+        if(isGrp) {
+            const snap = await db.ref(`groups/${uid}`).once('value'); const d = snap.val() || {}; 
+            let membersHtml = ''; 
+            for(let m in d.members) {
+                const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m]; const mDisp = localNames[m] || m; 
                 
-                if (m.type === 'audio') msgCache[key] = '🎤 Голосовое сообщение';
-                else if (m.type === 'image') msgCache[key] = '🖼️ Фотография / Стикер';
-                else msgCache[key] = data;
+                let uColor = colorCache[m] || 'var(--tg-accent)';
+                let nClass = uColor === 'text-rgb' ? 'class="text-rgb"' : `style="color:${uColor}; font-weight:bold; cursor:pointer;"`;
                 
-                if (m.sender !== me && !m.read) unreadUpdates[key + '/read'] = true;
-
-                let readIcon = '';
-                if (m.sender === me && targetId !== me) {
-                    readIcon = m.read ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="var(--tg-accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
-                                      : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#999" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
-                }
-
-                let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
-                let content = '';
-                if (m.type === 'image') content = `<img src="${data}" style="max-width:100%; border-radius:10px">`;
-                else if (m.type === 'audio') content = `<audio controls src="${m.file}" style="max-width: 100%;"></audio>`;
-                else content = `<div>${data}</div>`;
-
-                let reactionsHtml = '';
-                if (m.reactions) {
-                    const counts = {}; for(let uid in m.reactions) { const e = m.reactions[uid]; counts[e] = (counts[e]||0)+1; }
-                    let rBubbles = ''; for(let e in counts) { rBubbles += `<span style="background:rgba(0,0,0,0.08); padding:3px 8px; border-radius:12px; font-size:13px; margin-right:4px;">${e} ${counts[e]}</span>`; }
-                    if(rBubbles) reactionsHtml = `<div style="margin-top:6px; display:flex; flex-wrap:wrap;">${rBubbles}</div>`;
-                }
-                
-                let fClass = frameCache[m.sender] || '';
-                let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar ${fClass}" onclick="openProfile('${m.sender}')">` : '';
-                
-                let nameColorMsg = colorCache[m.sender] || 'var(--tg-accent)';
-                let nameClassMsg = nameColorMsg === 'text-rgb' ? 'class="text-rgb"' : `style="color:${nameColorMsg}"`;
-                
-                let statText = statusCache[m.sender] || '';
-                let statClassMsg = statText.includes('RGB') ? 'class="text-rgb"' : '';
-                
-                html += `<div class="msg-row ${msgClass}" id="msg-${key}">
-                    ${avatarHTML}
-                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;margin-bottom:4px;" ${nameClassMsg}>${m.sender} <span ${statClassMsg}>${statText}</span></div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
-                </div>`;
-            });
+                membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span ${nClass} onclick="openProfile('${m}')">${mDisp} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
+            }
+            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px;" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
+                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:10px;">${d.isChannel ? 'НАЗВАНИЕ КАНАЛА' : 'НАЗВАНИЕ ГРУППЫ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:10px;">
+                <input type="text" class="modal-input" style="border:none; background:transparent; padding:0; margin-top:0;" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)"></div>
+                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">${d.isChannel ? 'ПОДПИСЧИКИ' : 'УЧАСТНИКИ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:5px 15px;">${membersHtml}</div>`;
+        } else {
+            const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val() || {}; 
+            const isVer = (uid === 'sanya' || uid === 'misha' || d.verified); const locName = localNames[uid] || ''; const fClass = isMe ? myEquippedFrame : (frameCache[uid] || '');
+            const cColor = isMe ? myEquippedColor : (colorCache[uid] || 'var(--tg-accent)');
             
-            const div = document.getElementById('messages'); div.innerHTML = html; div.scrollTop = div.scrollHeight;
-            if (Object.keys(unreadUpdates).length > 0) db.ref(getChatPath()+'/messages').update(unreadUpdates);
+            let idColorHtml = cColor === 'text-rgb' ? 'class="text-rgb"' : `style="color:${cColor}; margin-bottom:15px; font-size:17px; font-weight:bold;"`;
+            
+            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar ${fClass}" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
+                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">О СЕБЕ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; margin-top:5px; padding:15px;">
+                <textarea id="m-desc" class="modal-input" style="border:none; background:transparent; padding:0; height:auto; min-height:40px;" ${!isMe?'disabled':''} onchange="updateProfile()">${d.description||''}</textarea></div>
+                ${(!isMe && d.settings?.allowRename !== false && uid !== me) ? `<span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">ЛОКАЛЬНОЕ ИМЯ (ВИДНО ТОЛЬКО ВАМ)</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; padding:10px; margin-top:5px;"><input type="text" class="modal-input" style="border:none; padding:0; background:transparent; margin:0;" placeholder="Введите имя..." value="${locName}" onchange="saveLocalName('${uid}', this.value)"></div>` : ''}
+                <div class="gray-block" style="background:#f8f9fa; border:none; margin-top:15px; padding:20px; border-radius:25px;"><span style="font-size:10px; color:#aaa; font-weight:bold;">ID</span><div ${idColorHtml}>@${uid} ${isVer ? '<span style="color:var(--tg-accent);">✔</span>' : ''}</div>
+                <span style="font-size:10px; color:#aaa; font-weight:bold;">НИКНЕЙМ</span><input type="text" id="m-nick" class="modal-input" style="border:1.5px solid #eee; background:#fff;" value="${d.nickname||uid}" ${!isMe?'disabled':''} onchange="updateProfile()"></div>
+                ${!isMe ? `<button onclick="startDirectChat('${uid}')" style="width:100%;margin-top:15px;padding:16px;background:var(--tg-accent);color:white;border:none;border-radius:18px;font-weight:bold;cursor:pointer;">Написать сообщение</button>` : ''}
+                ${(me === 'sanya' || me === 'misha') && uid !== me ? `<button onclick="toggleVerify('${uid}', ${!d.verified})" style="width:100%;margin-top:10px;padding:12px;background:#fff;color:var(--tg-accent);border:1.5px solid var(--tg-accent);border-radius:15px;font-weight:bold;cursor:pointer;">${d.verified ? 'Забрать галочку' : 'Выдать галочку'}</button>` : ''}
+                ${isMe ? `<span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">БЕЗОПАСНОСТЬ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; padding:10px;"><input type="password" id="old-p" class="modal-input" style="background:#eef5ff; border:none;" placeholder="Старый"><input type="password" id="new-p" class="modal-input" style="border:1.5px solid #eee; margin-top:10px;" placeholder="Новый"></div><button onclick="changePass()" style="width:100%;margin-top:15px;padding:14px;background:var(--tg-accent);color:white;border:none;border-radius:15px;font-weight:bold;cursor:pointer;">Сохранить пароль</button>` : ''}`;
+        }
+        document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function handleMsgClick(e, k, s) { 
+        e.stopPropagation(); selectedMsg = {key:k, sender:s, text:msgCache[k]};
+        const menu = document.getElementById('context-menu'); menu.style.display = 'block'; 
+        let x = e.clientX || window.innerWidth/2, y = e.clientY || window.innerHeight/2; const mw = 170, mh = 280;
+        if (x + mw > window.innerWidth) x = window.innerWidth - mw - 10; if (y + mh > window.innerHeight) y = window.innerHeight - mh - 10;
+        menu.style.left = x + 'px'; menu.style.top = y + 'px'; 
+        document.getElementById('menu-edit').style.display = (s===me) ? 'block' : 'none'; document.getElementById('menu-del').style.display = (s===me) ? 'block' : 'none'; 
+    }
+    
+    function copyMsg() { if (selectedMsg && selectedMsg.text) { navigator.clipboard.writeText(selectedMsg.text); } closePopups(); }
+    
+    function prepareForward() {
+        msgToForward = selectedMsg; closePopups();
+        db.ref(`contacts/${me}`).once('value', snap => {
+            const div = document.getElementById('forward-contacts');
+            let h = `<div class="user-item" onclick="doForward('${me}', false)"><div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar"></div><div><b>🔖 Избранное</b></div></div>`;
+            snap.forEach(c => {
+                const id = c.key; if(id === me) return; const isGrp = id.startsWith('grp_');
+                const domNode = document.getElementById('name-'+id); const n = domNode ? domNode.innerText : (isGrp ? '👥 '+id : id);
+                const avNode = document.getElementById('av-'+id); const avSrc = avNode ? avNode.src : `https://robohash.org/${id}`;
+                h += `<div class="user-item" onclick="doForward('${id}', ${isGrp})"><div class="avatar-wrapper"><img src="${avSrc}" class="avatar"></div><div><b>${n}</b></div></div>`;
+            });
+            div.innerHTML = h; document.getElementById('forward-modal').style.display = 'flex';
         });
     }
+
+    function doForward(target, isGrp) {
+        document.getElementById('forward-modal').style.display = 'none'; const fwdText = `[Переслано от: @${msgToForward.sender}]\n${msgToForward.text}`;
+        const path = isGrp ? `groups/${target}` : `chats/${me < target ? me+'_'+target : target+'_'+me}`;
+        db.ref(path + '/messages').push({ sender: me, text: compress(fwdText), time: Date.now(), type: 'text', read: false });
+        if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true); updateQuestProgress('msg', 1); selectChat(target, isGrp);
+    }
+
+    async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
+    function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
+    
+    async function changePass() { 
+        const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; 
+        const s=await db.ref(`users/${me}/password`).once('value'); 
+        if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); localStorage.setItem('petmess_pass', n); customAlert("Пароль успешно изменён!"); } 
+        else customAlert("Неверный старый пароль или пустой новый!"); 
+    }
+    
+    async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
+    function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
+    function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
+    function deleteMsg() { if(selectedMsg && selectedMsg.key) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
+    function pinMsg() { db.ref(getPinnedPath()).set({key:selectedMsg.key, text:selectedMsg.text}); closePopups(); }
+    function unpin(e) { e.stopPropagation(); db.ref(getPinnedPath()).remove(); }
+    function jumpToPinned() { db.ref(getPinnedPath()).once('value', s => { if(s.exists()) jumpToMessage(s.val().key); }); }
+    function cancelAction() { replyData=null; editingKey=null; document.getElementById('action-preview').style.display='none'; document.getElementById('input').value=''; document.getElementById('input').style.height='20px'; }
+    
+    function closePopups() { document.getElementById('context-menu').style.display='none'; document.getElementById('emoji-picker').style.display='none'; document.getElementById('profile-menu').style.display='none'; }
+    function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('create-modal').style.display = 'none'; }
+    
+    function goBack(e) { e.stopPropagation(); document.body.classList.remove('chat-open'); }
+    function getChatPath() { return isGroup ? `groups/${targetId}` : `chats/${me < targetId ? me+'_'+targetId : targetId+'_'+me}`; }
+    function getPinnedPath() { return getChatPath() + '/pinned'; }
+    function getChatId(a, b) { return a < b ? a+'_'+b : b+'_'+a; }
+    function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('send-btn').click(); } }
+    function handleTyping() { const i = document.getElementById('input'); i.style.height = '20px'; i.style.height = Math.min(i.scrollHeight - 24, 120) + 'px'; if(isGroup || targetId === me) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
+    
+    async function removeContact(e, n) { 
+        e.stopPropagation(); 
+        customConfirm(`Удалить чат с ${n}?`, async () => {
+            await db.ref(`contacts/${me}/${n}`).remove();
+        });
+    }
+    
+    async function toggleRecord(e) {
+        e.stopPropagation(); const btn = document.getElementById('mic-btn'); const inp = document.getElementById('input');
+        if (!isRecording) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream); mediaRecorder.start(); isRecording = true;
+                btn.innerHTML = '⏹️'; btn.classList.add('recording'); inp.placeholder = "Идет запись..."; inp.disabled = true;
+                mediaRecorder.ondataavailable = e => { audioChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); audioChunks = [];
+                    const reader = new FileReader(); reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => { db.ref(getChatPath()+'/messages').push({ sender: me, file: reader.result, time: Date.now(), type: 'audio', read: false }); if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1); };
+                    stream.getTracks().forEach(track => track.stop());
+                };
+            } catch(err) { customAlert("Нет доступа к микрофону! Разрешите доступ в настройках устройства."); }
+        } else { mediaRecorder.stop(); isRecording = false; btn.innerHTML = '🎤'; btn.classList.remove('recording'); inp.placeholder = "Написать сообщение..."; inp.disabled = false; }
+    }
+
+    async function sendMessage(e) { 
+        if(e) e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim() && !editingKey) return; 
+        
+        if(!isGroup && targetId !== me && !editingKey) {
+            const tSnap = await db.ref(`users/${targetId}`).once('value'); const tSet = tSnap.val()?.settings || {};
+            if(tSet.allowStrangers === false) {
+                const tContact = await db.ref(`contacts/${targetId}/${me}`).once('value');
+                if(!tContact.exists()) { customAlert("Этот пользователь запретил писать ему без добавления в контакты!"); return; }
+            }
+        }
+
+        if(editingKey){ db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); } 
+        else { 
+            const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text', read: false}; 
+            if(replyData) o.replyTo=replyData; db.ref(getChatPath()+'/messages').push(o); 
+            if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1);
+        } 
+        i.value=''; i.style.height='20px'; cancelAction(); 
+    }
+    
+    function inviteToGroup(e) { 
+        if(e) e.stopPropagation();
+        customPrompt("Введите ID пользователя:", async (i) => {
+            if(i){ 
+                const s = await db.ref('users/'+i).once('value'); 
+                if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); customAlert("Пользователь добавлен!"); } 
+                else { customAlert("Пользователь не найден."); }
+            } 
+        });
+    }
+
+    function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
+    
+    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else { db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now(), read: false}); updateQuestProgress('msg', 1); } }; }
 
     window.onload = () => {
         const savedU = localStorage.getItem('petmess_user'); const savedP = localStorage.getItem('petmess_pass'); const expiry = localStorage.getItem('petmess_expiry');
