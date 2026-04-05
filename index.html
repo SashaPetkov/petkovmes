@@ -69,6 +69,8 @@
         .frame-neon { border: 3px solid #00f3ff !important; box-shadow: 0 0 12px #00f3ff; }
         .frame-fire { border: 3px solid #ff4500 !important; box-shadow: 0 0 12px #ff4500; }
         .frame-diamond { border: 3px solid #b9f2ff !important; box-shadow: 0 0 15px #b9f2ff; }
+        .frame-toxic { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14; }
+        .frame-love { border: 3px solid #ff1493 !important; box-shadow: 0 0 15px #ff1493; }
 
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; background: #fff; position: relative; }
         #my-avatar { width: 50px !important; height: 50px !important; border-radius: 50%; object-fit: cover; cursor: pointer; }
@@ -82,7 +84,7 @@
         .msg-row { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; }
         .msg-row.sent { align-self: flex-end; flex-direction: row-reverse; }
         .msg-row.received { align-self: flex-start; }
-        .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; box-sizing: border-box; }
+        .msg-mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #eee; cursor: pointer; transition: border 0.3s; box-sizing: border-box; }
         
         .msg { padding: 10px 40px 22px 14px; min-width: 80px; box-sizing: border-box; border-radius: 18px; font-size: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative; word-wrap: break-word; cursor: pointer; white-space: pre-wrap; }
         .sent .msg { background: var(--tg-sent); border-bottom-right-radius: 4px; }
@@ -96,7 +98,7 @@
         audio::-webkit-media-controls-panel { background-color: rgba(255,255,255,0.7); }
 
         .reply-box { background: rgba(0,0,0,0.04); border-left: 3px solid var(--tg-accent); padding: 5px 8px; margin-bottom: 5px; border-radius: 5px; font-size: 13px; cursor: pointer; }
-        .reply-box b { color: var(--tg-accent); display: block; font-size: 11px; }
+        .reply-box b { display: block; font-size: 11px; }
 
         .msg-meta { position: absolute; right: 10px; bottom: 5px; font-size: 10px; opacity: 0.6; display: flex; align-items: center; gap: 4px; }
 
@@ -115,18 +117,23 @@
         #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal, #games-modal { z-index: 10005; }
         #custom-modal { z-index: 20000; } 
         
-        .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
+        .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
         .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
         .modal-input { border: 1.5px solid #eee; background: #fdfdfd; padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; margin-top: 8px; outline: none; transition: 0.3s; }
-        .gray-block { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-top: 15px; }
+        .gray-block { background: #f8f9fa; padding: 15px; border-radius: 20px; margin-top: 15px; flex-shrink: 0; }
 
         #context-menu, #profile-menu { display: none; position: fixed; background: #fff; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; min-width: 170px; max-width: 250px; border: 1px solid #eee; overflow: hidden; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
 
-        /* ИГРЫ */
-        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 15px; }
+        /* ИГРЫ И МАГАЗИН */
+        .tabs, .shop-tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 15px; }
         .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; color: #888; }
         .tab.active { color: var(--tg-accent); border-bottom: 2px solid var(--tg-accent); margin-bottom: -2px; }
+        
+        .shop-tabs { overflow-x: auto; white-space: nowrap; padding-bottom: 5px; gap: 8px; border: none; }
+        .shop-tab { padding: 8px 14px; cursor: pointer; font-weight: bold; color: #888; border-radius: 20px; background: #f1f3f4; font-size: 13px; }
+        .shop-tab.active { background: var(--tg-accent); color: #fff; }
+
         #gameCanvas { background: #e0f7fa; border-radius: 15px; width: 100%; height: 300px; display: block; margin: 0 auto; border: 2px solid #b2ebf2; cursor: pointer; touch-action: none; }
         .leaderboard-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
 
@@ -170,7 +177,7 @@
         <div id="my-profile">
             <div class="avatar-wrapper" style="cursor:pointer;" onclick="openProfile(me)"><img id="my-avatar" src="" class="avatar"></div>
             <div style="flex-grow:1;overflow:hidden;margin-left:12px; cursor:pointer; display:flex; align-items:center;" onclick="openProfile(me)">
-                <b id="my-name-display" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width: 140px;">...</b>
+                <b id="my-name-display" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width: 140px; transition:color 0.3s;">...</b>
                 <span id="my-status-display" style="margin-left:5px; font-size:18px;"></span>
             </div>
             <div onclick="openProfileMenu(event)" style="font-size:24px; cursor:pointer; color:var(--tg-accent); padding:5px 15px; font-weight:bold;">⋮</div>
@@ -184,7 +191,7 @@
             <img id="header-avatar" class="avatar" style="width:40px;height:40px; cursor:pointer;" onclick="openProfile(targetId)">
             <div style="flex-grow:1;overflow:hidden; margin-left: 10px; cursor:pointer;" onclick="openProfile(targetId)">
                 <div style="display:flex; align-items:center;">
-                    <div id="header-title" style="font-weight:700"></div>
+                    <div id="header-title" style="font-weight:700; transition:color 0.3s;"></div>
                     <span id="header-status" style="margin-left:5px; font-size:14px;"></span>
                 </div>
                 <div id="header-subtitle" style="font-size:12px; color:#888;"></div>
@@ -274,34 +281,47 @@
         <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎯 Задания</h3>
         <div style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:18px;">Баланс: <span id="q-coins">0</span> 🪙</div>
         <div id="quests-content" style="pointer-events: auto;"></div>
-        <button onclick="openShopModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🛒 Магазин</button>
+        <button onclick="openShopModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🛒 В Магазин</button>
         <button onclick="closeQuests()" style="width:100%; margin-top:10px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>
     </div>
 </div>
 
 <div id="shop-modal" onclick="closeShop()">
-    <div class="profile-card" onclick="event.stopPropagation()" id="shop-content"></div>
+    <div class="profile-card" onclick="event.stopPropagation()" style="display:flex; flex-direction:column; height:85vh;">
+        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center; flex-shrink:0;">🛒 Магазин</h3>
+        <div style="text-align:center; font-weight:bold; margin-bottom:10px; font-size:18px; flex-shrink:0;">Баланс: <span id="s-coins">0</span> 🪙</div>
+        
+        <div class="shop-tabs" style="flex-shrink:0;">
+            <div id="stab-frame" class="shop-tab active" onclick="switchShopTab('frame')">Рамки</div>
+            <div id="stab-color" class="shop-tab" onclick="switchShopTab('color')">Цвет имени</div>
+            <div id="stab-status" class="shop-tab" onclick="switchShopTab('status')">Статусы</div>
+            <div id="stab-sticker" class="shop-tab" onclick="switchShopTab('sticker')">Стикеры</div>
+            <div id="stab-emoji" class="shop-tab" onclick="switchShopTab('emoji')">Эмодзи</div>
+        </div>
+
+        <div id="shop-content" style="overflow-y:auto; flex-grow:1; padding-right:5px; margin-bottom:10px;"></div>
+        
+        <div id="shop-reset-btns" style="display:flex; gap:10px; flex-shrink:0;"></div>
+        <button onclick="openQuestsModal()" style="width:100%; margin-top:10px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer; flex-shrink:0;">⬅ Назад к заданиям</button>
+    </div>
 </div>
 
 <div id="games-modal" onclick="closeGames()">
     <div class="profile-card" onclick="event.stopPropagation()" style="padding: 20px;">
-        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎮 Игры: Wall Jumper</h3>
+        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎮 Wall Jumper</h3>
         <div class="tabs">
-            <div id="tab-offline" class="tab active" onclick="switchGameTab('offline')">Офлайн (Играть)</div>
+            <div id="tab-offline" class="tab active" onclick="switchGameTab('offline')">Офлайн (Игра)</div>
             <div id="tab-online" class="tab" onclick="switchGameTab('online')">Онлайн (Рейтинг)</div>
         </div>
-        
         <div id="game-offline-view">
-            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Жми на экран или на Пробел, чтобы прыгать по стенам!</div>
+            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Кликай по экрану или Пробелу, чтобы прыгать!</div>
             <div style="text-align:center; font-weight:bold; font-size:20px; color:var(--tg-accent); margin-bottom:5px;">Счет: <span id="game-score">0</span></div>
             <canvas id="gameCanvas" width="300" height="400"></canvas>
             <button onclick="startGame()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Играть / Перезапуск</button>
         </div>
-        
         <div id="game-online-view" style="display:none; max-height:350px; overflow-y:auto;">
             <div id="leaderboard-list">Загрузка...</div>
         </div>
-
         <button onclick="closeGames()" style="width:100%; margin-top:15px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>
     </div>
 </div>
@@ -347,23 +367,45 @@
     const db = firebase.database();
     
     let me = '', targetId = '', isGroup = false, selectedMsg = null, msgToForward = null, editingKey = null, replyData = null;
-    let avatarCache = {}, frameCache = {}, statusCache = {}, msgCache = {}, localNames = {};
+    let avatarCache = {}, frameCache = {}, statusCache = {}, colorCache = {}, msgCache = {}, localNames = {};
     let typingStatus = false, onlineStatus = 'offline', typingTimeout, myAutoDeleteDays = 3;
     let mediaRecorder, audioChunks = [], isRecording = false;
 
     // СИСТЕМА ЗАДАНИЙ И ЭКОНОМИКИ
-    let myCoins = 0, myInventory = { emojis: [], stickers: [] }, myStats = {}, myQuests = [], myEquippedFrame = '', myEquippedStatus = '';
+    let myCoins = 0, myInventory = { emojis: [], stickers: [] }, myStats = {}, myQuests = [];
+    let myEquippedFrame = '', myEquippedStatus = '', myEquippedColor = '';
+    let currentShopTab = 'frame';
     
     const shopItems = [
+        // Рамки
+        { id: 'frame_gold', type: 'frame', name: 'Золотая рамка', price: 100, value: 'frame-gold' },
+        { id: 'frame_neon', type: 'frame', name: 'Неоновая рамка', price: 150, value: 'frame-neon' },
+        { id: 'frame_fire', type: 'frame', name: 'Огненная рамка', price: 150, value: 'frame-fire' },
+        { id: 'frame_toxic', type: 'frame', name: 'Токсичная рамка', price: 200, value: 'frame-toxic' },
+        { id: 'frame_love', type: 'frame', name: 'Любовная рамка', price: 200, value: 'frame-love' },
+        { id: 'frame_diamond', type: 'frame', name: 'Алмазная рамка', price: 300, value: 'frame-diamond' },
+        // Цвета ника
+        { id: 'col_red', type: 'color', name: 'Красный ник', price: 100, value: '#ff4d4d' },
+        { id: 'col_green', type: 'color', name: 'Зеленый ник', price: 100, value: '#4cc351' },
+        { id: 'col_purple', type: 'color', name: 'Фиолетовый ник', price: 150, value: '#9c27b0' },
+        { id: 'col_gold', type: 'color', name: 'Золотой ник', price: 200, value: '#ffd700' },
+        // Статусы
+        { id: 'stat_sleep', type: 'status', name: 'Статус: 💤', price: 30, value: '💤' },
+        { id: 'stat_game', type: 'status', name: 'Статус: 🎮', price: 40, value: '🎮' },
         { id: 'stat_king', type: 'status', name: 'Статус: 👑', price: 50, value: '👑' },
         { id: 'stat_fire', type: 'status', name: 'Статус: 🔥', price: 50, value: '🔥' },
         { id: 'stat_alien', type: 'status', name: 'Статус: 👽', price: 50, value: '👽' },
-        { id: 'st_cat', type: 'sticker', name: 'Стикер: Крутой кот', price: 40, value: 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif' },
-        { id: 'st_dog', type: 'sticker', name: 'Стикер: Собака', price: 40, value: 'https://media.giphy.com/media/mCRJDo24UvJMA/giphy.gif' },
-        { id: 'emo_alien', type: 'emoji', name: 'Эмодзи: 👽🤖👻', price: 30, value: '👽,🤖,👻' },
-        { id: 'emo_clown', type: 'emoji', name: 'Эмодзи: 🤡💩🌚', price: 30, value: '🤡,💩,🌚' },
-        { id: 'frame_gold', type: 'frame', name: 'Золотая рамка', price: 100, value: 'frame-gold' },
-        { id: 'frame_neon', type: 'frame', name: 'Неоновая рамка', price: 150, value: 'frame-neon' }
+        { id: 'stat_diamond', type: 'status', name: 'Статус: 💎', price: 80, value: '💎' },
+        // Стикеры
+        { id: 'st_cat', type: 'sticker', name: 'Кот за ПК', price: 40, value: 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif' },
+        { id: 'st_dog', type: 'sticker', name: 'Добрая собака', price: 40, value: 'https://media.giphy.com/media/mCRJDo24UvJMA/giphy.gif' },
+        { id: 'st_dance', type: 'sticker', name: 'Танец пришельца', price: 50, value: 'https://media.giphy.com/media/3o7qE1YN7aIdF2hWve/giphy.gif' },
+        { id: 'st_cry', type: 'sticker', name: 'Слезы', price: 40, value: 'https://media.giphy.com/media/2rtQMJvhzOnRe/giphy.gif' },
+        // Эмодзи
+        { id: 'emo_alien', type: 'emoji', name: 'Набор: 👽🤖👻', price: 30, value: '👽,🤖,👻' },
+        { id: 'emo_clown', type: 'emoji', name: 'Набор: 🤡💩🌚', price: 30, value: '🤡,💩,🌚' },
+        { id: 'emo_food', type: 'emoji', name: 'Набор: 🍎🍔🍕', price: 30, value: '🍎,🍔,🍕' },
+        { id: 'emo_sport', type: 'emoji', name: 'Набор: ⚽🏀🏈', price: 30, value: '⚽,🏀,🏈' }
     ];
 
     const compress = (v) => LZString.compressToUTF16(v);
@@ -411,19 +453,20 @@
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('app-screen').style.display = 'flex';
         
-        // ОДНОРАЗОВАЯ ЗАГРУЗКА ПРОФИЛЯ (Без бесконечных циклов)
+        // ОДНОРАЗОВАЯ ЗАГРУЗКА (чтобы избежать петель)
         db.ref(`users/${me}`).once('value', s => { 
             const d = s.val() || {}; 
             myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
             myEquippedFrame = d.equippedFrame || '';
             myEquippedStatus = d.equippedStatus || '';
+            myEquippedColor = d.equippedColor || '';
             
             frameCache[me] = myEquippedFrame;
             statusCache[me] = myEquippedStatus;
+            colorCache[me] = myEquippedColor;
 
             checkDailyQuests(d); 
             
-            // ВЫДАЧА МОНЕТ РАЗ И НАВСЕГДА
             if (me === 'misha' || me === 'sanya') {
                 if (d.coins !== 999999999) { db.ref(`users/${me}/coins`).set(999999999); }
                 myCoins = 999999999;
@@ -432,7 +475,6 @@
             updateProfileUI(d);
         });
         
-        // Слушаем только важные изменения извне (аватарки/ники), чтобы не ловить лупы
         db.ref(`users/${me}`).on('value', s => { updateProfileUI(s.val() || {}); });
         loadContacts();
     }
@@ -440,6 +482,7 @@
     function updateProfileUI(d) {
         const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
         document.getElementById('my-name-display').innerHTML = (d.nickname || me) + tick; 
+        document.getElementById('my-name-display').style.color = myEquippedColor || 'inherit';
         document.getElementById('my-status-display').innerText = myEquippedStatus;
         document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; 
         document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
@@ -451,10 +494,11 @@
         menu.style.display = 'block'; menu.style.bottom = '80px'; menu.style.left = '20px';
     }
 
+    // --- ЗАДАНИЯ И ЭКОНОМИКА ---
     function checkDailyQuests(d) {
         const today = new Date().toDateString();
         myStats = d.stats || { messagesToday: 0, reactionsToday: 0, loginStreak: 0, lastLogin: '' };
-        myInventory = d.inventory || { emojis: [], stickers: [] };
+        myInventory = d.inventory || {};
         myQuests = d.quests || [];
         
         let isNewDay = (myStats.lastLogin !== today);
@@ -511,36 +555,64 @@
         }
     }
 
+    // --- МАГАЗИН И ВКЛАДКИ ---
+    function switchShopTab(tab) {
+        currentShopTab = tab;
+        ['frame', 'color', 'status', 'sticker', 'emoji'].forEach(t => {
+            document.getElementById('stab-'+t).className = (t === tab) ? 'shop-tab active' : 'shop-tab';
+        });
+        renderShopItems();
+    }
+
     function openShopModal() {
         document.getElementById('quests-modal').style.display = 'none';
-        let html = `<h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🛒 Магазин</h3>
-                    <div style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:18px;">Баланс: ${myCoins} 🪙</div>`;
+        document.getElementById('shop-modal').style.display = 'flex';
+        document.getElementById('s-coins').innerText = myCoins;
+        renderShopItems();
+    }
+    
+    function renderShopItems() {
+        let html = '';
+        const filteredItems = shopItems.filter(item => item.type === currentShopTab);
         
-        shopItems.forEach(item => {
-            let btnHtml = '';
-            if(myInventory[item.id]) {
-                if(item.type === 'frame') {
-                    let isEq = (myEquippedFrame === item.value);
-                    btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipItem('${item.type}', '${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Надеть</button>`;
-                } else if(item.type === 'status') {
-                    let isEq = (myEquippedStatus === item.value);
-                    btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipItem('${item.type}', '${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Поставить</button>`;
+        if (filteredItems.length === 0) {
+            html = '<div style="text-align:center; color:#888; padding: 20px;">Тут пока пусто!</div>';
+        } else {
+            filteredItems.forEach(item => {
+                let btnHtml = '';
+                if(myInventory[item.id]) {
+                    if(item.type === 'frame') {
+                        let isEq = (myEquippedFrame === item.value);
+                        btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipItem('${item.type}', '${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Надеть</button>`;
+                    } else if(item.type === 'status') {
+                        let isEq = (myEquippedStatus === item.value);
+                        btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipItem('${item.type}', '${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Поставить</button>`;
+                    } else if(item.type === 'color') {
+                        let isEq = (myEquippedColor === item.value);
+                        btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipItem('${item.type}', '${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Применить</button>`;
+                    } else {
+                        btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Куплено</button>`;
+                    }
                 } else {
-                    btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Куплено</button>`;
+                    btnHtml = `<button onclick="buyItem('${item.id}', ${item.price}, '${item.type}', '${item.value}')" style="background:#ffb703; color:black; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold;">${item.price} 🪙</button>`;
                 }
-            } else {
-                btnHtml = `<button onclick="buyItem('${item.id}', ${item.price}, '${item.type}', '${item.value}')" style="background:#ffb703; color:black; border:none; padding:8px; border-radius:10px; cursor:pointer; font-weight:bold;">${item.price} 🪙</button>`;
-            }
-            html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;"><div style="font-size:14px;">${item.type==='sticker'?`<img src="${item.value}" height="30" style="vertical-align:middle"> `:''}${item.name}</div>${btnHtml}</div>`;
-        });
+                
+                let displayName = item.name;
+                if(item.type === 'sticker') displayName = `<img src="${item.value}" height="30" style="vertical-align:middle; border-radius:5px; margin-right:5px;"> ${item.name}`;
+                if(item.type === 'color') displayName = `<span style="color:${item.value}; font-weight:bold;">${item.name}</span>`;
+
+                html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;"><div style="font-size:14px;">${displayName}</div>${btnHtml}</div>`;
+            });
+        }
+        document.getElementById('shop-content').innerHTML = html;
         
+        // Кнопки сброса зависят от вкладки
         let resetBtns = '';
-        if(myEquippedFrame) resetBtns += `<button onclick="equipItem('frame', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять рамку</button>`;
-        if(myEquippedStatus) resetBtns += `<button onclick="equipItem('status', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять статус</button>`;
-        if(resetBtns) html += `<div style="display:flex; gap:10px; margin-top:10px;">${resetBtns}</div>`;
-        html += `<button onclick="openQuestsModal()" style="width:100%; margin-top:15px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">⬅ Назад</button>`;
+        if(currentShopTab === 'frame' && myEquippedFrame) resetBtns = `<button onclick="equipItem('frame', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять рамку</button>`;
+        if(currentShopTab === 'status' && myEquippedStatus) resetBtns = `<button onclick="equipItem('status', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять статус</button>`;
+        if(currentShopTab === 'color' && myEquippedColor) resetBtns = `<button onclick="equipItem('color', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Вернуть стандартный</button>`;
         
-        document.getElementById('shop-content').innerHTML = html; document.getElementById('shop-modal').style.display = 'flex';
+        document.getElementById('shop-reset-btns').innerHTML = resetBtns;
     }
 
     function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
@@ -549,9 +621,10 @@
         if(myCoins < price) return customAlert("Недостаточно монет!");
         if(myInventory[id]) return;
         customConfirm(`Купить за ${price} монет?`, () => {
-            myCoins -= price; myInventory[id] = true;
+            myCoins -= price; 
+            myInventory[id] = true;
             
-            // ИСПРАВЛЕНИЕ МАССИВОВ FIREBASE
+            // Надежное добавление в массивы
             if(type === 'emoji') { 
                 let arr = myInventory.emojis ? (Array.isArray(myInventory.emojis) ? myInventory.emojis : Object.values(myInventory.emojis)) : [];
                 arr.push(...val.split(',')); myInventory.emojis = arr;
@@ -562,7 +635,8 @@
             }
             
             db.ref(`users/${me}/coins`).set(myCoins); db.ref(`users/${me}/inventory`).set(myInventory);
-            customAlert("Успешно куплено!", () => { openShopModal(); updateDynamicEmojis(); });
+            document.getElementById('s-coins').innerText = myCoins;
+            customAlert("Успешно куплено!", () => { renderShopItems(); updateDynamicEmojis(); });
         });
     }
 
@@ -571,19 +645,24 @@
             db.ref(`users/${me}/equippedFrame`).set(val);
             myEquippedFrame = val; frameCache[me] = val;
             document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
+            if(document.getElementById('av-'+me)) document.getElementById('av-'+me).className = 'avatar ' + myEquippedFrame;
         }
         if(type === 'status') {
             db.ref(`users/${me}/equippedStatus`).set(val);
             myEquippedStatus = val; statusCache[me] = val;
             document.getElementById('my-status-display').innerText = myEquippedStatus;
         }
-        openShopModal(); loadContacts(); loadMessages(); 
+        if(type === 'color') {
+            db.ref(`users/${me}/equippedColor`).set(val);
+            myEquippedColor = val; colorCache[me] = val;
+            document.getElementById('my-name-display').style.color = myEquippedColor || 'inherit';
+        }
+        renderShopItems(); loadContacts(); loadMessages(); 
     }
 
     function updateDynamicEmojis() {
         const baseEmojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
         let all = [...baseEmojis]; 
-        
         if(myInventory.emojis) {
             let userEmojis = Array.isArray(myInventory.emojis) ? myInventory.emojis : Object.values(myInventory.emojis);
             all = all.concat(userEmojis);
@@ -595,7 +674,7 @@
         if(myInventory.stickers) {
             let userStickers = Array.isArray(myInventory.stickers) ? myInventory.stickers : Object.values(myInventory.stickers);
             userStickers.forEach(url => {
-                const img = document.createElement('img'); img.src = url; img.style.height="40px"; img.style.cursor="pointer";
+                const img = document.createElement('img'); img.src = url; img.style.height="40px"; img.style.cursor="pointer"; img.style.borderRadius="8px";
                 img.onclick = () => { sendSticker(url); toggleEmoji({stopPropagation:()=>{}}); };
                 ep.appendChild(img);
             });
@@ -657,10 +736,9 @@
         customAlert("Ваш ID успешно изменён! Приложение сейчас перезапустится.", () => { location.reload(); });
     }
 
-    // ИГРА WALL JUMPER (ЧЕСТНАЯ ФИЗИКА, БЕЗ ЗАЖИМА ПРОБЕЛА)
+    // ИГРА WALL JUMPER С АБСОЛЮТНОЙ ЗАЩИТОЙ
     let isGamesOpen = false, canvas, ctx, gLoop, p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
-    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false;
-    let spaceReleased = true; // Защита от спама пробелом
+    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, spaceReleased = true;
 
     function openGamesModal(e) {
         if(e) e.stopPropagation(); closePopups(); document.getElementById('games-modal').style.display = 'flex';
@@ -679,7 +757,7 @@
             document.getElementById('leaderboard-list').innerHTML = 'Загрузка...';
             db.ref('leaderboards/walljumper').orderByValue().limitToLast(10).once('value', s => {
                 let html = ''; let arr = []; s.forEach(c => { arr.unshift({id: c.key, score: c.val()}); });
-                arr.forEach((a, i) => { let medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1+'.'); html += `<div class="leaderboard-item"><span>${medal} ${a.id}</span> <b>${a.score}</b></div>`; });
+                arr.forEach((a, i) => { let medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1+'.'); html += `<div class="leaderboard-item"><span>${medal} <b style="color:${colorCache[a.id]||'inherit'}">${a.id}</b></span> <b>${a.score}</b></div>`; });
                 document.getElementById('leaderboard-list').innerHTML = html || 'Пока нет рекордов!';
             });
         }
@@ -700,13 +778,9 @@
     }
 
     window.addEventListener('keydown', e => {
-        if(e.code === 'Space' && isGamesOpen) { 
-            e.preventDefault(); 
-            if(spaceReleased) { spaceReleased = false; gameJump(); }
-        }
+        if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); if(spaceReleased) { spaceReleased = false; gameJump(); } }
     });
-    
-    window.addEventListener('keyup', e => { if(e.code === 'Space') { spaceReleased = true; } });
+    window.addEventListener('keyup', e => { if(e.code === 'Space') spaceReleased = true; });
     document.addEventListener('DOMContentLoaded', () => { document.getElementById('gameCanvas')?.addEventListener('pointerdown', e => { e.preventDefault(); gameJump(); }); });
 
     function updateGame() {
@@ -761,6 +835,7 @@
 
         if (id === me) {
             document.getElementById('header-title').innerHTML = "🔖 Избранное"; 
+            document.getElementById('header-title').style.color = myEquippedColor || 'inherit';
             document.getElementById('header-avatar').src = `https://robohash.org/${me}`;
             document.getElementById('header-avatar').className = 'avatar ' + myEquippedFrame;
             document.getElementById('header-status').innerText = '';
@@ -768,6 +843,7 @@
         } else if (isGroup) {
             db.ref(`groups/${id}`).on('value', s => { 
                 const d = s.val() || {}; if(!d.name) return; document.getElementById('header-title').innerText = d.name; 
+                document.getElementById('header-title').style.color = 'inherit';
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
                 document.getElementById('header-avatar').className = 'avatar';
                 document.getElementById('header-status').innerText = '';
@@ -786,7 +862,12 @@
                 const d = s.val() || {}; if(!d.nickname && !d.avatar) return; 
                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 const dispName = localNames[id] || d.nickname || id; 
+                
+                colorCache[id] = d.equippedColor || '';
+                
                 document.getElementById('header-title').innerHTML = dispName + tick; 
+                document.getElementById('header-title').style.color = colorCache[id] || 'inherit';
+                
                 document.getElementById('header-status').innerText = d.equippedStatus || '';
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
                 document.getElementById('header-avatar').className = 'avatar ' + (frameCache[id] || '');
@@ -849,10 +930,11 @@
                 
                 let fClass = frameCache[m.sender] || '';
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar ${fClass}" onclick="openProfile('${m.sender}')">` : '';
+                let nameColorMsg = colorCache[m.sender] || 'var(--tg-accent)';
                 
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
-                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:var(--tg-accent);margin-bottom:4px;">${m.sender} ${statusCache[m.sender]||''}</div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
+                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:${nameColorMsg};margin-bottom:4px;">${m.sender} ${statusCache[m.sender]||''}</div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
                 </div>`;
             });
             
@@ -866,7 +948,7 @@
             const div = document.getElementById('contacts'); div.innerHTML = '';
             
             const favItem = document.createElement('div'); favItem.className=`user-item ${me === targetId ? 'active' : ''}`;
-            favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar ${myEquippedFrame}" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b>🔖 Избранное</b></div>`;
+            favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar ${myEquippedFrame}" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b style="color:${myEquippedColor||'inherit'}">🔖 Избранное</b></div>`;
             favItem.onclick = () => selectChat(me, false); div.appendChild(favItem);
             db.ref('users/'+me).on('value', s => { if(s.val() && s.val().avatar && document.getElementById('av-'+me)) document.getElementById('av-'+me).src = s.val().avatar; });
 
@@ -878,7 +960,7 @@
                     db.ref(`groups/${id}`).on('value', s => {
                         const d = s.val() || {}; if(d.name) {
                             const label = document.getElementById(nameId); const iconTxt = d.isChannel ? '📢 ' : '👥 ';
-                            if(label) label.innerText = iconTxt + (d.name || id);
+                            if(label) label.innerHTML = `<span style="color:inherit">${iconTxt + (d.name || id)}</span>`;
                             const icon = document.getElementById('av-'+id); if(d.avatar && icon) icon.src = d.avatar;
                         }
                     });
@@ -886,13 +968,15 @@
                     db.ref('users/'+id).on('value', s => { 
                         const d = s.val() || {}; if(d.nickname || d.avatar) {
                             if(d.avatar) { document.getElementById('av-'+id).src=d.avatar; avatarCache[id] = d.avatar; }
-                            frameCache[id] = d.equippedFrame || ''; statusCache[id] = d.equippedStatus || '';
+                            frameCache[id] = d.equippedFrame || ''; statusCache[id] = d.equippedStatus || ''; colorCache[id] = d.equippedColor || '';
+                            
                             const avEl = document.getElementById('av-'+id); if(avEl) avEl.className = 'avatar ' + frameCache[id];
                             const stEl = document.getElementById('st-'+id); if(stEl) stEl.innerText = statusCache[id];
                             const label = document.getElementById(nameId); 
                             if(label) {
                                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
-                                const dispName = localNames[id] || d.nickname || id; label.innerHTML = dispName + tick;
+                                const dispName = localNames[id] || d.nickname || id; 
+                                label.innerHTML = `<span style="color:${colorCache[id]||'inherit'}">${dispName} ${tick}</span>`;
                             }
                         }
                     });
@@ -912,7 +996,7 @@
             let membersHtml = ''; 
             for(let m in d.members) {
                 const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m]; const mDisp = localNames[m] || m; 
-                membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="color:var(--tg-accent); cursor:pointer;" onclick="openProfile('${m}')">${mDisp} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
+                membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="color:${colorCache[m]||'var(--tg-accent)'}; font-weight:bold; cursor:pointer;" onclick="openProfile('${m}')">${mDisp} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
             }
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px;" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
                 <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:10px;">${d.isChannel ? 'НАЗВАНИЕ КАНАЛА' : 'НАЗВАНИЕ ГРУППЫ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:10px;">
@@ -921,11 +1005,13 @@
         } else {
             const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val() || {}; 
             const isVer = (uid === 'sanya' || uid === 'misha' || d.verified); const locName = localNames[uid] || ''; const fClass = isMe ? myEquippedFrame : (frameCache[uid] || '');
+            const cColor = isMe ? myEquippedColor : (colorCache[uid] || 'var(--tg-accent)');
+            
             modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar ${fClass}" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
                 <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">О СЕБЕ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; margin-top:5px; padding:15px;">
                 <textarea id="m-desc" class="modal-input" style="border:none; background:transparent; padding:0; height:auto; min-height:40px;" ${!isMe?'disabled':''} onchange="updateProfile()">${d.description||''}</textarea></div>
                 ${(!isMe && d.settings?.allowRename !== false && uid !== me) ? `<span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">ЛОКАЛЬНОЕ ИМЯ (ВИДНО ТОЛЬКО ВАМ)</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; padding:10px; margin-top:5px;"><input type="text" class="modal-input" style="border:none; padding:0; background:transparent; margin:0;" placeholder="Введите имя..." value="${locName}" onchange="saveLocalName('${uid}', this.value)"></div>` : ''}
-                <div class="gray-block" style="background:#f8f9fa; border:none; margin-top:15px; padding:20px; border-radius:25px;"><span style="font-size:10px; color:#aaa; font-weight:bold;">ID</span><div style="font-weight:bold; color:var(--tg-accent); margin-bottom:15px; font-size:17px;">@${uid} ${isVer ? '<span style="color:var(--tg-accent);">✔</span>' : ''}</div>
+                <div class="gray-block" style="background:#f8f9fa; border:none; margin-top:15px; padding:20px; border-radius:25px;"><span style="font-size:10px; color:#aaa; font-weight:bold;">ID</span><div style="font-weight:bold; color:${cColor}; margin-bottom:15px; font-size:17px;">@${uid} ${isVer ? '<span style="color:var(--tg-accent);">✔</span>' : ''}</div>
                 <span style="font-size:10px; color:#aaa; font-weight:bold;">НИКНЕЙМ</span><input type="text" id="m-nick" class="modal-input" style="border:1.5px solid #eee; background:#fff;" value="${d.nickname||uid}" ${!isMe?'disabled':''} onchange="updateProfile()"></div>
                 ${!isMe ? `<button onclick="startDirectChat('${uid}')" style="width:100%;margin-top:15px;padding:16px;background:var(--tg-accent);color:white;border:none;border-radius:18px;font-weight:bold;cursor:pointer;">Написать сообщение</button>` : ''}
                 ${(me === 'sanya' || me === 'misha') && uid !== me ? `<button onclick="toggleVerify('${uid}', ${!d.verified})" style="width:100%;margin-top:10px;padding:12px;background:#fff;color:var(--tg-accent);border:1.5px solid var(--tg-accent);border-radius:15px;font-weight:bold;cursor:pointer;">${d.verified ? 'Забрать галочку' : 'Выдать галочку'}</button>` : ''}
@@ -967,9 +1053,6 @@
         if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true); updateQuestProgress('msg', 1); selectChat(target, isGrp);
     }
 
-    async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
-    function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
-    
     function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
     function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
     function deleteMsg() { if(selectedMsg && selectedMsg.key) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
@@ -1012,7 +1095,7 @@
                     reader.onloadend = () => { db.ref(getChatPath()+'/messages').push({ sender: me, file: reader.result, time: Date.now(), type: 'audio', read: false }); if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1); };
                     stream.getTracks().forEach(track => track.stop());
                 };
-            } catch(err) { customAlert("Нет доступа к микрофону!"); }
+            } catch(err) { customAlert("Нет доступа к микрофону! Разрешите доступ в настройках устройства."); }
         } else { mediaRecorder.stop(); isRecording = false; btn.innerHTML = '🎤'; btn.classList.remove('recording'); inp.placeholder = "Написать сообщение..."; inp.disabled = false; }
     }
 
