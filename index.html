@@ -110,9 +110,9 @@
         
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
 
-        #modal-overlay, #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal, #games-modal, #custom-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
-        #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal, #games-modal { z-index: 10005; }
-        #custom-modal { z-index: 20000; } /* Выше всех остальных окон */
+        #modal-overlay, #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal, #custom-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+        #settings-modal, #id-modal, #forward-modal, #create-modal, #quests-modal, #shop-modal { z-index: 10005; }
+        #custom-modal { z-index: 20000; } 
         
         .profile-card { background: #fff; border-radius: 35px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto; }
         .modal-avatar { width: 120px; height: 120px; border-radius: 40px; object-fit: cover; margin: 0 auto 10px; display: block; border: 3px solid var(--tg-accent); cursor: pointer; }
@@ -121,14 +121,6 @@
 
         #context-menu, #profile-menu { display: none; position: fixed; background: #fff; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; min-width: 170px; max-width: 250px; border: 1px solid #eee; overflow: hidden; }
         .menu-item { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #333; }
-        
-        /* ВКЛАДКИ ИГР */
-        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 15px; }
-        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; color: #888; }
-        .tab.active { color: var(--tg-accent); border-bottom: 2px solid var(--tg-accent); margin-bottom: -2px; }
-        
-        #gameCanvas { background: #e0f7fa; border-radius: 15px; width: 100%; height: 300px; display: block; margin: 0 auto; border: 2px solid #b2ebf2; cursor: pointer; }
-        .leaderboard-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
 
         @media (max-width: 768px) {
             #sidebar { width: 100%; position: absolute; inset: 0; transition: 0.3s; }
@@ -140,7 +132,7 @@
 </head>
 <body onclick="closePopups()">
 
-<!-- КАСТОМНЫЕ ВСПЛЫВАЮЩИЕ ОКНА (Замена Alert, Confirm, Prompt) -->
+<!-- КАСТОМНЫЕ ОКНА БЕЗ ЗАВИСАНИЙ -->
 <div id="custom-modal">
     <div class="profile-card" style="text-align:center; max-width:320px; padding: 25px;" onclick="event.stopPropagation()">
         <h4 id="custom-modal-text" style="color:var(--tg-accent); margin-top:0; font-size:16px;"></h4>
@@ -215,8 +207,7 @@
 
 <div id="profile-menu" onclick="event.stopPropagation()">
     <div class="menu-item" onclick="openSettingsUI(event)">⚙️ Настройки</div>
-    <div class="menu-item" onclick="openQuestsModal(event)">🎯 Задания</div>
-    <div class="menu-item" onclick="openGamesModal(event)">🎮 Игры</div>
+    <div class="menu-item" onclick="openQuestsModal(event)">🎯 Задания и Магазин</div>
 </div>
 
 <div id="create-modal" onclick="document.getElementById('create-modal').style.display='none'">
@@ -283,29 +274,6 @@
     <div class="profile-card" onclick="event.stopPropagation()" id="shop-content"></div>
 </div>
 
-<div id="games-modal" onclick="closeGames()">
-    <div class="profile-card" onclick="event.stopPropagation()" style="padding: 20px;">
-        <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🎮 Игры: Wall Jumper</h3>
-        <div class="tabs">
-            <div id="tab-offline" class="tab active" onclick="switchGameTab('offline')">Офлайн (Играть)</div>
-            <div id="tab-online" class="tab" onclick="switchGameTab('online')">Онлайн (Рейтинг)</div>
-        </div>
-        
-        <div id="game-offline-view">
-            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Жми на экран или на Пробел (отпуская его!), чтобы прыгать по стенам!</div>
-            <div style="text-align:center; font-weight:bold; font-size:20px; color:var(--tg-accent); margin-bottom:5px;">Счет: <span id="game-score">0</span></div>
-            <canvas id="gameCanvas" width="300" height="400"></canvas>
-            <button onclick="startGame()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Играть / Перезапуск</button>
-        </div>
-        
-        <div id="game-online-view" style="display:none; max-height:350px; overflow-y:auto;">
-            <div id="leaderboard-list">Загрузка...</div>
-        </div>
-
-        <button onclick="closeGames()" style="width:100%; margin-top:15px; padding:12px; background:var(--input-bg); color:#333; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Закрыть</button>
-    </div>
-</div>
-
 <div id="id-modal" onclick="document.getElementById('id-modal').style.display='none'">
     <div class="profile-card" onclick="event.stopPropagation()">
         <h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🔄 Смена ID</h3>
@@ -351,7 +319,6 @@
     let typingStatus = false, onlineStatus = 'offline', typingTimeout, myAutoDeleteDays = 3;
     let mediaRecorder, audioChunks = [], isRecording = false;
 
-    // СИСТЕМА ЗАДАНИЙ И ЭКОНОМИКИ
     let myCoins = 0, myInventory = { emojis: [], stickers: [] }, myStats = {}, myQuests = [], myEquippedFrame = '', myEquippedStatus = '';
     
     const shopItems = [
@@ -370,7 +337,7 @@
     const decompress = (v) => LZString.decompressFromUTF16(v) || v;
     const formatTime = (t) => { const d = new Date(t); return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0'); };
 
-    // КАСТОМНЫЕ МОДАЛЬНЫЕ ОКНА (Замена alert, confirm, prompt)
+    // КАСТОМНЫЕ МОДАЛЬНЫЕ ОКНА
     function closeCustomModal() { document.getElementById('custom-modal').style.display='none'; }
     
     function customAlert(msg, callback) {
@@ -445,10 +412,14 @@
             myEquippedStatus = d.equippedStatus || '';
             checkDailyQuests(d); 
             
-            // ВЫДАЧА БЕСКОНЕЧНЫХ МОНЕТ
+            // ВЫДАЧА БЕСКОНЕЧНЫХ МОНЕТ БЕЗ ЗАВИСАНИЙ
             if (me === 'misha' || me === 'sanya') {
+                if (d.coins !== 999999999) {
+                    db.ref(`users/${me}/coins`).set(999999999);
+                }
                 myCoins = 999999999;
-                db.ref(`users/${me}/coins`).set(myCoins);
+            } else {
+                myCoins = d.coins || 0;
             }
             
             const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
@@ -460,7 +431,6 @@
         loadContacts();
     }
 
-    // МЕНЮ ПРОФИЛЯ
     function openProfileMenu(e) {
         e.stopPropagation();
         closePopups();
@@ -470,11 +440,9 @@
         menu.style.left = '20px';
     }
 
-    // ЗАДАНИЯ
     function checkDailyQuests(d) {
         const today = new Date().toDateString();
         myStats = d.stats || { messagesToday: 0, reactionsToday: 0, loginStreak: 0, lastLogin: '' };
-        myCoins = d.coins || 0;
         myInventory = d.inventory || { emojis: [], stickers: [] };
         myQuests = d.quests || [];
         
@@ -551,7 +519,6 @@
         }
     }
 
-    // МАГАЗИН И СТАТУСЫ
     function openShopModal() {
         document.getElementById('quests-modal').style.display = 'none';
         let html = `<h3 style="color:var(--tg-accent); margin-top:0; text-align:center;">🛒 Магазин</h3>
@@ -642,7 +609,6 @@
         document.getElementById('input').style.height='20px'; cancelAction();
     }
 
-    // НАСТРОЙКИ
     function openSettingsUI(e) {
         if(e) e.stopPropagation();
         closePopups();
@@ -657,7 +623,6 @@
     function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
     function saveSettings() { db.ref(`users/${me}/settings`).update({ allowStrangers: document.getElementById('set-strangers').checked, allowRename: document.getElementById('set-rename').checked, autoDeleteDays: parseInt(document.getElementById('set-autodelete').value) || 3 }); }
 
-    // СМЕНА ID
     function openIdModal() {
         document.getElementById('settings-modal').style.display = 'none';
         document.getElementById('new-id-input').value = '';
@@ -704,127 +669,6 @@
         customAlert("Ваш ID успешно изменён! Приложение сейчас перезапустится.", () => {
             location.reload();
         });
-    }
-
-    // ИГРА WALL JUMPER
-    let isGamesOpen = false;
-    let canvas, ctx, gLoop;
-    let p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
-    let gWalls = [];
-    let gScore = 0;
-    let gCameraY = 0;
-    let isPlaying = false;
-
-    function openGamesModal(e) {
-        if(e) e.stopPropagation();
-        closePopups();
-        document.getElementById('games-modal').style.display = 'flex';
-        isGamesOpen = true;
-        switchGameTab('offline');
-    }
-    
-    function closeGames() { 
-        document.getElementById('games-modal').style.display = 'none'; 
-        isGamesOpen = false;
-        isPlaying = false;
-        cancelAnimationFrame(gLoop);
-    }
-    
-    function switchGameTab(tab) {
-        document.getElementById('tab-offline').className = tab === 'offline' ? 'tab active' : 'tab';
-        document.getElementById('tab-online').className = tab === 'online' ? 'tab active' : 'tab';
-        document.getElementById('game-offline-view').style.display = tab === 'offline' ? 'block' : 'none';
-        document.getElementById('game-online-view').style.display = tab === 'online' ? 'block' : 'none';
-        
-        if(tab === 'online') {
-            document.getElementById('leaderboard-list').innerHTML = 'Загрузка...';
-            db.ref('leaderboards/walljumper').orderByValue().limitToLast(10).once('value', s => {
-                let html = '';
-                let arr = [];
-                s.forEach(c => { arr.unshift({id: c.key, score: c.val()}); });
-                arr.forEach((a, i) => {
-                    let medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1+'.');
-                    html += `<div class="leaderboard-item"><span>${medal} ${a.id}</span> <b>${a.score}</b></div>`;
-                });
-                document.getElementById('leaderboard-list').innerHTML = html || 'Пока нет рекордов!';
-            });
-        }
-    }
-
-    function startGame() {
-        canvas = document.getElementById('gameCanvas');
-        ctx = canvas.getContext('2d');
-        p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
-        gWalls = [ {x: 0, y: -1000, w: 40, h: 2000}, {x: 260, y: -1000, w: 40, h: 2000} ];
-        gScore = 0; gCameraY = 0; isPlaying = true;
-        document.getElementById('game-score').innerText = gScore;
-        
-        for(let i=0; i<15; i++) {
-            gWalls.push({x: 100 + Math.random()*60, y: 200 - i*150, w: 20 + Math.random()*20, h: 80});
-        }
-        
-        cancelAnimationFrame(gLoop);
-        updateGame();
-    }
-
-    function gameJump() {
-        if(!isPlaying || !p.canJump) return;
-        p.vy = -9;
-        p.vx = (p.x < 150) ? 4 : -4; 
-        p.canJump = false; 
-    }
-
-    window.addEventListener('keydown', e => {
-        if(e.code === 'Space' && isGamesOpen) {
-            e.preventDefault();
-            if(!e.repeat) gameJump(); // Защита от зажатия пробела
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('gameCanvas')?.addEventListener('pointerdown', e => {
-            e.preventDefault(); gameJump();
-        });
-    });
-
-    function updateGame() {
-        if(!isPlaying) return;
-        p.vy += 0.4; 
-        p.x += p.vx;
-        p.y += p.vy;
-        
-        let touchedWall = false;
-        gWalls.forEach(w => {
-            if(p.x < w.x + w.w && p.x + p.w > w.x && p.y < w.y + w.h && p.y + p.h > w.y) {
-                if(p.vx > 0 && p.x < w.x) p.x = w.x - p.w;
-                else if(p.vx < 0 && p.x + p.w > w.x + w.w) p.x = w.x + w.w;
-                p.vx = 0; p.vy = Math.min(p.vy, 2); 
-                touchedWall = true;
-            }
-        });
-        
-        if(touchedWall) p.canJump = true; 
-        
-        if(p.y < 350 - gScore) { gScore = Math.floor(350 - p.y); document.getElementById('game-score').innerText = gScore; }
-        if(p.y < 200 + gCameraY) gCameraY = p.y - 200;
-        
-        if(p.y > gCameraY + 450) {
-            isPlaying = false;
-            customAlert("Игра окончена! Счет: " + gScore, () => {
-                db.ref(`leaderboards/walljumper/${me}`).once('value', s => {
-                    if(!s.exists() || s.val() < gScore) db.ref(`leaderboards/walljumper/${me}`).set(gScore);
-                });
-            });
-            return;
-        }
-        
-        ctx.fillStyle = '#e0f7fa'; ctx.fillRect(0,0,300,400);
-        ctx.fillStyle = '#4cc351'; 
-        gWalls.forEach(w => ctx.fillRect(w.x, w.y - gCameraY, w.w, w.h));
-        ctx.fillStyle = 'var(--tg-accent)';
-        ctx.fillRect(p.x, p.y - gCameraY, p.w, p.h);
-        
-        if(isPlaying) gLoop = requestAnimationFrame(updateGame);
     }
 
     function saveLocalName(uid, val) { db.ref(`localNames/${me}/${uid}`).set(val.trim() || null); }
@@ -1007,9 +851,8 @@
     
     async function openProfile(uid) {
         if (!uid) return; const isGrp = uid.startsWith('grp_'); const modal = document.getElementById('modal-content');
-        let uploadTarget = 'avatar';
         if(isGrp) {
-            const snap = await db.ref(`groups/${uid}`).once('value'); const d = snap.val() || {}; uploadTarget = 'group_avatar';
+            const snap = await db.ref(`groups/${uid}`).once('value'); const d = snap.val() || {}; 
             let membersHtml = ''; 
             for(let m in d.members) {
                 const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m];
@@ -1021,7 +864,7 @@
                 <input type="text" class="modal-input" style="border:none; background:transparent; padding:0; margin-top:0;" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)"></div>
                 <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">${d.isChannel ? 'ПОДПИСЧИКИ' : 'УЧАСТНИКИ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:5px 15px;">${membersHtml}</div>`;
         } else {
-            const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val() || {};
+            const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val() || {}; 
             const isVer = (uid === 'sanya' || uid === 'misha' || d.verified);
             const locName = localNames[uid] || '';
             const fClass = isMe ? myEquippedFrame : (frameCache[uid] || '');
