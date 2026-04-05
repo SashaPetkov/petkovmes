@@ -139,6 +139,7 @@
 </head>
 <body onclick="closePopups()">
 
+<!-- КАСТОМНЫЕ ОКНА БЕЗ ЗАВИСАНИЙ -->
 <div id="custom-modal">
     <div class="profile-card" style="text-align:center; max-width:320px; padding: 25px;" onclick="event.stopPropagation()">
         <h4 id="custom-modal-text" style="color:var(--tg-accent); margin-top:0; font-size:16px;"></h4>
@@ -413,14 +414,17 @@
             myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
             myEquippedFrame = d.equippedFrame || '';
             myEquippedStatus = d.equippedStatus || '';
+            
+            frameCache[me] = myEquippedFrame;
+            statusCache[me] = myEquippedStatus;
+
             checkDailyQuests(d); 
             
-            // ВЫДАЧА МОНЕТ без цикличности
             if (me === 'misha' || me === 'sanya') {
-                if (myCoins !== 999999999) {
-                    myCoins = 999999999;
+                if (d.coins !== 999999999) {
                     db.ref(`users/${me}/coins`).set(999999999);
                 }
+                myCoins = 999999999;
             } else {
                 myCoins = d.coins || 0;
             }
@@ -430,6 +434,9 @@
             document.getElementById('my-status-display').innerText = myEquippedStatus;
             document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; 
             document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
+            
+            const mySidebarAv = document.getElementById('av-'+me);
+            if(mySidebarAv) mySidebarAv.className = 'avatar ' + myEquippedFrame;
         });
         loadContacts();
     }
@@ -540,12 +547,27 @@
         if(myCoins < price) return customAlert("Недостаточно монет!");
         if(myInventory[id]) return;
         customConfirm(`Купить за ${price} монет?`, () => {
-            myCoins -= price; myInventory[id] = true;
-            if(type === 'emoji') { if(!myInventory.emojis) myInventory.emojis = []; myInventory.emojis.push(...val.split(',')); }
-            if(type === 'sticker') { if(!myInventory.stickers) myInventory.stickers = []; myInventory.stickers.push(val); }
+            myCoins -= price; 
+            myInventory[id] = true;
             
-            db.ref(`users/${me}/coins`).set(myCoins); db.ref(`users/${me}/inventory`).set(myInventory);
-            openShopModal(); updateDynamicEmojis();
+            if(type === 'emoji') { 
+                let arr = myInventory.emojis ? (Array.isArray(myInventory.emojis) ? myInventory.emojis : Object.values(myInventory.emojis)) : [];
+                arr.push(...val.split(',')); 
+                myInventory.emojis = arr;
+            }
+            if(type === 'sticker') { 
+                let arr = myInventory.stickers ? (Array.isArray(myInventory.stickers) ? myInventory.stickers : Object.values(myInventory.stickers)) : [];
+                arr.push(val); 
+                myInventory.stickers = arr;
+            }
+            
+            db.ref(`users/${me}/coins`).set(myCoins); 
+            db.ref(`users/${me}/inventory`).set(myInventory);
+            
+            customAlert("Успешно куплено!", () => {
+                openShopModal(); 
+                updateDynamicEmojis();
+            });
         });
     }
 
@@ -553,25 +575,36 @@
         if(type === 'frame') {
             db.ref(`users/${me}/equippedFrame`).set(val);
             myEquippedFrame = val;
+            frameCache[me] = val;
             document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
+            const avList = document.getElementById('av-'+me);
+            if(avList) avList.className = 'avatar ' + myEquippedFrame;
         }
         if(type === 'status') {
             db.ref(`users/${me}/equippedStatus`).set(val);
             myEquippedStatus = val;
+            statusCache[me] = val;
             document.getElementById('my-status-display').innerText = myEquippedStatus;
         }
         openShopModal();
+        loadMessages(); 
     }
 
     function updateDynamicEmojis() {
         const baseEmojis = ['😀','😂','😍','👍','🔥','🙏','❤️','😎','🎉','😡'];
-        let all = [...baseEmojis]; if(myInventory.emojis) all = all.concat(myInventory.emojis);
+        let all = [...baseEmojis]; 
+        
+        if(myInventory.emojis) {
+            let userEmojis = Array.isArray(myInventory.emojis) ? myInventory.emojis : Object.values(myInventory.emojis);
+            all = all.concat(userEmojis);
+        }
         
         const ep = document.getElementById('emoji-picker'); ep.innerHTML = '';
         all.forEach(e => { const d = document.createElement('div'); d.style.fontSize="24px"; d.style.cursor="pointer"; d.innerText=e; d.onclick=()=>document.getElementById('input').value+=e; ep.appendChild(d); });
         
         if(myInventory.stickers) {
-            myInventory.stickers.forEach(url => {
+            let userStickers = Array.isArray(myInventory.stickers) ? myInventory.stickers : Object.values(myInventory.stickers);
+            userStickers.forEach(url => {
                 const img = document.createElement('img'); img.src = url; img.style.height="40px"; img.style.cursor="pointer";
                 img.onclick = () => { sendSticker(url); toggleEmoji({stopPropagation:()=>{}}); };
                 ep.appendChild(img);
@@ -634,9 +667,9 @@
         customAlert("Ваш ID успешно изменён! Приложение сейчас перезапустится.", () => { location.reload(); });
     }
 
-    // ИГРА WALL JUMPER
+    // ИГРА WALL JUMPER С ЖЕСТКОЙ ЗАЩИТОЙ ОТ СПАМА
     let isGamesOpen = false, canvas, ctx, gLoop, p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
-    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, isSpaceDown = false;
+    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, lastJumpTime = 0;
 
     function openGamesModal(e) {
         if(e) e.stopPropagation(); closePopups(); document.getElementById('games-modal').style.display = 'flex';
@@ -672,14 +705,15 @@
     }
 
     function gameJump() {
-        if(!isPlaying || !p.canJump) return;
+        const now = Date.now();
+        if(!isPlaying || !p.canJump || now - lastJumpTime < 250) return; // ЗАЩИТА ОТ СПАМА И ЗАЖАТИЯ ПРОБЕЛА
+        lastJumpTime = now;
         p.vy = -9; p.vx = (p.x < 150) ? 4 : -4; p.canJump = false; 
     }
 
     window.addEventListener('keydown', e => {
-        if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); if(!isSpaceDown) { isSpaceDown = true; gameJump(); } }
+        if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); gameJump(); }
     });
-    window.addEventListener('keyup', e => { if(e.code === 'Space') isSpaceDown = false; });
     
     document.addEventListener('DOMContentLoaded', () => { document.getElementById('gameCanvas')?.addEventListener('pointerdown', e => { e.preventDefault(); gameJump(); }); });
 
@@ -734,17 +768,25 @@
         document.getElementById('form-container').style.display = 'block'; document.getElementById('group-invite-btn').style.display = 'none';
 
         if (id === me) {
-            document.getElementById('header-title').innerHTML = "🔖 Избранное"; document.getElementById('header-avatar').src = `https://robohash.org/${me}`;
-            document.getElementById('header-avatar').className = 'avatar ' + myEquippedFrame; document.getElementById('header-status').innerText = ''; document.getElementById('header-subtitle').innerText = "Сохраненные сообщения";
+            document.getElementById('header-title').innerHTML = "🔖 Избранное"; 
+            document.getElementById('header-avatar').src = `https://robohash.org/${me}`;
+            document.getElementById('header-avatar').className = 'avatar ' + myEquippedFrame;
+            document.getElementById('header-status').innerText = '';
+            document.getElementById('header-subtitle').innerText = "Сохраненные сообщения";
         } else if (isGroup) {
             db.ref(`groups/${id}`).on('value', s => { 
                 const d = s.val() || {}; if(!d.name) return; document.getElementById('header-title').innerText = d.name; 
-                document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`; document.getElementById('header-avatar').className = 'avatar'; document.getElementById('header-status').innerText = '';
+                document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
+                document.getElementById('header-avatar').className = 'avatar';
+                document.getElementById('header-status').innerText = '';
                 if (d.isChannel) {
                     const canPost = (d.owner === me || (d.admins && d.admins[me]));
                     document.getElementById('form-container').style.display = canPost ? 'block' : 'none';
                     document.getElementById('header-subtitle').innerText = d.channelType === 'public' ? 'Публичный канал' : 'Частный канал';
-                } else { document.getElementById('form-container').style.display = 'block'; document.getElementById('header-subtitle').innerText = "Групповой чат"; }
+                } else {
+                    document.getElementById('form-container').style.display = 'block';
+                    document.getElementById('header-subtitle').innerText = "Групповой чат";
+                }
                 document.getElementById('group-invite-btn').style.display = (d.owner===me || (d.admins && d.admins[me])) ? 'block' : 'none';
             });
         } else {
@@ -752,32 +794,45 @@
                 const d = s.val() || {}; if(!d.nickname && !d.avatar) return; 
                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 const dispName = localNames[id] || d.nickname || id; 
-                document.getElementById('header-title').innerHTML = dispName + tick; document.getElementById('header-status').innerText = d.equippedStatus || '';
-                document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`; document.getElementById('header-avatar').className = 'avatar ' + (frameCache[id] || '');
+                document.getElementById('header-title').innerHTML = dispName + tick; 
+                document.getElementById('header-status').innerText = d.equippedStatus || '';
+                document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
+                document.getElementById('header-avatar').className = 'avatar ' + (frameCache[id] || '');
             });
-            db.ref(`status/${id}`).on('value', s => { onlineStatus = s.val() || 'offline'; const sub = document.getElementById('header-subtitle'); sub.innerText = onlineStatus === 'online' ? 'В сети' : 'был(а) в сети недавно'; sub.style.color = onlineStatus === 'online' ? 'var(--tg-accent)' : '#888'; });
+            db.ref(`status/${id}`).on('value', s => { 
+                onlineStatus = s.val() || 'offline'; 
+                const sub = document.getElementById('header-subtitle');
+                sub.innerText = onlineStatus === 'online' ? 'В сети' : 'был(а) в сети недавно';
+                sub.style.color = onlineStatus === 'online' ? 'var(--tg-accent)' : '#888';
+            });
         }
         db.ref(getPinnedPath()).on('value', s => { if(s.exists()){ document.getElementById('pinned-bar').style.display='flex'; document.getElementById('pinned-text').innerText = s.val().text; } else document.getElementById('pinned-bar').style.display='none'; });
         loadMessages();
     }
 
-    function addReaction(emoji) { if(selectedMsg && selectedMsg.key) { db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji); updateQuestProgress('react', 1); } closePopups(); }
-
     function loadMessages() {
         db.ref(getChatPath()+'/messages').on('value', snap => {
             let html = ''; let unreadUpdates = {}; const now = Date.now();
-            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000; const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
+            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000;
+            const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
 
             snap.forEach(c => {
                 const m = c.val(), key = c.key;
                 if (now - m.time > maxMs || now - m.time > absoluteMaxMs) { db.ref(getChatPath()+'/messages/'+key).remove(); return; }
 
                 const msgClass = m.sender === me ? 'sent' : 'received'; const data = m.type === 'text' ? decompress(m.text) : m.file;
-                if (m.type === 'audio') msgCache[key] = '🎤 Голосовое сообщение'; else if (m.type === 'image') msgCache[key] = '🖼️ Фотография / Стикер'; else msgCache[key] = data;
+                
+                if (m.type === 'audio') msgCache[key] = '🎤 Голосовое сообщение';
+                else if (m.type === 'image') msgCache[key] = '🖼️ Фотография / Стикер';
+                else msgCache[key] = data;
+                
                 if (m.sender !== me && !m.read) unreadUpdates[key + '/read'] = true;
 
                 let readIcon = '';
-                if (m.sender === me && targetId !== me) { readIcon = m.read ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="var(--tg-accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>` : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#999" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`; }
+                if (m.sender === me && targetId !== me) {
+                    readIcon = m.read ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="var(--tg-accent)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
+                                      : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#999" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+                }
 
                 let reply = m.replyTo ? `<div class="reply-box" onclick="jumpToMessage('${m.replyTo.key}', event)"><b>${m.replyTo.sender}</b>${m.replyTo.text}</div>` : '';
                 let content = '';
@@ -809,6 +864,7 @@
     function loadContacts() {
         db.ref(`contacts/${me}`).on('value', snap => {
             const div = document.getElementById('contacts'); div.innerHTML = '';
+            
             const favItem = document.createElement('div'); favItem.className=`user-item ${me === targetId ? 'active' : ''}`;
             favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar ${myEquippedFrame}" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b>🔖 Избранное</b></div>`;
             favItem.onclick = () => selectChat(me, false); div.appendChild(favItem);
@@ -911,9 +967,6 @@
         if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true); updateQuestProgress('msg', 1); selectChat(target, isGrp);
     }
 
-    async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
-    function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
-    
     function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
     function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
     function deleteMsg() { if(selectedMsg && selectedMsg.key) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
@@ -954,7 +1007,6 @@
 
     async function sendMessage(e) { 
         if(e) e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim() && !editingKey) return; 
-        
         if(!isGroup && targetId !== me && !editingKey) {
             const tSnap = await db.ref(`users/${targetId}`).once('value'); const tSet = tSnap.val()?.settings || {};
             if(tSet.allowStrangers === false) {
@@ -962,7 +1014,6 @@
                 if(!tContact.exists()) { customAlert("Этот пользователь запретил писать ему без добавления в контакты!"); return; }
             }
         }
-
         if(editingKey){ db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); } 
         else { 
             const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text', read: false}; 
@@ -972,17 +1023,6 @@
         i.value=''; i.style.height='20px'; cancelAction(); 
     }
     
-    function inviteToGroup(e) { 
-        if(e) e.stopPropagation();
-        customPrompt("Введите ID пользователя:", async (i) => {
-            if(i){ 
-                const s = await db.ref('users/'+i).once('value'); 
-                if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); customAlert("Пользователь добавлен!"); } 
-                else { customAlert("Пользователь не найден."); }
-            } 
-        });
-    }
-
     function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
     async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else { db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now(), read: false}); updateQuestProgress('msg', 1); } }; }
 
