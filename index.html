@@ -64,7 +64,7 @@
         .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; }
         .user-item:hover .del-btn { opacity: 1; }
 
-        /* МАГАЗИННЫЕ РАМКИ */
+        /* МАГАЗИННЫЕ РАМКИ И RGB АНИМАЦИИ */
         .frame-gold { border: 3px solid #ffd700 !important; box-shadow: 0 0 10px rgba(255,215,0,0.8); }
         .frame-neon { border: 3px solid #00f3ff !important; box-shadow: 0 0 12px #00f3ff; }
         .frame-fire { border: 3px solid #ff4500 !important; box-shadow: 0 0 12px #ff4500; }
@@ -72,13 +72,14 @@
         .frame-toxic { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14; }
         .frame-love { border: 3px solid #ff1493 !important; box-shadow: 0 0 15px #ff1493; }
         
-        @keyframes rgb-border { 
-            0% {border-color: #ff0000; box-shadow: 0 0 15px #ff0000;} 
-            33% {border-color: #00ff00; box-shadow: 0 0 15px #00ff00;} 
-            66% {border-color: #0000ff; box-shadow: 0 0 15px #0000ff;} 
-            100% {border-color: #ff0000; box-shadow: 0 0 15px #ff0000;} 
+        @keyframes rgb-anim { 
+            0% {color: #ff0000; border-color: #ff0000; box-shadow: 0 0 10px #ff0000; text-shadow: 0 0 5px rgba(255,0,0,0.5);} 
+            33% {color: #00ff00; border-color: #00ff00; box-shadow: 0 0 10px #00ff00; text-shadow: 0 0 5px rgba(0,255,0,0.5);} 
+            66% {color: #0000ff; border-color: #0000ff; box-shadow: 0 0 10px #0000ff; text-shadow: 0 0 5px rgba(0,0,255,0.5);} 
+            100% {color: #ff0000; border-color: #ff0000; box-shadow: 0 0 10px #ff0000; text-shadow: 0 0 5px rgba(255,0,0,0.5);} 
         }
-        .frame-rainbow { border: 3px solid #ff0000 !important; animation: rgb-border 2s linear infinite; }
+        .frame-rainbow { border: 3px solid #ff0000 !important; animation: rgb-anim 2s linear infinite; }
+        .text-rgb { animation: rgb-anim 2s linear infinite !important; font-weight: bold; }
         .frame-matrix { border: 3px dashed #39ff14 !important; box-shadow: 0 0 15px #39ff14; background: rgba(0,255,0,0.1); }
 
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; background: #fff; position: relative; }
@@ -155,6 +156,7 @@
 </head>
 <body onclick="closePopups()">
 
+<!-- КАСТОМНЫЕ ОКНА БЕЗ ЗАВИСАНИЙ -->
 <div id="custom-modal">
     <div class="profile-card" style="text-align:center; max-width:320px; padding: 25px;" onclick="event.stopPropagation()">
         <h4 id="custom-modal-text" style="color:var(--tg-accent); margin-top:0; font-size:16px;"></h4>
@@ -329,7 +331,7 @@
             <div id="tab-online" class="tab" onclick="switchGameTab('online')">Онлайн (Рейтинг)</div>
         </div>
         <div id="game-offline-view">
-            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Кликай по экрану или Пробелу (не зажимая!), чтобы прыгать!</div>
+            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Кликай по экрану или зажимай Пробел, чтобы взлетать по стенам!</div>
             <div style="text-align:center; font-weight:bold; font-size:20px; color:var(--tg-accent); margin-bottom:5px;">Счет: <span id="game-score">0</span></div>
             <canvas id="gameCanvas" width="300" height="400"></canvas>
             <button onclick="startGame()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Играть / Перезапуск</button>
@@ -391,10 +393,10 @@
     let myEquippedFrame = '', myEquippedStatus = '', myEquippedColor = '';
     let currentShopTab = 'frame';
     
-    // БОЛЬШИЕ ЦЕНЫ И СЕТЫ
+    // БОЛЬШИЕ ЦЕНЫ И СЕТЫ С RGB
     const shopItems = [
         { id: 'set_starter', type: 'set', name: 'Набор Новичка (Неон + 2 пака эмодзи)', price: 400, items: ['frame_neon', 'emo_food', 'emo_sport'] },
-        { id: 'set_rgb', type: 'set', name: 'Сет Геймера (RGB рамка + VIP + 2 цвета)', price: 40000, items: ['frame_rainbow', 'stat_vip', 'col_magenta', 'col_cyan'] },
+        { id: 'set_rgb', type: 'set', name: 'Сет Геймера (RGB Рамка, Ник, Статус + VIP)', price: 60000, items: ['frame_rainbow', 'col_rgb', 'stat_rgb'] },
         
         { id: 'stat_sleep', type: 'status', name: 'Статус: 💤', price: 100, value: '💤' },
         { id: 'stat_game', type: 'status', name: 'Статус: 🎮', price: 150, value: '🎮' },
@@ -402,6 +404,7 @@
         { id: 'stat_king', type: 'status', name: 'Статус: 👑', price: 300, value: '👑' },
         { id: 'stat_diamond', type: 'status', name: 'Статус: 💎', price: 400, value: '💎' },
         { id: 'stat_vip', type: 'status', name: 'Статус: 🌟 VIP 🌟', price: 10000, value: '🌟VIP🌟' },
+        { id: 'stat_rgb', type: 'status', name: 'Статус: 🎮 RGB (VIP)', price: 20000, value: '🎮 RGB' },
         { id: 'stat_boss', type: 'status', name: 'Статус: 🎩 БОСС', price: 25000, value: '🎩' },
 
         { id: 'st_cat', type: 'sticker', name: 'Кот за ПК', price: 150, value: 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif' },
@@ -431,7 +434,8 @@
         { id: 'col_gold', type: 'color', name: 'Золотой ник', price: 600, value: '#ffd700' },
         { id: 'col_magenta', type: 'color', name: 'Неоновый Розовый (VIP)', price: 10000, value: '#ff00ff' },
         { id: 'col_cyan', type: 'color', name: 'Неоновый Голубой (VIP)', price: 10000, value: '#00ffff' },
-        { id: 'col_black', type: 'color', name: 'Эксклюзивный Черный (VIP)', price: 20000, value: '#111111' }
+        { id: 'col_black', type: 'color', name: 'Эксклюзивный Черный (VIP)', price: 20000, value: '#111111' },
+        { id: 'col_rgb', type: 'color', name: 'RGB Ник (VIP)', price: 25000, value: 'text-rgb' }
     ];
 
     const compress = (v) => LZString.compressToUTF16(v);
@@ -479,7 +483,7 @@
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('app-screen').style.display = 'flex';
         
-        // ОДНОРАЗОВАЯ ЗАГРУЗКА (чтобы избежать петель)
+        // ОДНОРАЗОВАЯ ЗАГРУЗКА БЕЗ ПЕТЛИ
         db.ref(`users/${me}`).once('value', s => { 
             const d = s.val() || {}; 
             myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
@@ -507,11 +511,39 @@
 
     function updateProfileUI(d) {
         const tick = (me === 'sanya' || me === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
-        document.getElementById('my-name-display').innerHTML = (d.nickname || me) + tick; 
-        document.getElementById('my-name-display').style.color = myEquippedColor || 'inherit';
-        document.getElementById('my-status-display').innerText = myEquippedStatus;
+        const myNameEl = document.getElementById('my-name-display');
+        myNameEl.innerHTML = (d.nickname || me) + tick; 
+        
+        if(myEquippedColor === 'text-rgb') {
+            myNameEl.style.color = ''; myNameEl.classList.add('text-rgb');
+        } else {
+            myNameEl.classList.remove('text-rgb'); myNameEl.style.color = myEquippedColor || 'inherit';
+        }
+        
+        const myStatEl = document.getElementById('my-status-display');
+        myStatEl.innerText = myEquippedStatus;
+        if(myEquippedStatus.includes('RGB')) myStatEl.classList.add('text-rgb');
+        else myStatEl.classList.remove('text-rgb');
+        
         document.getElementById('my-avatar').src = d.avatar || `https://robohash.org/${me}`; 
         document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
+        
+        const favAv = document.getElementById('av-'+me);
+        if(favAv) favAv.className = 'avatar ' + myEquippedFrame;
+        
+        // Если открыт чат "Сам с собой" (Избранное)
+        if(targetId === me) {
+            const hTitle = document.getElementById('header-title');
+            if(myEquippedColor === 'text-rgb') { hTitle.style.color = ''; hTitle.classList.add('text-rgb'); }
+            else { hTitle.classList.remove('text-rgb'); hTitle.style.color = myEquippedColor || 'inherit'; }
+            
+            const hStat = document.getElementById('header-status');
+            hStat.innerText = myEquippedStatus;
+            if(myEquippedStatus.includes('RGB')) hStat.classList.add('text-rgb');
+            else hStat.classList.remove('text-rgb');
+            
+            document.getElementById('header-avatar').className = 'avatar ' + myEquippedFrame;
+        }
     }
 
     function openProfileMenu(e) {
@@ -581,7 +613,7 @@
         }
     }
 
-    // --- МАГАЗИН И ВКЛАДКИ ---
+    // --- МАГАЗИН И ВКЛАДКИ (Без перезагрузки списка) ---
     function switchShopTab(tab) {
         currentShopTab = tab;
         ['set', 'frame', 'color', 'status', 'sticker', 'emoji'].forEach(t => { document.getElementById('stab-'+t).className = (t === tab) ? 'shop-tab active' : 'shop-tab'; });
@@ -625,7 +657,10 @@
                 
                 let displayName = item.name;
                 if(item.type === 'sticker') displayName = `<img src="${item.value}" height="30" style="vertical-align:middle; border-radius:5px; margin-right:5px;"> ${item.name}`;
-                if(item.type === 'color') displayName = `<span style="color:${item.value}; font-weight:bold;">${item.name}</span>`;
+                if(item.type === 'color') {
+                    if(item.value === 'text-rgb') displayName = `<span class="text-rgb">${item.name}</span>`;
+                    else displayName = `<span style="color:${item.value}; font-weight:bold;">${item.name}</span>`;
+                }
                 if(item.type === 'set') displayName = `<span style="font-weight:bold; color:var(--tg-accent);">${item.name}</span>`;
 
                 html += `<div class="gray-block" style="display:flex; align-items:center; justify-content:space-between; padding:10px;"><div style="font-size:14px;">${displayName}</div>${btnHtml}</div>`;
@@ -636,7 +671,7 @@
         let resetBtns = '';
         if(currentShopTab === 'frame' && myEquippedFrame) resetBtns = `<button onclick="equipItem('frame', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять рамку</button>`;
         if(currentShopTab === 'status' && myEquippedStatus) resetBtns = `<button onclick="equipItem('status', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять статус</button>`;
-        if(currentShopTab === 'color' && myEquippedColor) resetBtns = `<button onclick="equipItem('color', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Вернуть стандартный</button>`;
+        if(currentShopTab === 'color' && myEquippedColor) resetBtns = `<button onclick="equipItem('color', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Вернуть обычный</button>`;
         
         document.getElementById('shop-reset-btns').innerHTML = resetBtns;
     }
@@ -686,20 +721,17 @@
         if(type === 'frame') {
             db.ref(`users/${me}/equippedFrame`).set(val);
             myEquippedFrame = val; frameCache[me] = val;
-            document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
-            if(document.getElementById('av-'+me)) document.getElementById('av-'+me).className = 'avatar ' + myEquippedFrame;
         }
         if(type === 'status') {
             db.ref(`users/${me}/equippedStatus`).set(val);
             myEquippedStatus = val; statusCache[me] = val;
-            document.getElementById('my-status-display').innerText = myEquippedStatus;
         }
         if(type === 'color') {
             db.ref(`users/${me}/equippedColor`).set(val);
             myEquippedColor = val; colorCache[me] = val;
-            document.getElementById('my-name-display').style.color = myEquippedColor || 'inherit';
         }
-        renderShopItems(); loadContacts(); loadMessages(); 
+        renderShopItems();
+        // UI обновится сам через on('value') для users/${me}
     }
 
     function equipSet(setId) {
@@ -713,27 +745,23 @@
                 if(subItem.type === 'frame') {
                     db.ref(`users/${me}/equippedFrame`).set(subItem.value);
                     myEquippedFrame = subItem.value; frameCache[me] = subItem.value;
-                    document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
-                    if(document.getElementById('av-'+me)) document.getElementById('av-'+me).className = 'avatar ' + myEquippedFrame;
                     visualChanged = true;
                 }
                 if(subItem.type === 'status') {
                     db.ref(`users/${me}/equippedStatus`).set(subItem.value);
                     myEquippedStatus = subItem.value; statusCache[me] = subItem.value;
-                    document.getElementById('my-status-display').innerText = myEquippedStatus;
                     visualChanged = true;
                 }
                 if(subItem.type === 'color') {
                     db.ref(`users/${me}/equippedColor`).set(subItem.value);
                     myEquippedColor = subItem.value; colorCache[me] = subItem.value;
-                    document.getElementById('my-name-display').style.color = myEquippedColor || 'inherit';
                     visualChanged = true;
                 }
             }
         });
         
         if(visualChanged) {
-            openShopModal(); loadContacts(); loadMessages(); 
+            openShopModal(); 
             customAlert("Сет успешно применён! (Эмодзи и стикеры добавлены в меню скрепки)");
         } else {
             customAlert("Эмодзи и стикеры из сета уже доступны в меню скрепки!");
@@ -834,9 +862,9 @@
         customAlert("Ваш ID успешно изменён! Приложение сейчас перезапустится.", () => { location.reload(); });
     }
 
-    // ИГРА WALL JUMPER С АНТИ-СПАМОМ ПРОБЕЛА
+    // ИГРА WALL JUMPER С АНТИ-СПАМОМ
     let isGamesOpen = false, canvas, ctx, gLoop, p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
-    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, spaceReleased = true;
+    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false;
 
     function openGamesModal(e) {
         if(e) e.stopPropagation(); closePopups(); document.getElementById('games-modal').style.display = 'flex';
@@ -855,7 +883,12 @@
             document.getElementById('leaderboard-list').innerHTML = 'Загрузка...';
             db.ref('leaderboards/walljumper').orderByValue().limitToLast(10).once('value', s => {
                 let html = ''; let arr = []; s.forEach(c => { arr.unshift({id: c.key, score: c.val()}); });
-                arr.forEach((a, i) => { let medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1+'.'); html += `<div class="leaderboard-item"><span>${medal} <b style="color:${colorCache[a.id]||'inherit'}">${a.id}</b></span> <b>${a.score}</b></div>`; });
+                arr.forEach((a, i) => { 
+                    let medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1+'.'); 
+                    let nColor = colorCache[a.id] || 'inherit';
+                    let cClass = nColor === 'text-rgb' ? 'class="text-rgb"' : `style="color:${nColor}"`;
+                    html += `<div class="leaderboard-item"><span>${medal} <b ${cClass}>${a.id}</b></span> <b>${a.score}</b></div>`; 
+                });
                 document.getElementById('leaderboard-list').innerHTML = html || 'Пока нет рекордов!';
             });
         }
@@ -865,24 +898,17 @@
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
         p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
         gWalls = [ {x: 0, y: -1000, w: 40, h: 2000}, {x: 260, y: -1000, w: 40, h: 2000} ];
-        gScore = 0; gCameraY = 0; isPlaying = true; spaceReleased = true; document.getElementById('game-score').innerText = gScore;
+        gScore = 0; gCameraY = 0; isPlaying = true; document.getElementById('game-score').innerText = gScore;
         for(let i=0; i<15; i++) { gWalls.push({x: 100 + Math.random()*60, y: 200 - i*150, w: 20 + Math.random()*20, h: 80}); }
         cancelAnimationFrame(gLoop); updateGame();
     }
 
     function gameJump() {
-        if(!isPlaying || !p.canJump) return;
+        if(!isPlaying || !p.canJump) return; 
         p.vy = -9; p.vx = (p.x < 150) ? 4 : -4; p.canJump = false; 
     }
 
-    window.addEventListener('keydown', e => {
-        if(e.code === 'Space' && isGamesOpen) { 
-            e.preventDefault(); 
-            if(spaceReleased) { spaceReleased = false; gameJump(); }
-        }
-    });
-    
-    window.addEventListener('keyup', e => { if(e.code === 'Space') { spaceReleased = true; } });
+    window.addEventListener('keydown', e => { if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); gameJump(); } });
     document.addEventListener('DOMContentLoaded', () => { document.getElementById('gameCanvas')?.addEventListener('pointerdown', e => { e.preventDefault(); gameJump(); }); });
 
     function updateGame() {
@@ -914,8 +940,6 @@
         if(isPlaying) gLoop = requestAnimationFrame(updateGame);
     }
 
-    function saveLocalName(uid, val) { db.ref(`localNames/${me}/${uid}`).set(val.trim() || null); }
-
     let isCreatingChannel = false;
     function openCreateModal(e) { e.stopPropagation(); document.getElementById('create-modal').style.display = 'flex'; document.getElementById('create-options').style.display = 'flex'; document.getElementById('create-form').style.display = 'none'; document.getElementById('create-name').value = ''; }
     function showCreateForm(isChannel) { isCreatingChannel = isChannel; document.getElementById('create-options').style.display = 'none'; document.getElementById('create-form').style.display = 'block'; document.getElementById('create-channel-type').style.display = isChannel ? 'block' : 'none'; document.getElementById('create-name').placeholder = isChannel ? "Название канала" : "Название группы"; }
@@ -924,6 +948,10 @@
         const n = document.getElementById('create-name').value.trim(); if(!n) return;
         const id = 'grp_' + Date.now(); const data = { name: n, owner: me, members: {[me]: true} };
         if (isCreatingChannel) { data.isChannel = true; data.channelType = document.getElementById('create-channel-type').value; }
+        
+        // Сразу ставим заглушку имени в localNames чтобы она не была пустой
+        localNames[id] = (data.isChannel ? '📢 ' : '👥 ') + n;
+        
         await db.ref(`groups/${id}`).set(data); await db.ref(`contacts/${me}/${id}`).set(true);
         document.getElementById('create-modal').style.display = 'none'; selectChat(id, true);
     }
@@ -936,16 +964,22 @@
         document.getElementById('form-container').style.display = 'block'; document.getElementById('group-invite-btn').style.display = 'none';
 
         if (id === me) {
-            document.getElementById('header-title').innerHTML = "🔖 Избранное"; 
-            document.getElementById('header-title').style.color = myEquippedColor || 'inherit';
+            const hTitle = document.getElementById('header-title');
+            hTitle.innerHTML = "🔖 Избранное"; 
+            if(myEquippedColor === 'text-rgb') { hTitle.style.color = ''; hTitle.className = 'text-rgb'; }
+            else { hTitle.className = ''; hTitle.style.color = myEquippedColor || 'inherit'; }
+            
             document.getElementById('header-avatar').src = `https://robohash.org/${me}`;
             document.getElementById('header-avatar').className = 'avatar ' + myEquippedFrame;
             document.getElementById('header-status').innerText = '';
             document.getElementById('header-subtitle').innerText = "Сохраненные сообщения";
         } else if (isGroup) {
             db.ref(`groups/${id}`).on('value', s => { 
-                const d = s.val() || {}; if(!d.name) return; document.getElementById('header-title').innerText = d.name; 
+                const d = s.val() || {}; if(!d.name) return; 
+                document.getElementById('header-title').innerText = d.name; 
                 document.getElementById('header-title').style.color = 'inherit';
+                document.getElementById('header-title').className = '';
+                
                 document.getElementById('header-avatar').src = d.avatar || `https://robohash.org/${id}`;
                 document.getElementById('header-avatar').className = 'avatar';
                 document.getElementById('header-status').innerText = '';
@@ -966,10 +1000,15 @@
                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 
                 colorCache[id] = d.equippedColor || '';
-                document.getElementById('header-title').innerHTML = dispName + tick; 
-                document.getElementById('header-title').style.color = colorCache[id] || 'inherit';
+                const hTitle = document.getElementById('header-title');
+                hTitle.innerHTML = dispName + tick; 
+                if(colorCache[id] === 'text-rgb') { hTitle.style.color = ''; hTitle.className = 'text-rgb'; }
+                else { hTitle.className = ''; hTitle.style.color = colorCache[id] || 'inherit'; }
                 
-                document.getElementById('header-status').innerText = d.equippedStatus || '';
+                const hStat = document.getElementById('header-status');
+                hStat.innerText = d.equippedStatus || '';
+                if((d.equippedStatus || '').includes('RGB')) hStat.classList.add('text-rgb');
+                else hStat.classList.remove('text-rgb');
                 
                 const avatarEl = document.getElementById('header-avatar');
                 if(avatarEl) {
@@ -988,12 +1027,61 @@
         loadMessages();
     }
 
-    function addReaction(emoji) {
-        if(selectedMsg && selectedMsg.key) {
-            db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji);
-            updateQuestProgress('react', 1);
-        }
-        closePopups();
+    function loadContacts() {
+        db.ref(`contacts/${me}`).on('value', snap => {
+            const div = document.getElementById('contacts'); div.innerHTML = '';
+            
+            const favItem = document.createElement('div'); favItem.className=`user-item ${me === targetId ? 'active' : ''}`;
+            
+            let myNColor = myEquippedColor === 'text-rgb' ? 'class="text-rgb"' : `style="color:${myEquippedColor||'inherit'}"`;
+            
+            favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar ${myEquippedFrame}" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b ${myNColor}>🔖 Избранное</b></div>`;
+            favItem.onclick = () => selectChat(me, false); div.appendChild(favItem);
+            db.ref('users/'+me).on('value', s => { if(s.val() && s.val().avatar && document.getElementById('av-'+me)) document.getElementById('av-'+me).src = s.val().avatar; });
+
+            snap.forEach(c => {
+                const id = c.key, isGrp = id.startsWith('grp_'); if (id === me) return; 
+                const item = document.createElement('div'); item.className=`user-item ${id === targetId ? 'active' : ''}`; const nameId = `name-${id}`;
+                item.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${id}" class="avatar" id="av-${id}"><div class="status-dot" id="dot-${id}" style="${isGrp?'display:none':''}"></div></div><div style="flex-grow:1;overflow:hidden; display:flex; align-items:center;"><b id="${nameId}" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${localNames[id] || (isGrp ? '👥 ' : '')+id}</b><span id="st-${id}" style="margin-left:4px; font-size:14px;"></span></div><span class="del-btn" onclick="removeContact(event,'${id}')">×</span>`;
+                div.appendChild(item);
+                
+                if(isGrp) {
+                    db.ref(`groups/${id}`).on('value', s => {
+                        const d = s.val() || {}; if(d.name) {
+                            const label = document.getElementById(nameId); const iconTxt = d.isChannel ? '📢 ' : '👥 ';
+                            if(label) label.innerHTML = `<span style="color:inherit">${iconTxt + (d.name || id)}</span>`;
+                            const icon = document.getElementById('av-'+id); if(d.avatar && icon) icon.src = d.avatar;
+                        }
+                    });
+                } else {
+                    db.ref('users/'+id).on('value', s => { 
+                        const d = s.val() || {}; 
+                        const icon = document.getElementById('av-'+id);
+                        if(icon) icon.src = d.avatar || `https://robohash.org/${id}`;
+                        
+                        frameCache[id] = d.equippedFrame || ''; statusCache[id] = d.equippedStatus || ''; colorCache[id] = d.equippedColor || '';
+                        
+                        if(icon) icon.className = 'avatar ' + frameCache[id];
+                        
+                        const stEl = document.getElementById('st-'+id); 
+                        if(stEl) {
+                            stEl.innerText = statusCache[id];
+                            if(statusCache[id].includes('RGB')) stEl.classList.add('text-rgb');
+                            else stEl.classList.remove('text-rgb');
+                        }
+                        
+                        const label = document.getElementById(nameId); 
+                        if(label) {
+                            const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
+                            const dispName = localNames[id] || d.nickname || id; 
+                            let nColor = colorCache[id] === 'text-rgb' ? 'class="text-rgb"' : `style="color:${colorCache[id]||'inherit'}"`;
+                            label.innerHTML = `<span ${nColor}>${dispName} ${tick}</span>`;
+                        }
+                    });
+                    db.ref('status/'+id).on('value', s => { if(document.getElementById('dot-'+id)) document.getElementById('dot-'+id).className = `status-dot ${s.val()==='online'?'online':''}`; });
+                }
+            });
+        });
     }
 
     function loadMessages() {
@@ -1035,11 +1123,16 @@
                 
                 let fClass = frameCache[m.sender] || '';
                 let avatarHTML = (m.sender !== me) ? `<img src="${avatarCache[m.sender] || 'https://robohash.org/'+m.sender}" class="msg-mini-avatar ${fClass}" onclick="openProfile('${m.sender}')">` : '';
+                
                 let nameColorMsg = colorCache[m.sender] || 'var(--tg-accent)';
+                let nameClassMsg = nameColorMsg === 'text-rgb' ? 'class="text-rgb"' : `style="color:${nameColorMsg}"`;
+                
+                let statText = statusCache[m.sender] || '';
+                let statClassMsg = statText.includes('RGB') ? 'class="text-rgb"' : '';
                 
                 html += `<div class="msg-row ${msgClass}" id="msg-${key}">
                     ${avatarHTML}
-                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;color:${nameColorMsg};margin-bottom:4px;">${m.sender} ${statusCache[m.sender]||''}</div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
+                    <div class="msg" onclick="handleMsgClick(event, '${key}', '${m.sender}')">${isGroup && m.sender!==me ? `<div style="font-size:11px;font-weight:bold;margin-bottom:4px;" ${nameClassMsg}>${m.sender} <span ${statClassMsg}>${statText}</span></div>` : ''}${reply}${content}${reactionsHtml}<div class="msg-meta">${formatTime(m.time)} ${m.edited?'(ред.)':''}${readIcon}</div></div>
                 </div>`;
             });
             
@@ -1047,215 +1140,6 @@
             if (Object.keys(unreadUpdates).length > 0) db.ref(getChatPath()+'/messages').update(unreadUpdates);
         });
     }
-
-    function loadContacts() {
-        db.ref(`contacts/${me}`).on('value', snap => {
-            const div = document.getElementById('contacts'); div.innerHTML = '';
-            
-            const favItem = document.createElement('div'); favItem.className=`user-item ${me === targetId ? 'active' : ''}`;
-            favItem.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar ${myEquippedFrame}" id="av-${me}"></div><div style="flex-grow:1;overflow:hidden"><b style="color:${myEquippedColor||'inherit'}">🔖 Избранное</b></div>`;
-            favItem.onclick = () => selectChat(me, false); div.appendChild(favItem);
-            db.ref('users/'+me).on('value', s => { if(s.val() && s.val().avatar && document.getElementById('av-'+me)) document.getElementById('av-'+me).src = s.val().avatar; });
-
-            snap.forEach(c => {
-                const id = c.key, isGrp = id.startsWith('grp_'); if (id === me) return; 
-                const item = document.createElement('div'); item.className=`user-item ${id === targetId ? 'active' : ''}`; const nameId = `name-${id}`;
-                item.innerHTML = `<div class="avatar-wrapper"><img src="https://robohash.org/${id}" class="avatar" id="av-${id}"><div class="status-dot" id="dot-${id}" style="${isGrp?'display:none':''}"></div></div><div style="flex-grow:1;overflow:hidden; display:flex; align-items:center;"><b id="${nameId}" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${isGrp ? '👥 ' : ''}${id}</b><span id="st-${id}" style="margin-left:4px; font-size:14px;"></span></div><span class="del-btn" onclick="removeContact(event,'${id}')">×</span>`;
-                if(isGrp) {
-                    db.ref(`groups/${id}`).on('value', s => {
-                        const d = s.val() || {}; if(d.name) {
-                            const label = document.getElementById(nameId); const iconTxt = d.isChannel ? '📢 ' : '👥 ';
-                            if(label) label.innerHTML = `<span style="color:inherit">${iconTxt + (d.name || id)}</span>`;
-                            const icon = document.getElementById('av-'+id); if(d.avatar && icon) icon.src = d.avatar;
-                        }
-                    });
-                } else {
-                    db.ref('users/'+id).on('value', s => { 
-                        const d = s.val() || {}; 
-                        const icon = document.getElementById('av-'+id);
-                        if(icon) icon.src = d.avatar || `https://robohash.org/${id}`;
-                        
-                        frameCache[id] = d.equippedFrame || ''; statusCache[id] = d.equippedStatus || ''; colorCache[id] = d.equippedColor || '';
-                        
-                        if(icon) icon.className = 'avatar ' + frameCache[id];
-                        const stEl = document.getElementById('st-'+id); if(stEl) stEl.innerText = statusCache[id];
-                        const label = document.getElementById(nameId); 
-                        if(label) {
-                            const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
-                            const dispName = localNames[id] || d.nickname || id; 
-                            label.innerHTML = `<span style="color:${colorCache[id]||'inherit'}">${dispName} ${tick}</span>`;
-                        }
-                    });
-                    db.ref('status/'+id).on('value', s => { if(document.getElementById('dot-'+id)) document.getElementById('dot-'+id).className = `status-dot ${s.val()==='online'?'online':''}`; });
-                }
-                item.onclick=()=>selectChat(id,isGrp); div.appendChild(item);
-            });
-        });
-    }
-
-    function jumpToMessage(k, e) { if(e) e.stopPropagation(); const el = document.getElementById('msg-'+k); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); const msgEl = el.querySelector('.msg'); msgEl.classList.add('highlight'); setTimeout(()=>msgEl.classList.remove('highlight'), 2000); } }
-    
-    async function openProfile(uid) {
-        if (!uid) return; const isGrp = uid.startsWith('grp_'); const modal = document.getElementById('modal-content');
-        if(isGrp) {
-            const snap = await db.ref(`groups/${uid}`).once('value'); const d = snap.val() || {}; 
-            let membersHtml = ''; 
-            for(let m in d.members) {
-                const isOwner = d.owner === m; const isAdmin = d.admins && d.admins[m]; const mDisp = localNames[m] || m; 
-                membersHtml += `<div class="member-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="color:${colorCache[m]||'var(--tg-accent)'}; font-weight:bold; cursor:pointer;" onclick="openProfile('${m}')">${mDisp} ${isOwner ? '<small style="color:orange">(Вл)</small>' : (isAdmin ? '<small style="color:var(--tg-accent)">(Ад)</small>' : '')}</span><div>${d.owner === me && m !== me ? `<span onclick="groupAction('${m}', '${isAdmin?'demoteAdmin':'makeAdmin'}')" style="font-size:11px; text-decoration:underline; cursor:pointer; margin-right:10px; color:#666;">${isAdmin?'Разж.':'Админ'}</span>` : ''}${(d.owner === me || (d.admins && d.admins[me] && !isOwner && !isAdmin)) && m !== me ? `<span onclick="groupAction('${m}', 'kick')" style="font-size:11px; text-decoration:underline; cursor:pointer; color:red;">Выгнать</span>` : ''}</div></div>`;
-            }
-            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar" style="border-radius:40px;" onclick="${d.owner===me?'document.getElementById(\'modal-upload\').click()':''}">
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:10px;">${d.isChannel ? 'НАЗВАНИЕ КАНАЛА' : 'НАЗВАНИЕ ГРУППЫ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:10px;">
-                <input type="text" class="modal-input" style="border:none; background:transparent; padding:0; margin-top:0;" value="${d.name}" ${d.owner!==me?'disabled':''} onchange="db.ref('groups/'+targetId+'/name').set(this.value)"></div>
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">${d.isChannel ? 'ПОДПИСЧИКИ' : 'УЧАСТНИКИ'}</span><div class="gray-block" style="background:#fff; margin-top:5px; padding:5px 15px;">${membersHtml}</div>`;
-        } else {
-            const isMe = (uid === me); const snap = await db.ref(`users/${uid}`).once('value'); const d = snap.val() || {}; 
-            const isVer = (uid === 'sanya' || uid === 'misha' || d.verified); const locName = localNames[uid] || ''; const fClass = isMe ? myEquippedFrame : (frameCache[uid] || '');
-            const cColor = isMe ? myEquippedColor : (colorCache[uid] || 'var(--tg-accent)');
-            
-            modal.innerHTML = `<img src="${d.avatar || 'https://robohash.org/'+uid}" class="modal-avatar ${fClass}" onclick="${isMe?'document.getElementById(\'modal-upload\').click()':''}">
-                <span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:15px;">О СЕБЕ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; margin-top:5px; padding:15px;">
-                <textarea id="m-desc" class="modal-input" style="border:none; background:transparent; padding:0; height:auto; min-height:40px;" ${!isMe?'disabled':''} onchange="updateProfile()">${d.description||''}</textarea></div>
-                ${(!isMe && d.settings?.allowRename !== false && uid !== me) ? `<span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">ЛОКАЛЬНОЕ ИМЯ (ВИДНО ТОЛЬКО ВАМ)</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; padding:10px; margin-top:5px;"><input type="text" class="modal-input" style="border:none; padding:0; background:transparent; margin:0;" placeholder="Введите имя..." value="${locName}" onchange="saveLocalName('${uid}', this.value)"></div>` : ''}
-                <div class="gray-block" style="background:#f8f9fa; border:none; margin-top:15px; padding:20px; border-radius:25px;"><span style="font-size:10px; color:#aaa; font-weight:bold;">ID</span><div style="font-weight:bold; color:${cColor}; margin-bottom:15px; font-size:17px;">@${uid} ${isVer ? '<span style="color:var(--tg-accent);">✔</span>' : ''}</div>
-                <span style="font-size:10px; color:#aaa; font-weight:bold;">НИКНЕЙМ</span><input type="text" id="m-nick" class="modal-input" style="border:1.5px solid #eee; background:#fff;" value="${d.nickname||uid}" ${!isMe?'disabled':''} onchange="updateProfile()"></div>
-                ${!isMe ? `<button onclick="startDirectChat('${uid}')" style="width:100%;margin-top:15px;padding:16px;background:var(--tg-accent);color:white;border:none;border-radius:18px;font-weight:bold;cursor:pointer;">Написать сообщение</button>` : ''}
-                ${(me === 'sanya' || me === 'misha') && uid !== me ? `<button onclick="toggleVerify('${uid}', ${!d.verified})" style="width:100%;margin-top:10px;padding:12px;background:#fff;color:var(--tg-accent);border:1.5px solid var(--tg-accent);border-radius:15px;font-weight:bold;cursor:pointer;">${d.verified ? 'Забрать галочку' : 'Выдать галочку'}</button>` : ''}
-                ${isMe ? `<span style="font-size:10px; color:#aaa; font-weight:bold; display:block; margin-top:20px;">БЕЗОПАСНОСТЬ</span><div class="gray-block" style="background:#fff; border: 1px solid #eee; padding:10px;"><input type="password" id="old-p" class="modal-input" style="background:#eef5ff; border:none;" placeholder="Старый"><input type="password" id="new-p" class="modal-input" style="border:1.5px solid #eee; margin-top:10px;" placeholder="Новый"></div><button onclick="changePass()" style="width:100%;margin-top:15px;padding:14px;background:var(--tg-accent);color:white;border:none;border-radius:15px;font-weight:bold;cursor:pointer;">Сохранить пароль</button>` : ''}`;
-        }
-        document.getElementById('modal-overlay').style.display = 'flex';
-    }
-
-    function handleMsgClick(e, k, s) { 
-        e.stopPropagation(); selectedMsg = {key:k, sender:s, text:msgCache[k]};
-        const menu = document.getElementById('context-menu'); menu.style.display = 'block'; 
-        let x = e.clientX || window.innerWidth/2, y = e.clientY || window.innerHeight/2; const mw = 170, mh = 280;
-        if (x + mw > window.innerWidth) x = window.innerWidth - mw - 10; if (y + mh > window.innerHeight) y = window.innerHeight - mh - 10;
-        menu.style.left = x + 'px'; menu.style.top = y + 'px'; 
-        document.getElementById('menu-edit').style.display = (s===me) ? 'block' : 'none'; document.getElementById('menu-del').style.display = (s===me) ? 'block' : 'none'; 
-    }
-    
-    function copyMsg() { if (selectedMsg && selectedMsg.text) { navigator.clipboard.writeText(selectedMsg.text); } closePopups(); }
-    
-    function prepareForward() {
-        msgToForward = selectedMsg; closePopups();
-        db.ref(`contacts/${me}`).once('value', snap => {
-            const div = document.getElementById('forward-contacts');
-            let h = `<div class="user-item" onclick="doForward('${me}', false)"><div class="avatar-wrapper"><img src="https://robohash.org/${me}" class="avatar"></div><div><b>🔖 Избранное</b></div></div>`;
-            snap.forEach(c => {
-                const id = c.key; if(id === me) return; const isGrp = id.startsWith('grp_');
-                const domNode = document.getElementById('name-'+id); const n = domNode ? domNode.innerText : (isGrp ? '👥 '+id : id);
-                const avNode = document.getElementById('av-'+id); const avSrc = avNode ? avNode.src : `https://robohash.org/${id}`;
-                h += `<div class="user-item" onclick="doForward('${id}', ${isGrp})"><div class="avatar-wrapper"><img src="${avSrc}" class="avatar"></div><div><b>${n}</b></div></div>`;
-            });
-            div.innerHTML = h; document.getElementById('forward-modal').style.display = 'flex';
-        });
-    }
-
-    function doForward(target, isGrp) {
-        document.getElementById('forward-modal').style.display = 'none'; const fwdText = `[Переслано от: @${msgToForward.sender}]\n${msgToForward.text}`;
-        const path = isGrp ? `groups/${target}` : `chats/${me < target ? me+'_'+target : target+'_'+me}`;
-        db.ref(path + '/messages').push({ sender: me, text: compress(fwdText), time: Date.now(), type: 'text', read: false });
-        if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true); updateQuestProgress('msg', 1); selectChat(target, isGrp);
-    }
-
-    async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
-    function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
-    
-    async function changePass() { 
-        const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; 
-        const s=await db.ref(`users/${me}/password`).once('value'); 
-        if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); localStorage.setItem('petmess_pass', n); customAlert("Пароль успешно изменён!"); } 
-        else customAlert("Неверный старый пароль или пустой новый!"); 
-    }
-    
-    async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
-    function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
-    function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
-    function deleteMsg() { if(selectedMsg && selectedMsg.key) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
-    function pinMsg() { db.ref(getPinnedPath()).set({key:selectedMsg.key, text:selectedMsg.text}); closePopups(); }
-    function unpin(e) { e.stopPropagation(); db.ref(getPinnedPath()).remove(); }
-    function jumpToPinned() { db.ref(getPinnedPath()).once('value', s => { if(s.exists()) jumpToMessage(s.val().key); }); }
-    function cancelAction() { replyData=null; editingKey=null; document.getElementById('action-preview').style.display='none'; document.getElementById('input').value=''; document.getElementById('input').style.height='20px'; }
-    
-    function closePopups() { document.getElementById('context-menu').style.display='none'; document.getElementById('emoji-picker').style.display='none'; document.getElementById('profile-menu').style.display='none'; }
-    function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('create-modal').style.display = 'none'; }
-    
-    // Вкладки Эмодзи/Стикеров
-    function toggleEmojiWrapper(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; switchEpTab('emo'); }
-    function switchEpTab(tab) {
-        document.getElementById('ep-tab-emo').style.color = tab==='emo' ? 'var(--tg-accent)' : '#888';
-        document.getElementById('ep-tab-st').style.color = tab==='st' ? 'var(--tg-accent)' : '#888';
-        document.getElementById('ep-content-emo').style.display = tab==='emo' ? 'flex' : 'none';
-        document.getElementById('ep-content-st').style.display = tab==='st' ? 'flex' : 'none';
-    }
-
-    function goBack(e) { e.stopPropagation(); document.body.classList.remove('chat-open'); }
-    function getChatPath() { return isGroup ? `groups/${targetId}` : `chats/${me < targetId ? me+'_'+targetId : targetId+'_'+me}`; }
-    function getPinnedPath() { return getChatPath() + '/pinned'; }
-    function getChatId(a, b) { return a < b ? a+'_'+b : b+'_'+a; }
-    function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('send-btn').click(); } }
-    function handleTyping() { const i = document.getElementById('input'); i.style.height = '20px'; i.style.height = Math.min(i.scrollHeight - 24, 120) + 'px'; if(isGroup || targetId === me) return; db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(true); clearTimeout(typingTimeout); typingTimeout = setTimeout(()=>db.ref(`typing/${getChatId(me,targetId)}/${me}`).set(false),2000); }
-    
-    async function removeContact(e, n) { 
-        e.stopPropagation(); 
-        customConfirm(`Удалить чат с ${n}?`, async () => {
-            await db.ref(`contacts/${me}/${n}`).remove();
-        });
-    }
-    
-    async function toggleRecord(e) {
-        e.stopPropagation(); const btn = document.getElementById('mic-btn'); const inp = document.getElementById('input');
-        if (!isRecording) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream); mediaRecorder.start(); isRecording = true;
-                btn.innerHTML = '⏹️'; btn.classList.add('recording'); inp.placeholder = "Идет запись..."; inp.disabled = true;
-                mediaRecorder.ondataavailable = e => { audioChunks.push(e.data); };
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); audioChunks = [];
-                    const reader = new FileReader(); reader.readAsDataURL(audioBlob);
-                    reader.onloadend = () => { db.ref(getChatPath()+'/messages').push({ sender: me, file: reader.result, time: Date.now(), type: 'audio', read: false }); if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1); };
-                    stream.getTracks().forEach(track => track.stop());
-                };
-            } catch(err) { customAlert("Нет доступа к микрофону! Разрешите доступ в настройках устройства."); }
-        } else { mediaRecorder.stop(); isRecording = false; btn.innerHTML = '🎤'; btn.classList.remove('recording'); inp.placeholder = "Написать сообщение..."; inp.disabled = false; }
-    }
-
-    async function sendMessage(e) { 
-        if(e) e.preventDefault(); const i = document.getElementById('input'); if(!i.value.trim() && !editingKey) return; 
-        
-        if(!isGroup && targetId !== me && !editingKey) {
-            const tSnap = await db.ref(`users/${targetId}`).once('value'); const tSet = tSnap.val()?.settings || {};
-            if(tSet.allowStrangers === false) {
-                const tContact = await db.ref(`contacts/${targetId}/${me}`).once('value');
-                if(!tContact.exists()) { customAlert("Этот пользователь запретил писать ему без добавления в контакты!"); return; }
-            }
-        }
-
-        if(editingKey){ db.ref(getChatPath()+'/messages/'+editingKey).update({text:compress(i.value.trim()), edited:true}); } 
-        else { 
-            const o={sender:me, text:compress(i.value.trim()), time:Date.now(), type:'text', read: false}; 
-            if(replyData) o.replyTo=replyData; db.ref(getChatPath()+'/messages').push(o); 
-            if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1);
-        } 
-        i.value=''; i.style.height='20px'; cancelAction(); 
-    }
-    
-    function inviteToGroup(e) { 
-        if(e) e.stopPropagation();
-        customPrompt("Введите ID пользователя:", async (i) => {
-            if(i){ 
-                const s = await db.ref('users/'+i).once('value'); 
-                if(s.exists()){ await db.ref(`groups/${targetId}/members/${i}`).set(true); await db.ref(`contacts/${i}/${targetId}`).set(true); customAlert("Пользователь добавлен!"); } 
-                else { customAlert("Пользователь не найден."); }
-            } 
-        });
-    }
-
-    function searchUser(v) { const q = v.trim().toLowerCase(); if(!q){ document.getElementById('search-results').style.display='none'; return; } db.ref('users').once('value', s => { let h = ''; s.forEach(c => { if(c.key!==me && c.key.includes(q)) h += `<div class='search-item' onclick="db.ref('contacts/${me}/${c.key}').set(true); selectChat('${c.key}'); document.getElementById('search-results').style.display='none';"><b>${c.key}</b></div>`; }); document.getElementById('search-results').innerHTML = h; document.getElementById('search-results').style.display = h?'block':'none'; }); }
-    
-    async function processFile(input) { const reader = new FileReader(); reader.readAsDataURL(input.files[0]); reader.onload = () => { if(document.getElementById('modal-overlay').style.display==='flex') db.ref(`users/${me}/avatar`).set(reader.result); else { db.ref(getChatPath()+'/messages').push({sender:me, file:reader.result, type:'image', time:Date.now(), read: false}); updateQuestProgress('msg', 1); } }; }
 
     window.onload = () => {
         const savedU = localStorage.getItem('petmess_user'); const savedP = localStorage.getItem('petmess_pass'); const expiry = localStorage.getItem('petmess_expiry');
