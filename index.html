@@ -64,6 +64,7 @@
         .del-btn { margin-left: auto; color: #ccc; font-size: 24px; opacity: 0; padding: 0 5px; transition: 0.2s; cursor: pointer; }
         .user-item:hover .del-btn { opacity: 1; }
 
+        /* МАГАЗИННЫЕ РАМКИ */
         .frame-gold { border: 3px solid #ffd700 !important; box-shadow: 0 0 10px rgba(255,215,0,0.8); }
         .frame-neon { border: 3px solid #00f3ff !important; box-shadow: 0 0 12px #00f3ff; }
         .frame-fire { border: 3px solid #ff4500 !important; box-shadow: 0 0 12px #ff4500; }
@@ -478,6 +479,7 @@
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('app-screen').style.display = 'flex';
         
+        // ОДНОРАЗОВАЯ ЗАГРУЗКА (чтобы избежать петель)
         db.ref(`users/${me}`).once('value', s => { 
             const d = s.val() || {}; 
             myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
@@ -612,6 +614,8 @@
                     } else if(item.type === 'color') {
                         let isEq = (myEquippedColor === item.value);
                         btnHtml = isEq ? `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Надето</button>` : `<button onclick="equipItem('${item.type}', '${item.value}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Применить</button>`;
+                    } else if(item.type === 'set') {
+                        btnHtml = `<button onclick="equipSet('${item.id}')" style="background:var(--tg-accent); color:white; border:none; padding:8px; border-radius:10px; cursor:pointer;">Надеть всё</button>`;
                     } else {
                         btnHtml = `<button disabled style="background:#eee; color:#aaa; border:none; padding:8px; border-radius:10px;">Куплено</button>`;
                     }
@@ -698,12 +702,50 @@
         renderShopItems(); loadContacts(); loadMessages(); 
     }
 
+    function equipSet(setId) {
+        const setObj = shopItems.find(x => x.id === setId);
+        if(!setObj) return;
+        
+        let visualChanged = false;
+        setObj.items.forEach(itemId => {
+            const subItem = shopItems.find(x => x.id === itemId);
+            if(subItem) {
+                if(subItem.type === 'frame') {
+                    db.ref(`users/${me}/equippedFrame`).set(subItem.value);
+                    myEquippedFrame = subItem.value; frameCache[me] = subItem.value;
+                    document.getElementById('my-avatar').className = 'avatar ' + myEquippedFrame;
+                    if(document.getElementById('av-'+me)) document.getElementById('av-'+me).className = 'avatar ' + myEquippedFrame;
+                    visualChanged = true;
+                }
+                if(subItem.type === 'status') {
+                    db.ref(`users/${me}/equippedStatus`).set(subItem.value);
+                    myEquippedStatus = subItem.value; statusCache[me] = subItem.value;
+                    document.getElementById('my-status-display').innerText = myEquippedStatus;
+                    visualChanged = true;
+                }
+                if(subItem.type === 'color') {
+                    db.ref(`users/${me}/equippedColor`).set(subItem.value);
+                    myEquippedColor = subItem.value; colorCache[me] = subItem.value;
+                    document.getElementById('my-name-display').style.color = myEquippedColor || 'inherit';
+                    visualChanged = true;
+                }
+            }
+        });
+        
+        if(visualChanged) {
+            openShopModal(); loadContacts(); loadMessages(); 
+            customAlert("Сет успешно применён! (Эмодзи и стикеры добавлены в меню скрепки)");
+        } else {
+            customAlert("Эмодзи и стикеры из сета уже доступны в меню скрепки!");
+        }
+    }
+
     // --- ВКЛАДКИ ДЛЯ ЭМОДЗИ/СТИКЕРОВ ---
     function toggleEmojiWrapper(e) {
         e.stopPropagation();
         const p = document.getElementById('emoji-picker');
         p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
-        switchEpTab('emo'); // По умолчанию открываем эмодзи
+        switchEpTab('emo'); 
     }
 
     function switchEpTab(tab) {
@@ -792,9 +834,9 @@
         customAlert("Ваш ID успешно изменён! Приложение сейчас перезапустится.", () => { location.reload(); });
     }
 
-    // ИГРА WALL JUMPER С АНТИ-СПАМОМ
+    // ИГРА WALL JUMPER С АНТИ-СПАМОМ ПРОБЕЛА
     let isGamesOpen = false, canvas, ctx, gLoop, p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
-    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, lastJumpTime = 0;
+    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, spaceReleased = true;
 
     function openGamesModal(e) {
         if(e) e.stopPropagation(); closePopups(); document.getElementById('games-modal').style.display = 'flex';
@@ -823,18 +865,24 @@
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
         p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
         gWalls = [ {x: 0, y: -1000, w: 40, h: 2000}, {x: 260, y: -1000, w: 40, h: 2000} ];
-        gScore = 0; gCameraY = 0; isPlaying = true; document.getElementById('game-score').innerText = gScore;
+        gScore = 0; gCameraY = 0; isPlaying = true; spaceReleased = true; document.getElementById('game-score').innerText = gScore;
         for(let i=0; i<15; i++) { gWalls.push({x: 100 + Math.random()*60, y: 200 - i*150, w: 20 + Math.random()*20, h: 80}); }
         cancelAnimationFrame(gLoop); updateGame();
     }
 
     function gameJump() {
-        const now = Date.now();
-        if(!isPlaying || !p.canJump || now - lastJumpTime < 250) return; 
-        lastJumpTime = now; p.vy = -9; p.vx = (p.x < 150) ? 4 : -4; p.canJump = false; 
+        if(!isPlaying || !p.canJump) return;
+        p.vy = -9; p.vx = (p.x < 150) ? 4 : -4; p.canJump = false; 
     }
 
-    window.addEventListener('keydown', e => { if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); gameJump(); } });
+    window.addEventListener('keydown', e => {
+        if(e.code === 'Space' && isGamesOpen) { 
+            e.preventDefault(); 
+            if(spaceReleased) { spaceReleased = false; gameJump(); }
+        }
+    });
+    
+    window.addEventListener('keyup', e => { if(e.code === 'Space') { spaceReleased = true; } });
     document.addEventListener('DOMContentLoaded', () => { document.getElementById('gameCanvas')?.addEventListener('pointerdown', e => { e.preventDefault(); gameJump(); }); });
 
     function updateGame() {
@@ -914,7 +962,6 @@
         } else {
             db.ref(`users/${id}`).on('value', s => { 
                 const d = s.val() || {}; 
-                // Создаем резервный ник, если нет nickname
                 const dispName = localNames[id] || d.nickname || id; 
                 const tick = (id === 'sanya' || id === 'misha' || d.verified) ? '<span style="color:var(--tg-accent); margin-left:4px;">✔</span>' : '';
                 
@@ -924,7 +971,6 @@
                 
                 document.getElementById('header-status').innerText = d.equippedStatus || '';
                 
-                // Фикс: всегда ставим аватар или заглушку
                 const avatarEl = document.getElementById('header-avatar');
                 if(avatarEl) {
                     avatarEl.src = d.avatar || `https://robohash.org/${id}`;
@@ -1136,7 +1182,7 @@
     function closeProfileModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('create-modal').style.display = 'none'; }
     
     // Вкладки Эмодзи/Стикеров
-    function toggleEmoji(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; switchEpTab('emo'); }
+    function toggleEmojiWrapper(e) { e.stopPropagation(); const p=document.getElementById('emoji-picker'); p.style.display=p.style.display==='flex'?'none':'flex'; switchEpTab('emo'); }
     function switchEpTab(tab) {
         document.getElementById('ep-tab-emo').style.color = tab==='emo' ? 'var(--tg-accent)' : '#888';
         document.getElementById('ep-tab-st').style.color = tab==='st' ? 'var(--tg-accent)' : '#888';
