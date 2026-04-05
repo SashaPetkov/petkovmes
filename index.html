@@ -71,6 +71,16 @@
         .frame-diamond { border: 3px solid #b9f2ff !important; box-shadow: 0 0 15px #b9f2ff; }
         .frame-toxic { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14; }
         .frame-love { border: 3px solid #ff1493 !important; box-shadow: 0 0 15px #ff1493; }
+        
+        /* НОВАЯ VIP РАМКА С АНИМАЦИЕЙ */
+        @keyframes rgb-border { 
+            0% {border-color: #ff0000; box-shadow: 0 0 15px #ff0000;} 
+            33% {border-color: #00ff00; box-shadow: 0 0 15px #00ff00;} 
+            66% {border-color: #0000ff; box-shadow: 0 0 15px #0000ff;} 
+            100% {border-color: #ff0000; box-shadow: 0 0 15px #ff0000;} 
+        }
+        .frame-rainbow { border: 3px solid #ff0000 !important; animation: rgb-border 2s linear infinite; }
+        .frame-matrix { border: 3px dashed #39ff14 !important; box-shadow: 0 0 15px #39ff14; background: rgba(0,255,0,0.1); }
 
         #my-profile { padding: 15px 20px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; background: #fff; position: relative; }
         #my-avatar { width: 50px !important; height: 50px !important; border-radius: 50%; object-fit: cover; cursor: pointer; }
@@ -98,7 +108,7 @@
         audio::-webkit-media-controls-panel { background-color: rgba(255,255,255,0.7); }
 
         .reply-box { background: rgba(0,0,0,0.04); border-left: 3px solid var(--tg-accent); padding: 5px 8px; margin-bottom: 5px; border-radius: 5px; font-size: 13px; cursor: pointer; }
-        .reply-box b { display: block; font-size: 11px; }
+        .reply-box b { color: var(--tg-accent); display: block; font-size: 11px; }
 
         .msg-meta { position: absolute; right: 10px; bottom: 5px; font-size: 10px; opacity: 0.6; display: flex; align-items: center; gap: 4px; }
 
@@ -147,7 +157,6 @@
 </head>
 <body onclick="closePopups()">
 
-<!-- КАСТОМНЫЕ ОКНА БЕЗ ЗАВИСАНИЙ -->
 <div id="custom-modal">
     <div class="profile-card" style="text-align:center; max-width:320px; padding: 25px;" onclick="event.stopPropagation()">
         <h4 id="custom-modal-text" style="color:var(--tg-accent); margin-top:0; font-size:16px;"></h4>
@@ -314,7 +323,7 @@
             <div id="tab-online" class="tab" onclick="switchGameTab('online')">Онлайн (Рейтинг)</div>
         </div>
         <div id="game-offline-view">
-            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Кликай по экрану или Пробелу, чтобы прыгать!</div>
+            <div style="text-align:center; font-size:12px; color:#888; margin-bottom:10px;">Кликай по экрану или Пробелу (не зажимая!), чтобы прыгать!</div>
             <div style="text-align:center; font-weight:bold; font-size:20px; color:var(--tg-accent); margin-bottom:5px;">Счет: <span id="game-score">0</span></div>
             <canvas id="gameCanvas" width="300" height="400"></canvas>
             <button onclick="startGame()" style="width:100%; margin-top:15px; padding:12px; background:var(--tg-accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">Играть / Перезапуск</button>
@@ -371,41 +380,49 @@
     let typingStatus = false, onlineStatus = 'offline', typingTimeout, myAutoDeleteDays = 3;
     let mediaRecorder, audioChunks = [], isRecording = false;
 
-    // СИСТЕМА ЗАДАНИЙ И ЭКОНОМИКИ
+    // ЭКОНОМИКА И ИНВЕНТАРЬ
     let myCoins = 0, myInventory = { emojis: [], stickers: [] }, myStats = {}, myQuests = [];
     let myEquippedFrame = '', myEquippedStatus = '', myEquippedColor = '';
     let currentShopTab = 'frame';
     
+    // БОЛЬШИЕ ЦЕНЫ И VIP ТОВАРЫ
     const shopItems = [
-        // Рамки
-        { id: 'frame_gold', type: 'frame', name: 'Золотая рамка', price: 100, value: 'frame-gold' },
-        { id: 'frame_neon', type: 'frame', name: 'Неоновая рамка', price: 150, value: 'frame-neon' },
-        { id: 'frame_fire', type: 'frame', name: 'Огненная рамка', price: 150, value: 'frame-fire' },
-        { id: 'frame_toxic', type: 'frame', name: 'Токсичная рамка', price: 200, value: 'frame-toxic' },
-        { id: 'frame_love', type: 'frame', name: 'Любовная рамка', price: 200, value: 'frame-love' },
-        { id: 'frame_diamond', type: 'frame', name: 'Алмазная рамка', price: 300, value: 'frame-diamond' },
-        // Цвета ника
-        { id: 'col_red', type: 'color', name: 'Красный ник', price: 100, value: '#ff4d4d' },
-        { id: 'col_green', type: 'color', name: 'Зеленый ник', price: 100, value: '#4cc351' },
-        { id: 'col_purple', type: 'color', name: 'Фиолетовый ник', price: 150, value: '#9c27b0' },
-        { id: 'col_gold', type: 'color', name: 'Золотой ник', price: 200, value: '#ffd700' },
-        // Статусы
-        { id: 'stat_sleep', type: 'status', name: 'Статус: 💤', price: 30, value: '💤' },
-        { id: 'stat_game', type: 'status', name: 'Статус: 🎮', price: 40, value: '🎮' },
-        { id: 'stat_king', type: 'status', name: 'Статус: 👑', price: 50, value: '👑' },
-        { id: 'stat_fire', type: 'status', name: 'Статус: 🔥', price: 50, value: '🔥' },
-        { id: 'stat_alien', type: 'status', name: 'Статус: 👽', price: 50, value: '👽' },
-        { id: 'stat_diamond', type: 'status', name: 'Статус: 💎', price: 80, value: '💎' },
-        // Стикеры
-        { id: 'st_cat', type: 'sticker', name: 'Кот за ПК', price: 40, value: 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif' },
-        { id: 'st_dog', type: 'sticker', name: 'Добрая собака', price: 40, value: 'https://media.giphy.com/media/mCRJDo24UvJMA/giphy.gif' },
-        { id: 'st_dance', type: 'sticker', name: 'Танец пришельца', price: 50, value: 'https://media.giphy.com/media/3o7qE1YN7aIdF2hWve/giphy.gif' },
-        { id: 'st_cry', type: 'sticker', name: 'Слезы', price: 40, value: 'https://media.giphy.com/media/2rtQMJvhzOnRe/giphy.gif' },
-        // Эмодзи
-        { id: 'emo_alien', type: 'emoji', name: 'Набор: 👽🤖👻', price: 30, value: '👽,🤖,👻' },
-        { id: 'emo_clown', type: 'emoji', name: 'Набор: 🤡💩🌚', price: 30, value: '🤡,💩,🌚' },
-        { id: 'emo_food', type: 'emoji', name: 'Набор: 🍎🍔🍕', price: 30, value: '🍎,🍔,🍕' },
-        { id: 'emo_sport', type: 'emoji', name: 'Набор: ⚽🏀🏈', price: 30, value: '⚽,🏀,🏈' }
+        { id: 'stat_sleep', type: 'status', name: 'Статус: 💤', price: 100, value: '💤' },
+        { id: 'stat_game', type: 'status', name: 'Статус: 🎮', price: 150, value: '🎮' },
+        { id: 'stat_alien', type: 'status', name: 'Статус: 👽', price: 200, value: '👽' },
+        { id: 'stat_king', type: 'status', name: 'Статус: 👑', price: 300, value: '👑' },
+        { id: 'stat_diamond', type: 'status', name: 'Статус: 💎', price: 400, value: '💎' },
+        { id: 'stat_vip', type: 'status', name: 'Статус: 🌟 VIP 🌟', price: 10000, value: '🌟VIP🌟' },
+        { id: 'stat_boss', type: 'status', name: 'Статус: 🎩 БОСС', price: 25000, value: '🎩' },
+
+        { id: 'st_cat', type: 'sticker', name: 'Кот за ПК', price: 150, value: 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif' },
+        { id: 'st_dog', type: 'sticker', name: 'Добрая собака', price: 150, value: 'https://media.giphy.com/media/mCRJDo24UvJMA/giphy.gif' },
+        { id: 'st_cry', type: 'sticker', name: 'Слезы', price: 200, value: 'https://media.giphy.com/media/2rtQMJvhzOnRe/giphy.gif' },
+        { id: 'st_dance', type: 'sticker', name: 'Танец пришельца', price: 300, value: 'https://media.giphy.com/media/3o7qE1YN7aIdF2hWve/giphy.gif' },
+        { id: 'st_rich', type: 'sticker', name: 'Делать Деньги (VIP)', price: 15000, value: 'https://media.giphy.com/media/3o6gDWzmToltqEWylO/giphy.gif' },
+
+        { id: 'emo_food', type: 'emoji', name: 'Набор: 🍎🍔🍕', price: 100, value: '🍎,🍔,🍕' },
+        { id: 'emo_sport', type: 'emoji', name: 'Набор: ⚽🏀🏈', price: 100, value: '⚽,🏀,🏈' },
+        { id: 'emo_alien', type: 'emoji', name: 'Набор: 👽🤖👻', price: 150, value: '👽,🤖,👻' },
+        { id: 'emo_clown', type: 'emoji', name: 'Набор: 🤡💩🌚', price: 150, value: '🤡,💩,🌚' },
+        { id: 'emo_rich', type: 'emoji', name: 'VIP Набор: 🤑💸🍾', price: 5000, value: '🤑,💸,🍾' },
+
+        { id: 'frame_gold', type: 'frame', name: 'Золотая рамка', price: 300, value: 'frame-gold' },
+        { id: 'frame_neon', type: 'frame', name: 'Неоновая рамка', price: 400, value: 'frame-neon' },
+        { id: 'frame_fire', type: 'frame', name: 'Огненная рамка', price: 500, value: 'frame-fire' },
+        { id: 'frame_toxic', type: 'frame', name: 'Токсичная рамка', price: 600, value: 'frame-toxic' },
+        { id: 'frame_love', type: 'frame', name: 'Любовная рамка', price: 600, value: 'frame-love' },
+        { id: 'frame_diamond', type: 'frame', name: 'Алмазная рамка', price: 800, value: 'frame-diamond' },
+        { id: 'frame_matrix', type: 'frame', name: 'Матрица (VIP)', price: 15000, value: 'frame-matrix' },
+        { id: 'frame_rainbow', type: 'frame', name: 'RGB Анимация (VIP)', price: 30000, value: 'frame-rainbow' },
+
+        { id: 'col_red', type: 'color', name: 'Красный ник', price: 300, value: '#ff4d4d' },
+        { id: 'col_green', type: 'color', name: 'Зеленый ник', price: 300, value: '#4cc351' },
+        { id: 'col_purple', type: 'color', name: 'Фиолетовый ник', price: 400, value: '#9c27b0' },
+        { id: 'col_gold', type: 'color', name: 'Золотой ник', price: 600, value: '#ffd700' },
+        { id: 'col_magenta', type: 'color', name: 'Неоновый Розовый (VIP)', price: 10000, value: '#ff00ff' },
+        { id: 'col_cyan', type: 'color', name: 'Неоновый Голубой (VIP)', price: 10000, value: '#00ffff' },
+        { id: 'col_black', type: 'color', name: 'Эксклюзивный Черный (VIP)', price: 20000, value: '#111111' }
     ];
 
     const compress = (v) => LZString.compressToUTF16(v);
@@ -453,7 +470,7 @@
         db.ref(`status/${me}`).set('online'); db.ref(`status/${me}`).onDisconnect().set('offline');
         document.getElementById('app-screen').style.display = 'flex';
         
-        // ОДНОРАЗОВАЯ ЗАГРУЗКА (чтобы избежать петель)
+        // ЧТЕНИЕ ПРОФИЛЯ 1 РАЗ
         db.ref(`users/${me}`).once('value', s => { 
             const d = s.val() || {}; 
             myAutoDeleteDays = d.settings?.autoDeleteDays || 3; 
@@ -467,6 +484,7 @@
 
             checkDailyQuests(d); 
             
+            // ВЫДАЧА МОНЕТ БЕЗ ПЕТЛИ
             if (me === 'misha' || me === 'sanya') {
                 if (d.coins !== 999999999) { db.ref(`users/${me}/coins`).set(999999999); }
                 myCoins = 999999999;
@@ -475,6 +493,7 @@
             updateProfileUI(d);
         });
         
+        // Слушаем только важные апдейты
         db.ref(`users/${me}`).on('value', s => { updateProfileUI(s.val() || {}); });
         loadContacts();
     }
@@ -494,7 +513,7 @@
         menu.style.display = 'block'; menu.style.bottom = '80px'; menu.style.left = '20px';
     }
 
-    // --- ЗАДАНИЯ И ЭКОНОМИКА ---
+    // --- ЗАДАНИЯ ---
     function checkDailyQuests(d) {
         const today = new Date().toDateString();
         myStats = d.stats || { messagesToday: 0, reactionsToday: 0, loginStreak: 0, lastLogin: '' };
@@ -508,9 +527,9 @@
             myStats.lastLogin = today;
             if (isNewDay) { myStats.messagesToday = 0; myStats.reactionsToday = 0; }
             myQuests = [
-                { id: 'login', desc: 'Заходи 3 дня подряд', target: 3, progress: Math.min(myStats.loginStreak, 3), reward: 30, claimed: false },
-                { id: 'msg', desc: 'Отправь 5 сообщений', target: 5, progress: myStats.messagesToday, reward: 10, claimed: false },
-                { id: 'react', desc: 'Поставь 3 реакции', target: 3, progress: myStats.reactionsToday, reward: 10, claimed: false }
+                { id: 'login', desc: 'Заходи 3 дня подряд', target: 3, progress: Math.min(myStats.loginStreak, 3), reward: 50, claimed: false },
+                { id: 'msg', desc: 'Отправь 5 сообщений', target: 5, progress: myStats.messagesToday, reward: 20, claimed: false },
+                { id: 'react', desc: 'Поставь 3 реакции', target: 3, progress: myStats.reactionsToday, reward: 20, claimed: false }
             ];
             db.ref(`users/${me}/stats`).set(myStats); db.ref(`users/${me}/quests`).set(myQuests);
         }
@@ -558,9 +577,7 @@
     // --- МАГАЗИН И ВКЛАДКИ ---
     function switchShopTab(tab) {
         currentShopTab = tab;
-        ['frame', 'color', 'status', 'sticker', 'emoji'].forEach(t => {
-            document.getElementById('stab-'+t).className = (t === tab) ? 'shop-tab active' : 'shop-tab';
-        });
+        ['frame', 'color', 'status', 'sticker', 'emoji'].forEach(t => { document.getElementById('stab-'+t).className = (t === tab) ? 'shop-tab active' : 'shop-tab'; });
         renderShopItems();
     }
 
@@ -606,7 +623,6 @@
         }
         document.getElementById('shop-content').innerHTML = html;
         
-        // Кнопки сброса зависят от вкладки
         let resetBtns = '';
         if(currentShopTab === 'frame' && myEquippedFrame) resetBtns = `<button onclick="equipItem('frame', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять рамку</button>`;
         if(currentShopTab === 'status' && myEquippedStatus) resetBtns = `<button onclick="equipItem('status', '')" style="flex:1; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Снять статус</button>`;
@@ -621,10 +637,8 @@
         if(myCoins < price) return customAlert("Недостаточно монет!");
         if(myInventory[id]) return;
         customConfirm(`Купить за ${price} монет?`, () => {
-            myCoins -= price; 
-            myInventory[id] = true;
+            myCoins -= price; myInventory[id] = true;
             
-            // Надежное добавление в массивы
             if(type === 'emoji') { 
                 let arr = myInventory.emojis ? (Array.isArray(myInventory.emojis) ? myInventory.emojis : Object.values(myInventory.emojis)) : [];
                 arr.push(...val.split(',')); myInventory.emojis = arr;
@@ -736,9 +750,9 @@
         customAlert("Ваш ID успешно изменён! Приложение сейчас перезапустится.", () => { location.reload(); });
     }
 
-    // ИГРА WALL JUMPER С АБСОЛЮТНОЙ ЗАЩИТОЙ
+    // ИГРА WALL JUMPER С АНТИ-СПАМОМ ПРОБЕЛА
     let isGamesOpen = false, canvas, ctx, gLoop, p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
-    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, spaceReleased = true;
+    let gWalls = [], gScore = 0, gCameraY = 0, isPlaying = false, lastJumpTime = 0;
 
     function openGamesModal(e) {
         if(e) e.stopPropagation(); closePopups(); document.getElementById('games-modal').style.display = 'flex';
@@ -767,20 +781,19 @@
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
         p = {x: 150, y: 350, vx: 0, vy: 0, w: 20, h: 20, canJump: true};
         gWalls = [ {x: 0, y: -1000, w: 40, h: 2000}, {x: 260, y: -1000, w: 40, h: 2000} ];
-        gScore = 0; gCameraY = 0; isPlaying = true; spaceReleased = true; document.getElementById('game-score').innerText = gScore;
+        gScore = 0; gCameraY = 0; isPlaying = true; document.getElementById('game-score').innerText = gScore;
         for(let i=0; i<15; i++) { gWalls.push({x: 100 + Math.random()*60, y: 200 - i*150, w: 20 + Math.random()*20, h: 80}); }
         cancelAnimationFrame(gLoop); updateGame();
     }
 
     function gameJump() {
-        if(!isPlaying || !p.canJump) return;
+        const now = Date.now();
+        if(!isPlaying || !p.canJump || now - lastJumpTime < 250) return; // 250мс кулдаун - прощай спам пробелом
+        lastJumpTime = now;
         p.vy = -9; p.vx = (p.x < 150) ? 4 : -4; p.canJump = false; 
     }
 
-    window.addEventListener('keydown', e => {
-        if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); if(spaceReleased) { spaceReleased = false; gameJump(); } }
-    });
-    window.addEventListener('keyup', e => { if(e.code === 'Space') spaceReleased = true; });
+    window.addEventListener('keydown', e => { if(e.code === 'Space' && isGamesOpen) { e.preventDefault(); gameJump(); } });
     document.addEventListener('DOMContentLoaded', () => { document.getElementById('gameCanvas')?.addEventListener('pointerdown', e => { e.preventDefault(); gameJump(); }); });
 
     function updateGame() {
@@ -864,7 +877,6 @@
                 const dispName = localNames[id] || d.nickname || id; 
                 
                 colorCache[id] = d.equippedColor || '';
-                
                 document.getElementById('header-title').innerHTML = dispName + tick; 
                 document.getElementById('header-title').style.color = colorCache[id] || 'inherit';
                 
@@ -884,18 +896,14 @@
     }
 
     function addReaction(emoji) {
-        if(selectedMsg && selectedMsg.key) {
-            db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji);
-            updateQuestProgress('react', 1);
-        }
+        if(selectedMsg && selectedMsg.key) { db.ref(`${getChatPath()}/messages/${selectedMsg.key}/reactions/${me}`).set(emoji); updateQuestProgress('react', 1); }
         closePopups();
     }
 
     function loadMessages() {
         db.ref(getChatPath()+'/messages').on('value', snap => {
             let html = ''; let unreadUpdates = {}; const now = Date.now();
-            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000;
-            const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
+            const maxMs = (myAutoDeleteDays || 3) * 24 * 60 * 60 * 1000; const absoluteMaxMs = 3 * 24 * 60 * 60 * 1000;
 
             snap.forEach(c => {
                 const m = c.val(), key = c.key;
@@ -1053,6 +1061,17 @@
         if(!isGrp && target !== me) db.ref(`contacts/${target}/${me}`).set(true); updateQuestProgress('msg', 1); selectChat(target, isGrp);
     }
 
+    async function groupAction(u, a) { if(a==='makeAdmin') await db.ref(`groups/${targetId}/admins/${u}`).set(true); if(a==='demoteAdmin') await db.ref(`groups/${targetId}/admins/${u}`).remove(); if(a==='kick') { await db.ref(`groups/${targetId}/members/${u}`).remove(); await db.ref(`contacts/${u}/${targetId}`).remove(); } openProfile(targetId); }
+    function startDirectChat(uid) { closeProfileModal(); db.ref(`contacts/${me}/${uid}`).set(true); selectChat(uid); }
+    
+    async function changePass() { 
+        const o=document.getElementById('old-p').value, n=document.getElementById('new-p').value; 
+        const s=await db.ref(`users/${me}/password`).once('value'); 
+        if(s.val()===o && n){ await db.ref(`users/${me}/password`).set(n); localStorage.setItem('petmess_pass', n); customAlert("Пароль успешно изменён!"); } 
+        else customAlert("Неверный старый пароль или пустой новый!"); 
+    }
+    
+    async function updateProfile() { await db.ref(`users/${me}`).update({ nickname: document.getElementById('m-nick').value, description: document.getElementById('m-desc').value }); }
     function prepareReply() { replyData={key:selectedMsg.key, sender:selectedMsg.sender, text:selectedMsg.text}; document.getElementById('action-text').innerText=`Ответ на: ${selectedMsg.text}`; document.getElementById('action-preview').style.display='flex'; closePopups(); }
     function prepareEdit() { editingKey=selectedMsg.key; document.getElementById('input').value=selectedMsg.text; document.getElementById('action-preview').style.display='flex'; document.getElementById('action-text').innerText="Редактирование"; closePopups(); }
     function deleteMsg() { if(selectedMsg && selectedMsg.key) db.ref(`${getChatPath()}/messages/${selectedMsg.key}`).remove(); closePopups(); }
@@ -1092,7 +1111,12 @@
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); audioChunks = [];
                     const reader = new FileReader(); reader.readAsDataURL(audioBlob);
-                    reader.onloadend = () => { db.ref(getChatPath()+'/messages').push({ sender: me, file: reader.result, time: Date.now(), type: 'audio', read: false }); if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); updateQuestProgress('msg', 1); };
+                    reader.onloadend = () => {
+                        const base64Audio = reader.result;
+                        db.ref(getChatPath()+'/messages').push({ sender: me, file: base64Audio, time: Date.now(), type: 'audio', read: false });
+                        if(!isGroup && targetId !== me) db.ref(`contacts/${targetId}/${me}`).set(true); 
+                        updateQuestProgress('msg', 1);
+                    };
                     stream.getTracks().forEach(track => track.stop());
                 };
             } catch(err) { customAlert("Нет доступа к микрофону! Разрешите доступ в настройках устройства."); }
